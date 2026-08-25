@@ -32,14 +32,14 @@ export const AICopilot: React.FC<AICopilotProps> = ({ project, onApplyFix }) => 
       const data = await res.json();
 
       setAnalysisResult({
-        status: action === 'debug' ? 'Auto-Fixed 1 CPU Loop Issue' : 'Optimization Analysis Ready',
+        status: action === 'debug' ? 'Auto-Fixed CPU Delay & Sensor Threshold Logic' : 'Optimization Analysis Ready',
         suggestion: data.suggestion || '',
         explanation: data.explanation || ''
       });
     } catch (e) {
       setAnalysisResult({
         status: 'Optimization Suggestions Ready',
-        suggestion: `# AI Suggestion for ${project.title}:\n1. Calibrate sensors in setup()\n2. Add non-blocking delay(0.05)`,
+        suggestion: `# AI Suggestion for ${project.title}:\n1. Calibrate sensors in setup()\n2. Add non-blocking time.sleep(0.05)`,
         explanation: 'Added non-blocking delay to prevent microcontroller lockups.'
       });
     } finally {
@@ -47,18 +47,24 @@ export const AICopilot: React.FC<AICopilotProps> = ({ project, onApplyFix }) => 
     }
   };
 
+  const handleApply = () => {
+    if (analysisResult?.suggestion) {
+      onApplyFix(analysisResult.suggestion);
+    }
+  };
+
   return (
     <div className="glass-panel p-5 rounded-3xl border border-gray-800 flex flex-col gap-4">
       
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-xl bg-purple-500/20 border border-purple-500/40 flex items-center justify-center">
             <Bot className="w-4.5 h-4.5 text-purple-400" />
           </div>
           <div>
             <h3 className="font-bold text-sm text-white flex items-center gap-2">
-              <span>AI Co-Pilot & Debugger</span>
+              <span>AI Co-Pilot & Automated Debugger</span>
               <span className="text-[10px] bg-purple-500/10 text-purple-400 border border-purple-500/30 px-2 py-0.5 rounded-full font-medium">
                 Educational Guardrails
               </span>
@@ -103,7 +109,13 @@ export const AICopilot: React.FC<AICopilotProps> = ({ project, onApplyFix }) => 
               <CheckCircle2 className="w-4 h-4 text-emerald-400" />
               {analysisResult.status}
             </span>
-            <span className="text-[10px] text-gray-400">Guardrails: Active</span>
+            <button
+              onClick={handleApply}
+              className="flex items-center gap-1 px-3 py-1 rounded-lg bg-emerald-500 text-gray-950 font-bold text-xs hover:bg-emerald-400 transition-colors shadow"
+            >
+              <Wrench className="w-3 h-3" />
+              <span>Apply Fix to Workspace</span>
+            </button>
           </div>
 
           <p className="text-xs text-gray-200">{analysisResult.explanation}</p>

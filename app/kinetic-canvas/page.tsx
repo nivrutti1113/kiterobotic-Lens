@@ -21,9 +21,24 @@ function StudioContent() {
   const [isSimRunning, setIsSimRunning] = useState(false);
   const [deployModalOpen, setDeployModalOpen] = useState(false);
 
+  const [customPython, setCustomPython] = useState<string>(initialProject.generatedPython);
+  const [customCpp, setCustomCpp] = useState<string>(initialProject.generatedCpp);
+
   const handleSelectTemplate = (proj: ProjectTemplate) => {
     setActiveProject(proj);
+    setCustomPython(proj.generatedPython);
+    setCustomCpp(proj.generatedCpp);
     setIsSimRunning(false);
+  };
+
+  const handleUpdateBlocks = (blocks: any[], pythonCode: string, cppCode: string) => {
+    setCustomPython(pythonCode);
+    setCustomCpp(cppCode);
+  };
+
+  const handleApplyCopilotFix = (fixedCode: string) => {
+    setCustomPython(fixedCode);
+    setActiveTab('code');
   };
 
   return (
@@ -35,7 +50,7 @@ function StudioContent() {
           <h1 className="text-2xl font-black text-white flex items-center gap-3">
             <span>Kinetic Canvas Studio</span>
             <span className="text-xs bg-purple-500/10 text-purple-400 border border-purple-500/30 px-2.5 py-1 rounded-full font-bold">
-              Simulator & IDE
+              Simulator & IDE Active
             </span>
           </h1>
           <p className="text-xs text-gray-400 mt-1">
@@ -110,16 +125,20 @@ function StudioContent() {
           {activeTab === 'blocks' ? (
             <BlockEditor
               project={activeProject}
-              onUpdateBlocks={() => {}}
+              onUpdateBlocks={handleUpdateBlocks}
               onRunSimulation={() => setIsSimRunning(true)}
             />
           ) : (
-            <CodeView project={activeProject} />
+            <CodeView
+              project={activeProject}
+              customPython={customPython}
+              customCpp={customCpp}
+            />
           )}
 
           <AICopilot
             project={activeProject}
-            onApplyFix={() => {}}
+            onApplyFix={handleApplyCopilotFix}
           />
         </div>
 
@@ -136,7 +155,7 @@ function StudioContent() {
 
       {/* WebSerial Deployment Modal */}
       <HardwareDeploy
-        code={activeProject.generatedCpp}
+        code={customCpp || activeProject.generatedCpp}
         isOpen={deployModalOpen}
         onClose={() => setDeployModalOpen(false)}
       />

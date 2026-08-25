@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Camera, Cpu, LayoutDashboard, Globe, Zap, Bot, Sparkles, Check } from 'lucide-react';
+import { Camera, Cpu, Activity, Globe, Zap, Bot, Check } from 'lucide-react';
 import { LANGUAGES, SupportedLanguage, UI_TRANSLATIONS } from '@/lib/languages';
 
 interface NavbarProps {
@@ -73,15 +73,15 @@ export const Navbar: React.FC<NavbarProps> = ({
             </Link>
 
             <Link
-              href="/dashboard"
+              href="/hardware-lab"
               className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all ${
-                pathname.startsWith('/dashboard')
+                pathname.startsWith('/hardware-lab')
                   ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-md shadow-cyan-500/25'
                   : 'text-gray-400 hover:text-white hover:bg-gray-800/50'
               }`}
             >
-              <LayoutDashboard className="w-4 h-4" />
-              <span>{t.lmsTab}</span>
+              <Activity className="w-4 h-4" />
+              <span>{t.hardwareLabTab}</span>
             </Link>
           </nav>
 
@@ -135,7 +135,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             >
               <Zap className={`w-4 h-4 ${hardwareConnected ? 'animate-pulse text-emerald-400' : 'text-cyan-400'}`} />
               <span className="hidden sm:inline">
-                {hardwareConnected ? 'Hardware USB: Connected' : 'Connect Hardware USB'}
+                {hardwareConnected ? 'Hardware USB: Active' : 'Connect WebSerial USB'}
               </span>
             </button>
 

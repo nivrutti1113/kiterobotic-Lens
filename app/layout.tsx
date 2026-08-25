@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import '@/app/globals.css';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
@@ -11,14 +11,16 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   const [currentLang, setCurrentLang] = useState<SupportedLanguage>('en');
   const [hardwareConnected, setHardwareConnected] = useState(false);
 
+  useEffect(() => {
+    const unsub = webSerialBridge.subscribeStatus((status) => {
+      setHardwareConnected(status.connected);
+    });
+    return () => unsub();
+  }, []);
+
   const handleConnectHardware = async () => {
     const res = await webSerialBridge.connect();
-    if (res.connected) {
-      setHardwareConnected(true);
-    } else {
-      // Simulate connected state for browser demo testing if hardware isn't physically plugged in
-      setHardwareConnected(true);
-    }
+    setHardwareConnected(res.connected);
   };
 
   return (
