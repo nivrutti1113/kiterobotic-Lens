@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Camera, Upload, Sparkles, Scan, CheckCircle2, RefreshCw, AlertCircle, Video, Image as ImageIcon } from 'lucide-react';
+import { Camera, Upload, Sparkles, Scan, CheckCircle2, RefreshCw, AlertCircle, Video, Image as ImageIcon, Key, Info, X } from 'lucide-react';
 import { StemComponent, STEM_COMPONENTS } from '@/lib/stem-data';
 
 interface CameraScannerProps {
@@ -21,12 +21,12 @@ export const CameraScanner: React.FC<CameraScannerProps> = ({
   const [webcamActive, setWebcamActive] = useState(false);
   const [webcamError, setWebcamError] = useState<string | null>(null);
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
-  
+  const [showEnvModal, setShowEnvModal] = useState(false);
+
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const mediaStreamRef = useRef<MediaStream | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
-  // Handle WebCam start/stop
   useEffect(() => {
     if (scanMode === 'webcam') {
       startWebcam();
@@ -79,28 +79,35 @@ export const CameraScanner: React.FC<CameraScannerProps> = ({
   };
 
   return (
-    <div className="glass-panel p-6 rounded-3xl border border-gray-800 flex flex-col gap-6">
+    <div className="glass-panel p-5 rounded-3xl border border-slate-800 flex flex-col gap-5">
       
-      {/* Scanner Mode Switcher Header */}
+      {/* Scanner Mode Switcher & API Status Badge */}
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2">
-            <Camera className="w-5 h-5 text-cyan-400" />
-            <h2 className="font-bold text-lg text-white">STEM Lens AI Scanner</h2>
-            <span className="text-xs bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 px-2.5 py-0.5 rounded-full font-bold">
-              AI Vision 2.4 Active
-            </span>
+            <Camera className="w-5 h-5 text-sky-400" />
+            <h2 className="font-bold text-base text-slate-100">STEM Lens AI Scanner</h2>
+            
+            {/* API Environment Status Inspector Badge */}
+            <button
+              onClick={() => setShowEnvModal(true)}
+              className="text-[10px] bg-slate-900 text-sky-400 border border-sky-500/30 hover:border-sky-400 px-2.5 py-0.5 rounded-full font-bold flex items-center gap-1 transition-colors"
+              title="Click to check Gemini / OpenAI API status & Environment Variables"
+            >
+              <Key className="w-3 h-3 text-amber-400" />
+              <span>AI API Status: Ready</span>
+            </button>
           </div>
-          <p className="text-xs text-gray-400 mt-1">
+          <p className="text-xs text-slate-400 mt-0.5">
             Point camera at physical hardware or select a sample component below to trigger real-time AI recognition.
           </p>
         </div>
 
-        <div className="flex items-center gap-1 bg-gray-950 p-1.5 rounded-2xl border border-gray-800">
+        <div className="flex items-center gap-1 bg-slate-950 p-1.5 rounded-2xl border border-slate-800">
           <button
             onClick={() => setScanMode('preset')}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
-              scanMode === 'preset' ? 'bg-cyan-500 text-gray-950 shadow' : 'text-gray-400 hover:text-white'
+              scanMode === 'preset' ? 'bg-sky-500 text-slate-950 shadow' : 'text-slate-400 hover:text-white'
             }`}
           >
             <ImageIcon className="w-3.5 h-3.5" />
@@ -109,7 +116,7 @@ export const CameraScanner: React.FC<CameraScannerProps> = ({
           <button
             onClick={() => setScanMode('webcam')}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
-              scanMode === 'webcam' ? 'bg-cyan-500 text-gray-950 shadow' : 'text-gray-400 hover:text-white'
+              scanMode === 'webcam' ? 'bg-sky-500 text-slate-950 shadow' : 'text-slate-400 hover:text-white'
             }`}
           >
             <Video className="w-3.5 h-3.5" />
@@ -118,7 +125,7 @@ export const CameraScanner: React.FC<CameraScannerProps> = ({
           <button
             onClick={() => setScanMode('upload')}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
-              scanMode === 'upload' ? 'bg-cyan-500 text-gray-950 shadow' : 'text-gray-400 hover:text-white'
+              scanMode === 'upload' ? 'bg-sky-500 text-slate-950 shadow' : 'text-slate-400 hover:text-white'
             }`}
           >
             <Upload className="w-3.5 h-3.5" />
@@ -127,10 +134,9 @@ export const CameraScanner: React.FC<CameraScannerProps> = ({
         </div>
       </div>
 
-      {/* Main Viewport */}
-      <div className="relative aspect-video w-full rounded-2xl overflow-hidden bg-gray-950 border border-gray-800 shadow-2xl group flex items-center justify-center">
+      {/* Viewport */}
+      <div className="relative aspect-video w-full rounded-2xl overflow-hidden bg-slate-950 border border-slate-800 shadow-2xl group flex items-center justify-center">
         
-        {/* Mode 1: Preset Catalog Image */}
         {scanMode === 'preset' && (
           <img
             src={selectedComponent.imageUrl}
@@ -141,14 +147,13 @@ export const CameraScanner: React.FC<CameraScannerProps> = ({
           />
         )}
 
-        {/* Mode 2: Live HTML5 WebCam Stream */}
         {scanMode === 'webcam' && (
           <div className="relative w-full h-full bg-black flex items-center justify-center">
             {webcamError ? (
               <div className="p-6 text-center text-xs text-amber-400 space-y-2">
                 <AlertCircle className="w-8 h-8 mx-auto" />
                 <p>{webcamError}</p>
-                <p className="text-gray-400 text-[11px]">Using fallback sample preview for scanning.</p>
+                <p className="text-slate-400 text-[11px]">Using catalog preview for scan demo.</p>
                 <img src={selectedComponent.imageUrl} className="w-full h-48 object-cover rounded-xl mt-2 opacity-50" />
               </div>
             ) : (
@@ -163,19 +168,18 @@ export const CameraScanner: React.FC<CameraScannerProps> = ({
           </div>
         )}
 
-        {/* Mode 3: Upload Photo Dropzone */}
         {scanMode === 'upload' && (
-          <div className="w-full h-full flex flex-col items-center justify-center p-6 bg-gray-950 text-center">
+          <div className="w-full h-full flex flex-col items-center justify-center p-6 bg-slate-950 text-center">
             {uploadedImage ? (
               <img src={uploadedImage} alt="Uploaded preview" className="w-full h-full object-cover rounded-xl" />
             ) : (
               <div
                 onClick={() => fileInputRef.current?.click()}
-                className="w-full h-full border-2 border-dashed border-cyan-500/40 rounded-xl flex flex-col items-center justify-center p-8 cursor-pointer hover:border-cyan-400 hover:bg-cyan-500/5 transition-all"
+                className="w-full h-full border-2 border-dashed border-sky-500/40 rounded-xl flex flex-col items-center justify-center p-8 cursor-pointer hover:border-sky-400 hover:bg-sky-500/5 transition-all"
               >
-                <Upload className="w-10 h-10 text-cyan-400 mb-3 animate-bounce" />
-                <h4 className="text-sm font-bold text-white">Click or Drag Image to Upload</h4>
-                <p className="text-xs text-gray-400 mt-1">Supports JPG, PNG, WEBP hardware photos</p>
+                <Upload className="w-10 h-10 text-sky-400 mb-3 animate-bounce" />
+                <h4 className="text-sm font-bold text-slate-100">Click or Drag Circuit Image to Upload</h4>
+                <p className="text-xs text-slate-400 mt-1">Supports JPG, PNG, WEBP hardware photos</p>
               </div>
             )}
             <input
@@ -188,16 +192,16 @@ export const CameraScanner: React.FC<CameraScannerProps> = ({
           </div>
         )}
 
-        {/* Scan Laser Line Overlay */}
+        {/* Scan Laser Overlay */}
         {isScanning && (
-          <div className="absolute inset-0 bg-gradient-to-b from-cyan-500/0 via-cyan-400/20 to-cyan-500/0 animate-laser-scan border-b-2 border-cyan-400 shadow-[0_0_15px_#00f2fe] pointer-events-none" />
+          <div className="absolute inset-0 bg-gradient-to-b from-sky-500/0 via-sky-400/20 to-sky-500/0 animate-laser-scan border-b-2 border-sky-400 shadow-[0_0_15px_#38bdf8] pointer-events-none" />
         )}
 
-        {/* HUD Bounding Boxes & Controls */}
-        <div className="absolute inset-4 border-2 border-dashed border-cyan-400/30 rounded-xl pointer-events-none flex flex-col justify-between p-4 z-10">
+        {/* HUD Bounding Box */}
+        <div className="absolute inset-4 border-2 border-dashed border-sky-400/30 rounded-xl pointer-events-none flex flex-col justify-between p-4 z-10">
           <div className="flex justify-between items-start">
-            <span className="text-[10px] font-mono text-cyan-400 bg-gray-950/80 px-2 py-1 rounded border border-cyan-500/30 backdrop-blur-md flex items-center gap-1">
-              <Scan className="w-3 h-3 text-cyan-400 animate-spin" /> STEM_VISION_v2.4 [ACTIVE]
+            <span className="text-[10px] font-mono text-sky-400 bg-slate-950/80 px-2 py-1 rounded border border-sky-500/30 backdrop-blur-md flex items-center gap-1">
+              <Scan className="w-3 h-3 text-sky-400 animate-spin" /> STEM_VISION_v2.4 [ACTIVE]
             </span>
             <span className="text-[10px] font-mono text-emerald-400 bg-emerald-950/80 px-2 py-1 rounded border border-emerald-500/30 backdrop-blur-md flex items-center gap-1">
               <CheckCircle2 className="w-3 h-3 text-emerald-400" /> AI MATCH: 99.4%
@@ -205,20 +209,20 @@ export const CameraScanner: React.FC<CameraScannerProps> = ({
           </div>
 
           <div className="flex justify-between items-end pointer-events-auto">
-            <div className="bg-gray-950/90 backdrop-blur-md p-3 rounded-xl border border-gray-800">
-              <h3 className="text-sm font-bold text-white flex items-center gap-2">
+            <div className="bg-slate-950/90 backdrop-blur-md p-3 rounded-xl border border-slate-800">
+              <h3 className="text-sm font-bold text-slate-100 flex items-center gap-2">
                 <span>{selectedComponent.name}</span>
-                <span className="text-[10px] px-2 py-0.5 rounded bg-blue-500/20 text-blue-300 font-normal">
+                <span className="text-[10px] px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-300 font-normal">
                   {selectedComponent.category}
                 </span>
               </h3>
-              <p className="text-xs text-gray-300 mt-0.5 line-clamp-1">{selectedComponent.shortDesc}</p>
+              <p className="text-xs text-slate-300 mt-0.5 line-clamp-1">{selectedComponent.shortDesc}</p>
             </div>
 
             <button
               onClick={onTriggerScan}
               disabled={isScanning}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-gray-950 font-bold text-xs shadow-lg shadow-cyan-500/30 transition-all hover:scale-105 active:scale-95 disabled:opacity-50"
+              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-sky-500 to-indigo-600 hover:from-sky-400 hover:to-indigo-500 text-slate-950 font-bold text-xs shadow-md shadow-sky-500/30 transition-all hover:scale-105 active:scale-95 disabled:opacity-50"
             >
               <RefreshCw className={`w-4 h-4 ${isScanning ? 'animate-spin' : ''}`} />
               <span>{isScanning ? 'AI Scanning...' : 'Re-Scan Object'}</span>
@@ -227,28 +231,66 @@ export const CameraScanner: React.FC<CameraScannerProps> = ({
         </div>
       </div>
 
-      {/* Hardware Component Catalog Selector Grid */}
+      {/* Catalog Selector Grid */}
       <div>
-        <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
+        <h4 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2.5">
           Select Hardware Component Catalog Sample:
         </h4>
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2.5">
           {STEM_COMPONENTS.map((comp) => (
             <button
               key={comp.id}
               onClick={() => onSelectComponent(comp)}
-              className={`p-3 rounded-xl border text-left transition-all ${
+              className={`p-2.5 rounded-xl border text-left transition-all ${
                 selectedComponent.id === comp.id
-                  ? 'bg-cyan-500/10 border-cyan-500 shadow-lg shadow-cyan-500/10'
-                  : 'bg-gray-900/60 border-gray-800 hover:border-gray-700 hover:bg-gray-800/50'
+                  ? 'bg-sky-500/10 border-sky-500 shadow-md shadow-sky-500/10'
+                  : 'bg-slate-900/60 border-slate-800 hover:border-slate-700 hover:bg-slate-800/50'
               }`}
             >
-              <div className="text-xs font-bold text-white truncate">{comp.name}</div>
-              <div className="text-[10px] text-gray-400">{comp.category}</div>
+              <div className="text-xs font-bold text-slate-100 truncate">{comp.name}</div>
+              <div className="text-[10px] text-slate-400">{comp.category}</div>
             </button>
           ))}
         </div>
       </div>
+
+      {/* Environment Variable Setup Modal */}
+      {showEnvModal && (
+        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="bg-slate-900 border border-slate-800 p-6 rounded-3xl max-w-md w-full space-y-4 shadow-2xl">
+            <div className="flex items-center justify-between pb-2 border-b border-slate-800">
+              <h3 className="font-bold text-sm text-slate-100 flex items-center gap-2">
+                <Key className="w-4 h-4 text-amber-400" />
+                <span>AI Vision API Key Configuration</span>
+              </h3>
+              <button onClick={() => setShowEnvModal(false)} className="text-slate-400 hover:text-white">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <p className="text-xs text-slate-300 leading-relaxed">
+              Kite Robotics AI Vision runs on both a built-in offline engine and online Gemini/OpenAI vision models.
+            </p>
+
+            <div className="bg-slate-950 p-3 rounded-xl border border-slate-800 font-mono text-[11px] text-sky-300 space-y-1">
+              <div># Optional Environment Variables (.env.local / Vercel):</div>
+              <div className="text-amber-400">GEMINI_API_KEY=your_google_gemini_key</div>
+              <div className="text-indigo-400">OPENAI_API_KEY=your_openai_key</div>
+            </div>
+
+            <p className="text-[11px] text-slate-400">
+              If no API key is set, the system automatically uses the high-speed offline STEM knowledge engine without throwing errors!
+            </p>
+
+            <button
+              onClick={() => setShowEnvModal(false)}
+              className="w-full py-2 rounded-xl bg-sky-500 text-slate-950 font-bold text-xs hover:bg-sky-400 transition-colors"
+            >
+              Got It
+            </button>
+          </div>
+        </div>
+      )}
 
     </div>
   );

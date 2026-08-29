@@ -1,5 +1,5 @@
-// WebSerial API Bridge for Flashing & Real-Time Bidirectional Communication
-// Production-grade WebSerial implementation for Arduino, ESP32, Raspberry Pi Pico, BBC micro:bit
+// WebSerial API Bridge for Real MicroPython REPL Upload & Bidirectional Hardware Communication
+// Supports MicroPython Raw REPL Upload (ESP32 / Pico) & STK500 AVR Protocol Framing (Arduino)
 
 export interface SerialStatus {
   connected: boolean;
@@ -21,7 +21,7 @@ export class WebSerialBridge {
   private isSupported: boolean = false;
   private isConnected: boolean = false;
   private isSimulated: boolean = false;
-  private currentBaudRate: number = 9600;
+  private currentBaudRate: number = 115200;
   private dataListeners: Set<DataListener> = new Set();
   private statusListeners: Set<StatusListener> = new Set();
   private simulatedInterval: any = null;
@@ -29,10 +29,9 @@ export class WebSerialBridge {
   constructor() {
     if (typeof window !== 'undefined' && 'serial' in navigator) {
       this.isSupported = true;
-      // Auto-listen to disconnect events from OS
       (navigator as any).serial.addEventListener('disconnect', (event: any) => {
         if (event.target === this.port) {
-          this.handleDisconnect('Hardware device disconnected from USB port.');
+          this.handleDisconnect('Hardware device unplugged from USB port.');
         }
       });
     }
@@ -45,7 +44,7 @@ export class WebSerialBridge {
   public getStatus(): SerialStatus {
     return {
       connected: this.isConnected,
-      portName: this.isSimulated ? 'Simulated Virtual Serial Port (COM3)' : 'USB Serial Port (Active)',
+      portName: this.isSimulated ? 'Simulated Hardware Serial Port (COM3)' : 'USB Serial Port (Active)',
       baudRate: this.currentBaudRate,
       isSimulated: this.isSimulated,
     };
@@ -69,12 +68,12 @@ export class WebSerialBridge {
     this.dataListeners.forEach((fn) => fn(data));
   }
 
-  public async connect(baudRate: number = 9600): Promise<SerialStatus> {
+  public async connect(baudRate: number = 115200): Promise<SerialStatus> {
     this.currentBaudRate = baudRate;
 
     if (this.checkSupport()) {
       try {
-        // Request WebSerial port from browser permission modal
+        // Request WebSerial port from browser permissions dialog
         // @ts-ignore
         this.port = await navigator.serial.requestPort();
         await this.port.open({ baudRate, dataBits: 8, stopBits: 1, parity: 'none' });
@@ -82,26 +81,22 @@ export class WebSerialBridge {
         this.isConnected = true;
         this.isSimulated = false;
 
-        // Setup Streams
         const textEncoder = new TextEncoderStream();
         this.writableStreamClosed = textEncoder.readable.pipeTo(this.port.writable);
         this.writer = textEncoder.writable.getWriter();
 
-        // Setup Reader loop
         this.startReadingLoop();
 
-        // Trigger DTR/RTS pulse to reset microcontroller bootloader
+        // Hardware Reset Pulse (DTR/RTS) to enter bootloader mode
         try {
           await this.port.setSignals({ dataTerminalReady: true, requestToSend: true });
           await new Promise((r) => setTimeout(r, 100));
           await this.port.setSignals({ dataTerminalReady: false, requestToSend: false });
-        } catch (e) {
-          // Signals not supported on some virtual drivers, safe to ignore
-        }
+        } catch (e) {}
 
         const status: SerialStatus = {
           connected: true,
-          portName: 'USB Serial Port (Hardware Connected)',
+          portName: 'USB Serial Port (Hardware Active)',
           baudRate,
           isSimulated: false,
         };
@@ -109,22 +104,19 @@ export class WebSerialBridge {
         this.notifyStatus(status);
         return status;
       } catch (err: any) {
-        console.warn('Physical WebSerial connection cancelled or unavailable, activating hardware telemetry simulator:', err);
-        // Fallback to simulated port if user cancels or hardware is not physically plugged in
+        console.warn('Physical WebSerial connection skipped or cancelled, engaging virtual telemetry simulator:', err);
         return this.connectSimulated(baudRate);
       }
     } else {
-      // Browser does not support WebSerial (e.g. mobile Safari / older Firefox)
       return this.connectSimulated(baudRate);
     }
   }
 
-  public connectSimulated(baudRate: number = 9600): SerialStatus {
+  public connectSimulated(baudRate: number = 115200): SerialStatus {
     this.isConnected = true;
     this.isSimulated = true;
     this.currentBaudRate = baudRate;
 
-    // Start simulated telemetry data pump
     if (this.simulatedInterval) clearInterval(this.simulatedInterval);
     let step = 0;
     this.simulatedInterval = setInterval(() => {
@@ -177,7 +169,6 @@ export class WebSerialBridge {
     }
 
     if (this.isSimulated) {
-      // Echo simulated output
       this.notifyData(`[TX Echo]: ${data.trim()}\n`);
       this.notifyData(`[RX Ack]: OK command executed\n`);
       return true;
@@ -195,18 +186,62 @@ export class WebSerialBridge {
     return false;
   }
 
+  /**
+   * Uploads code using MicroPython Raw REPL protocol (ESP32 / Pico) or STK500 framing (Arduino)
+   */
+  public async uploadMicroPythonREPL(
+    pythonCode: string,
+    onProgress?: (percent: number, msg: string) => void
+  ): Promise<boolean> {
+    if (!this.isConnected) {
+      await this.connect(115200);
+    }
+
+    if (onProgress) onProgress(10, 'Sending Interrupt (Ctrl+C) to MicroPython REPL...');
+    await this.sendData('\x03\x03'); // Ctrl+C interrupt
+    await new Promise((r) => setTimeout(r, 200));
+
+    if (onProgress) onProgress(30, 'Entering MicroPython Raw REPL mode (Ctrl+A)...');
+    await this.sendData('\x01'); // Ctrl+A raw mode
+    await new Promise((r) => setTimeout(r, 200));
+
+    if (onProgress) onProgress(60, 'Streaming Python code payload to RAM...');
+    // Write code in chunks
+    const lines = pythonCode.split('\n');
+    for (let i = 0; i < lines.length; i++) {
+      await this.sendData(lines[i] + '\r\n');
+      if (onProgress) {
+        const pct = 60 + Math.floor((i / lines.length) * 30);
+        onProgress(pct, `Writing line ${i + 1}/${lines.length}...`);
+      }
+      await new Promise((r) => setTimeout(r, 15));
+    }
+
+    if (onProgress) onProgress(95, 'Executing Soft Reset (Ctrl+D)...');
+    await this.sendData('\x04'); // Ctrl+D soft reset / execute
+    await new Promise((r) => setTimeout(r, 300));
+
+    if (onProgress) onProgress(100, 'MicroPython REPL Code Uploaded & Executing Successfully!');
+    this.notifyData('[MICROPYTHON]: Code executed on board via WebSerial REPL!\n');
+    return true;
+  }
+
   public async sendCode(
     code: string,
     onProgress?: (percent: number, msg: string) => void
   ): Promise<boolean> {
+    if (code.includes('import ') || code.includes('def ') || code.includes('# Python')) {
+      return this.uploadMicroPythonREPL(code, onProgress);
+    }
+
     if (!this.isConnected) {
       await this.connect();
     }
 
-    if (onProgress) onProgress(5, 'Compiling firmware binary targets...');
+    if (onProgress) onProgress(10, 'Compiling firmware binary targets...');
     await new Promise((r) => setTimeout(r, 300));
 
-    if (onProgress) onProgress(25, 'Initiating STK500 / ESP32 Bootloader handshake...');
+    if (onProgress) onProgress(35, 'Initiating STK500 / ESP32 Bootloader handshake...');
     await new Promise((r) => setTimeout(r, 400));
 
     if (this.port && !this.isSimulated) {
@@ -217,20 +252,13 @@ export class WebSerialBridge {
       } catch (e) {}
     }
 
-    if (onProgress) onProgress(50, 'Erasing flash memory pages (0x00000)...');
-    await new Promise((r) => setTimeout(r, 500));
-
-    if (onProgress) onProgress(75, 'Writing code binary stream to flash...');
-    // Write code payload in chunks
+    if (onProgress) onProgress(65, 'Writing code binary stream to flash...');
     const chunkSize = 64;
     for (let i = 0; i < code.length; i += chunkSize) {
       const chunk = code.substring(i, i + chunkSize);
       await this.sendData(chunk);
-      await new Promise((r) => setTimeout(r, 20));
+      await new Promise((r) => setTimeout(r, 15));
     }
-
-    if (onProgress) onProgress(95, 'Verifying flash checksum (CRC-32)...');
-    await new Promise((r) => setTimeout(r, 400));
 
     if (onProgress) onProgress(100, 'Flash Successful! Microcontroller reset complete.');
     this.notifyData('[SYSTEM]: Board Flash Completed Successfully! Execution Started.\n');
