@@ -14,6 +14,7 @@ interface ChatMessage {
   sender: 'user' | 'ai';
   text: string;
   timestamp: string;
+  source?: string;
 }
 
 export const DoubtSolverChat: React.FC<DoubtSolverChatProps> = ({ component, currentLang = 'en' }) => {
@@ -73,18 +74,21 @@ export const DoubtSolverChat: React.FC<DoubtSolverChatProps> = ({ component, cur
         id: `ai-${Date.now()}`,
         sender: 'ai',
         text: answerText,
-        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        source: data.source || 'STEM Engine'
       };
       setMessages((prev) => [...prev, aiMsg]);
     } catch (e) {
-      const fallbackText = `For ${component.name}: VCC connects to 5V power, GND to Ground, and signal lines connect to digital/analog pins. You can write software for it in Kinetic Canvas!`;
+      const pinDetails = component.grades.grade9_10.pinout.map(p => `${p.pin}: ${p.function}`).join(', ');
+      const offlineMsg = `[Built-in STEM Guide for ${component.name}]: VCC connects to 5V/3.3V power, GND to Ground, and signal lines connect to digital/analog pins. Pinout details: ${pinDetails}.`;
       setMessages((prev) => [
         ...prev,
         {
           id: `ai-${Date.now()}`,
           sender: 'ai',
-          text: fallbackText,
-          timestamp: 'Just now'
+          text: offlineMsg,
+          timestamp: 'Just now',
+          source: 'Offline STEM KB'
         }
       ]);
     } finally {
@@ -93,104 +97,96 @@ export const DoubtSolverChat: React.FC<DoubtSolverChatProps> = ({ component, cur
   };
 
   return (
-    <div className="glass-panel p-6 rounded-3xl border border-gray-800 flex flex-col h-[480px]">
+    <div className="glass-panel p-6 rounded-3xl border border-slate-800 flex flex-col h-[480px]">
       
       {/* Header */}
-      <div className="flex items-center justify-between pb-4 border-b border-gray-800 shrink-0">
+      <div className="flex items-center justify-between pb-4 border-b border-slate-800 shrink-0">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-xl bg-cyan-500/20 border border-cyan-500/40 flex items-center justify-center">
-            <Sparkles className="w-4 h-4 text-cyan-400" />
-          </div>
+          <MessageSquare className="w-5 h-5 text-sky-400" />
           <div>
-            <h3 className="font-bold text-sm text-white flex items-center gap-2">
+            <h3 className="font-bold text-sm text-slate-100 flex items-center gap-2">
               <span>Vernacular AI Doubt-Solver</span>
-              <span className="text-[10px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded-full font-medium">
-                ONLINE
+              <span className="text-[10px] bg-sky-500/10 text-sky-400 border border-sky-500/30 px-2 py-0.5 rounded-full font-semibold">
+                Instant Q&A
               </span>
             </h3>
-            <p className="text-[11px] text-gray-400">Context: {component.name}</p>
+            <p className="text-xs text-slate-400">Asking about: {component.name}</p>
           </div>
         </div>
       </div>
 
-      {/* Messages List */}
-      <div className="flex-1 overflow-y-auto py-4 space-y-3.5 pr-2">
-        {messages.map((m) => (
+      {/* Messages Feed */}
+      <div className="flex-1 overflow-y-auto py-4 space-y-3 pr-2 shadow-inner">
+        {messages.map((msg) => (
           <div
-            key={m.id}
-            className={`flex gap-3 text-xs ${m.sender === 'user' ? 'justify-end' : 'justify-start'}`}
+            key={msg.id}
+            className={`flex items-start gap-2.5 ${msg.sender === 'user' ? 'flex-row-reverse' : ''}`}
           >
-            {m.sender === 'ai' && (
-              <div className="w-7 h-7 rounded-lg bg-cyan-500/20 border border-cyan-500/40 flex items-center justify-center shrink-0">
-                <Bot className="w-4 h-4 text-cyan-400" />
-              </div>
-            )}
-
             <div
-              className={`max-w-[80%] p-3.5 rounded-2xl relative group ${
-                m.sender === 'user'
-                  ? 'bg-gradient-to-r from-cyan-600 to-blue-600 text-white rounded-br-none'
-                  : 'bg-gray-900 border border-gray-800 text-gray-200 rounded-bl-none'
+              className={`w-7 h-7 rounded-xl flex items-center justify-center text-xs font-bold shrink-0 ${
+                msg.sender === 'user' ? 'bg-sky-500 text-slate-950' : 'bg-slate-900 border border-slate-800 text-indigo-400'
               }`}
             >
-              <p className="leading-relaxed">{m.text}</p>
-              
-              <div className="flex items-center justify-between mt-1 pt-1 border-t border-white/10 text-[9px] opacity-70">
-                <span>{m.timestamp}</span>
-                {m.sender === 'ai' && (
-                  <button
-                    onClick={() => handleSpeak(m.text)}
-                    className="flex items-center gap-1 hover:text-cyan-300 transition-colors"
-                    title="Read Aloud with Text-to-Speech"
-                  >
-                    <Volume2 className={`w-3 h-3 ${isSpeaking ? 'animate-pulse text-cyan-400' : ''}`} />
-                    <span>Listen</span>
-                  </button>
-                )}
-              </div>
+              {msg.sender === 'user' ? <User className="w-4 h-4" /> : <Bot className="w-4 h-4" />}
             </div>
 
-            {m.sender === 'user' && (
-              <div className="w-7 h-7 rounded-lg bg-blue-600/30 border border-blue-500/40 flex items-center justify-center shrink-0">
-                <User className="w-4 h-4 text-blue-300" />
+            <div
+              className={`max-w-[80%] p-3 rounded-2xl text-xs flex flex-col gap-1.5 ${
+                msg.sender === 'user'
+                  ? 'bg-sky-500 text-slate-950 font-medium rounded-tr-none'
+                  : 'bg-slate-900 border border-slate-800 text-slate-200 rounded-tl-none'
+              }`}
+            >
+              <div className="flex items-center justify-between gap-3 text-[10px] opacity-75">
+                <span>{msg.sender === 'user' ? 'You' : 'Kite AI Assistant'}</span>
+                {msg.source && <span className="font-mono text-sky-400">[{msg.source}]</span>}
               </div>
-            )}
+              <p className="leading-relaxed">{msg.text}</p>
+
+              {msg.sender === 'ai' && (
+                <button
+                  onClick={() => handleSpeak(msg.text)}
+                  className="self-end p-1 rounded hover:bg-slate-800 text-slate-400 hover:text-sky-400 transition-colors"
+                  title="Read aloud with Web Speech TTS"
+                >
+                  <Volume2 className={`w-3.5 h-3.5 ${isSpeaking ? 'text-sky-400 animate-pulse' : ''}`} />
+                </button>
+              )}
+            </div>
           </div>
         ))}
 
         {loading && (
-          <div className="flex gap-2 items-center text-xs text-cyan-400">
+          <div className="flex items-center gap-2 text-xs text-sky-400 font-mono p-2">
             <Loader2 className="w-4 h-4 animate-spin" />
-            <span>AI is analyzing circuit logic...</span>
+            <span>AI is composing response...</span>
           </div>
         )}
       </div>
 
-      {/* Input Box */}
-      <div className="pt-3 border-t border-gray-800 shrink-0">
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            handleSend();
-          }}
-          className="flex items-center gap-2"
+      {/* Input Field */}
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          handleSend();
+        }}
+        className="flex items-center gap-2 pt-3 border-t border-slate-800 shrink-0"
+      >
+        <input
+          type="text"
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          placeholder={`Ask a question about ${component.name} (e.g. How do I wire this?)...`}
+          className="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-sky-500 font-medium"
+        />
+        <button
+          type="submit"
+          disabled={!input.trim() || loading}
+          className="p-2.5 rounded-xl bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold transition-all disabled:opacity-40"
         >
-          <input
-            type="text"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            placeholder={`Ask a doubt about ${component.name}...`}
-            className="flex-1 bg-gray-950 border border-gray-800 rounded-xl px-4 py-2.5 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-cyan-500 transition-colors"
-          />
-          <button
-            type="submit"
-            disabled={!input.trim() || loading}
-            className="p-2.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-gray-950 font-bold transition-all disabled:opacity-40 shrink-0"
-          >
-            <Send className="w-4 h-4" />
-          </button>
-        </form>
-      </div>
+          <Send className="w-4 h-4" />
+        </button>
+      </form>
 
     </div>
   );
