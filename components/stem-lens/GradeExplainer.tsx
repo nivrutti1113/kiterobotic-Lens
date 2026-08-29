@@ -9,7 +9,7 @@ import Link from 'next/link';
 interface GradeExplainerProps {
   component: StemComponent;
   currentLang: SupportedLanguage;
-  onOpenKineticCanvas: () => void;
+  onOpenKineticCanvas?: () => void;
 }
 
 export type GradeBandKey = 'grade3_5' | 'grade6_8' | 'grade9_10' | 'grade11_12';

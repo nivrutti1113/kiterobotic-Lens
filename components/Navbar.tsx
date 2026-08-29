@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Camera, Cpu, Activity, Globe, Zap, Bot, Check, Sparkles } from 'lucide-react';
+import { Camera, Cpu, Activity, Globe, Zap, Bot, Check, Trophy } from 'lucide-react';
 import { LANGUAGES, SupportedLanguage, UI_TRANSLATIONS } from '@/lib/languages';
 
 interface NavbarProps {
@@ -83,6 +83,18 @@ export const Navbar: React.FC<NavbarProps> = ({
             >
               <Activity className="w-3.5 h-3.5" />
               <span>{t.hardwareLabTab}</span>
+            </Link>
+
+            <Link
+              href="/challenges"
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                pathname.startsWith('/challenges')
+                  ? 'bg-amber-500 text-slate-950 font-bold shadow-sm'
+                  : 'text-slate-400 hover:text-slate-100 hover:bg-slate-800/50'
+              }`}
+            >
+              <Trophy className="w-3.5 h-3.5 text-amber-400" />
+              <span>Quests</span>
             </Link>
           </nav>
 
