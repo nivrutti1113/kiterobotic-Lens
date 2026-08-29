@@ -29,8 +29,8 @@ export const Footer: React.FC = () => {
           </div>
         </div>
       </div>
-      <div className="max-w-7xl mx-auto border-t border-slate-800/80 mt-4 pt-3 text-center text-[11px] text-slate-400">
-        © 2026 Kite Robotics India. Prepared by Pranab Chauhan, CEO & Co-Founder (kiterobotics.in).
+      <div className="max-w-7xl mx-auto border-t border-slate-800/80 mt-4 pt-3 text-center text-[11px] text-slate-400 font-medium">
+        © 2026 Built by KiteRobotics Pvt Ltd (kiterobotics.in). All rights reserved.
       </div>
     </footer>
   );

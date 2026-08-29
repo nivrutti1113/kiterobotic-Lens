@@ -9,32 +9,32 @@ interface VernacularAudioTutorProps {
   currentLang?: SupportedLanguage;
 }
 
-export const VernacularAudioTutor: React.FC<VernacularAudioTutorProps> = ({ currentLang = 'hi' }) => {
+export const VernacularAudioTutor: React.FC<VernacularAudioTutorProps> = ({ currentLang = 'en' }) => {
   const [activeLang, setActiveLang] = useState<SupportedLanguage>(currentLang);
   const [isPlaying, setIsPlaying] = useState<string | null>(null);
 
-  const langCode = activeLang === 'en' ? 'hi' : (activeLang as 'hi' | 'ta' | 'mr' | 'te' | 'bn');
+  const langCode = activeLang as 'en' | 'hi' | 'ta' | 'mr' | 'te' | 'bn';
 
   const handlePlayTTS = (termObj: VernacularTerm) => {
     if (typeof window === 'undefined' || !('speechSynthesis' in window)) return;
 
     window.speechSynthesis.cancel();
-    const trans = termObj.translations[langCode] || termObj.translations.hi;
+    const trans = termObj.translations[langCode] || termObj.translations.en;
     const textToSpeak = `${trans.term}. ${trans.explanation}`;
 
     const utterance = new SpeechSynthesisUtterance(textToSpeak);
     utterance.rate = 0.95;
 
-    // Set voice language code if supported
-    const langMap: Record<string, string> = {
+    // Set voice language code for Web Speech API
+    const langMap: Record<SupportedLanguage, string> = {
+      en: 'en-IN',
       hi: 'hi-IN',
       ta: 'ta-IN',
       mr: 'mr-IN',
       te: 'te-IN',
-      bn: 'bn-IN',
-      en: 'en-IN'
+      bn: 'bn-IN'
     };
-    utterance.lang = langMap[activeLang] || 'hi-IN';
+    utterance.lang = langMap[activeLang] || 'en-IN';
 
     utterance.onstart = () => setIsPlaying(termObj.englishTerm);
     utterance.onend = () => setIsPlaying(null);
@@ -54,13 +54,13 @@ export const VernacularAudioTutor: React.FC<VernacularAudioTutorProps> = ({ curr
           </div>
           <div>
             <h2 className="text-lg font-black text-slate-100 flex items-center gap-2">
-              <span>Vernacular Audio Tutor & NEP 2020 Glossary</span>
+              <span>Vernacular & English Audio Tutor (NEP 2020)</span>
               <span className="text-[10px] bg-purple-500/10 text-purple-400 border border-purple-500/30 px-2 py-0.5 rounded-full font-bold">
-                6 Indian Languages
+                Multi-Language TTS
               </span>
             </h2>
             <p className="text-xs text-slate-400">
-              Listen to hardware concepts in your regional mother tongue with native Web Speech TTS audio synthesis.
+              Listen to hardware concepts in English or your regional mother tongue with native Web Speech TTS audio synthesis.
             </p>
           </div>
         </div>
@@ -87,7 +87,7 @@ export const VernacularAudioTutor: React.FC<VernacularAudioTutorProps> = ({ curr
       {/* Dictionary Cards Grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {VERNACULAR_DICTIONARY.map((term) => {
-          const trans = term.translations[langCode] || term.translations.hi;
+          const trans = term.translations[langCode] || term.translations.en;
           const playingThis = isPlaying === term.englishTerm;
 
           return (
@@ -119,7 +119,7 @@ export const VernacularAudioTutor: React.FC<VernacularAudioTutorProps> = ({ curr
                 }`}
               >
                 <Volume2 className={`w-4 h-4 ${playingThis ? 'animate-pulse' : ''}`} />
-                <span>{playingThis ? 'Playing Audio...' : 'Listen Audio 🔊'}</span>
+                <span>{playingThis ? 'Playing Audio...' : `Listen Audio (${langCode.toUpperCase()}) 🔊`}</span>
               </button>
 
             </div>
