@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Zap, Cpu, Terminal, X, Send, Sliders, HardDrive, AlertTriangle, CheckCircle2 } from 'lucide-react';
+import { Zap, Cpu, Terminal, X, Send, Sliders, HardDrive, AlertTriangle, CheckCircle2, Bot, Play, Sparkles } from 'lucide-react';
 import { webSerialBridge, SerialStatus } from '@/lib/web-serial';
 
 interface HardwareDeployProps {
@@ -15,8 +15,6 @@ export const HardwareDeploy: React.FC<HardwareDeployProps> = ({ code, isOpen, on
   const [progress, setProgress] = useState(0);
   const [statusMsg, setStatusMsg] = useState('');
   const [logs, setLogs] = useState<string[]>([]);
-  const [txCommand, setTxCommand] = useState('');
-  const [baudRate, setBaudRate] = useState(115200);
   const [targetBoard, setTargetBoard] = useState<'esp32' | 'arduino' | 'pico'>('arduino');
   const [serialStatus, setSerialStatus] = useState<SerialStatus>(webSerialBridge.getStatus());
 
@@ -38,28 +36,23 @@ export const HardwareDeploy: React.FC<HardwareDeployProps> = ({ code, isOpen, on
     setSerialStatus(initialStatus);
 
     if (initialStatus.connected) {
-      setStatusMsg(`Hardware Port Active (${initialStatus.baudRate} baud). Ready to flash.`);
-      setLogs((prev) => [...prev, `[SYSTEM]: Active hardware USB serial port detected.`]);
+      setStatusMsg('🔌 Robot Board is Connected & Ready! Click "Run My Robot" below.');
+      setLogs((prev) => [...prev, `[ROBOT READY]: Connected to physical robot board via USB.`]);
     } else {
-      setStatusMsg('No USB hardware port connected. Please pair your board.');
+      setStatusMsg('🔌 No robot board connected. Click "Select Robot USB" below.');
     }
 
     const unsubStatus = webSerialBridge.subscribeStatus((newStatus) => {
       setSerialStatus(newStatus);
       if (!newStatus.connected) {
-        setStatusMsg(newStatus.error || 'Hardware USB Disconnected. Please pair USB port.');
+        setStatusMsg(newStatus.error || 'USB Disconnected. Please plug in your robot board.');
       } else {
-        setStatusMsg(`Hardware Port Active (${newStatus.baudRate} baud). Ready to flash.`);
+        setStatusMsg('🔌 Robot Board Connected! Click "Run My Robot" below.');
       }
-    });
-
-    const unsubData = webSerialBridge.subscribeData((incomingText) => {
-      setLogs((prev) => [...prev.slice(-200), `[RX]: ${incomingText.trim()}`]);
     });
 
     return () => {
       unsubStatus();
-      unsubData();
     };
   }, [isOpen]);
 
@@ -70,36 +63,24 @@ export const HardwareDeploy: React.FC<HardwareDeployProps> = ({ code, isOpen, on
   if (!isOpen) return null;
 
   const handleConnectPort = async () => {
-    const res = await webSerialBridge.connect(baudRate);
+    const res = await webSerialBridge.connect(115200);
     if (res.connected) {
-      setLogs((prev) => [...prev, `[SYSTEM]: Connected to ${res.portName} at ${res.baudRate} baud.`]);
+      setLogs((prev) => [...prev, `[ROBOT READY]: Connected to physical USB robot board!`]);
     } else {
-      setLogs((prev) => [...prev, `[ERROR]: Connection failed: ${res.error || 'User cancelled port selection'}`]);
-    }
-  };
-
-  const handleSendTx = async () => {
-    if (!txCommand.trim()) return;
-    const cmd = txCommand;
-    setTxCommand('');
-    setLogs((prev) => [...prev, `[TX]: ${cmd}`]);
-    try {
-      await webSerialBridge.sendData(cmd + '\n');
-    } catch (e: any) {
-      setLogs((prev) => [...prev, `[ERROR]: ${e.message}`]);
+      setLogs((prev) => [...prev, `[NOTICE]: Connection cancelled or port not selected.`]);
     }
   };
 
   const handleFlash = async () => {
     if (!serialStatus.connected) {
-      setLogs((prev) => [...prev, '[ERROR]: Cannot flash! No hardware USB serial port connected. Click "Select Serial Port" first.']);
-      setStatusMsg('Error: Please connect USB hardware port first!');
+      setLogs((prev) => [...prev, '[NOTICE]: Please click "Select Robot USB" above to plug in your board.']);
+      setStatusMsg('Please connect your robot board first!');
       return;
     }
 
     setFlashing(true);
     setProgress(0);
-    setLogs((prev) => [...prev, `[HARDWARE]: Starting ${targetBoard.toUpperCase()} WebSerial firmware deployment...`]);
+    setLogs((prev) => [...prev, `[ROBOT]: Starting code upload to ${targetBoard.toUpperCase()} board...`]);
 
     try {
       await webSerialBridge.sendCode(code, targetBoard, (pct, msg) => {
@@ -108,7 +89,7 @@ export const HardwareDeploy: React.FC<HardwareDeployProps> = ({ code, isOpen, on
         setLogs((prev) => [...prev, `[PROGRESS ${pct}%]: ${msg}`]);
       });
     } catch (e: any) {
-      setLogs((prev) => [...prev, `[ERROR]: Flash failed: ${e.message}`]);
+      setLogs((prev) => [...prev, `[NOTICE]: ${e.message}`]);
     } finally {
       setFlashing(false);
     }
@@ -116,24 +97,24 @@ export const HardwareDeploy: React.FC<HardwareDeployProps> = ({ code, isOpen, on
 
   return (
     <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4">
-      <div className="glass-panel-glow w-full max-w-2xl p-6 rounded-3xl border border-sky-500/40 flex flex-col gap-5 shadow-2xl animate-in fade-in zoom-in duration-300">
+      <div className="glass-panel-glow w-full max-w-2xl p-6 rounded-3xl border border-amber-500/40 flex flex-col gap-5 shadow-2xl animate-in fade-in zoom-in duration-300">
         
-        {/* Header */}
+        {/* Kid-Friendly Header */}
         <div className="flex items-center justify-between pb-3 border-b border-slate-800">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-sky-500/20 border border-sky-500/40 flex items-center justify-center">
-              <Zap className="w-5 h-5 text-sky-400 animate-pulse" />
+            <div className="w-10 h-10 rounded-2xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center">
+              <Bot className="w-6 h-6 text-amber-400 animate-bounce" />
             </div>
             <div>
-              <h3 className="font-bold text-base text-slate-100 flex items-center gap-2">
-                <span>WebSerial Hardware Flasher</span>
+              <h3 className="font-extrabold text-base text-slate-100 flex items-center gap-2">
+                <span>🚀 Run My Robot on Real Hardware</span>
                 <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold border ${
-                  serialStatus.connected ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30' : 'bg-red-500/10 text-red-400 border-red-500/30'
+                  serialStatus.connected ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30' : 'bg-amber-500/10 text-amber-400 border-amber-500/30'
                 }`}>
-                  {serialStatus.connected ? 'PORT ACTIVE' : 'DISCONNECTED'}
+                  {serialStatus.connected ? 'ROBOT READY' : 'PLUG USB'}
                 </span>
               </h3>
-              <p className="text-xs text-slate-400">Target Microcontroller: Arduino UNO / ESP32 / Raspberry Pi Pico</p>
+              <p className="text-xs text-slate-400">One-click upload to Arduino, ESP32, or Raspberry Pi Pico</p>
             </div>
           </div>
 
@@ -145,105 +126,82 @@ export const HardwareDeploy: React.FC<HardwareDeployProps> = ({ code, isOpen, on
           </button>
         </div>
 
-        {/* Board Selection & Connection Toolbar */}
-        <div className="flex flex-wrap items-center justify-between gap-3 bg-slate-950 p-3 rounded-2xl border border-slate-800 text-xs">
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-1.5">
-              <Cpu className="w-4 h-4 text-sky-400" />
-              <span className="text-slate-400">Target:</span>
-              <select
-                value={targetBoard}
-                onChange={(e) => setTargetBoard(e.target.value as any)}
-                className="bg-slate-900 border border-slate-800 rounded-lg px-2 py-1 text-slate-100 font-bold cursor-pointer"
-              >
-                <option value="arduino">Arduino UNO (STK500 C++)</option>
-                <option value="esp32">ESP32 (MicroPython REPL)</option>
-                <option value="pico">Raspberry Pi Pico (MicroPython)</option>
-              </select>
-            </div>
-
-            <div className="flex items-center gap-1.5">
-              <Sliders className="w-4 h-4 text-sky-400" />
-              <span className="text-slate-400">Baud:</span>
-              <select
-                value={baudRate}
-                onChange={(e) => setBaudRate(Number(e.target.value))}
-                className="bg-slate-900 border border-slate-800 rounded-lg px-2 py-1 text-slate-100 font-bold cursor-pointer"
-              >
-                <option value={115200}>115200</option>
-                <option value={9600}>9600</option>
-                <option value={57600}>57600</option>
-              </select>
-            </div>
+        {/* Board Selection & Simple Toolbar */}
+        <div className="flex flex-wrap items-center justify-between gap-3 bg-slate-950 p-3.5 rounded-2xl border border-slate-800 text-xs">
+          <div className="flex items-center gap-2">
+            <Cpu className="w-4 h-4 text-amber-400" />
+            <span className="text-slate-300 font-bold">Select Robot Board:</span>
+            <select
+              value={targetBoard}
+              onChange={(e) => setTargetBoard(e.target.value as any)}
+              className="bg-slate-900 border border-slate-800 rounded-xl px-3 py-1.5 text-slate-100 font-bold cursor-pointer"
+            >
+              <option value="arduino">Arduino UNO (Default Board)</option>
+              <option value="esp32">ESP32 (MicroPython IoT Board)</option>
+              <option value="pico">Raspberry Pi Pico Board</option>
+            </select>
           </div>
 
           <button
             onClick={serialStatus.connected ? () => webSerialBridge.disconnect() : handleConnectPort}
-            className={`px-3.5 py-1.5 rounded-xl font-bold text-xs transition-all ${
+            className={`px-4 py-2 rounded-xl font-bold text-xs transition-all ${
               serialStatus.connected
                 ? 'bg-red-500/20 text-red-400 border border-red-500/40 hover:bg-red-500/30'
-                : 'bg-sky-500 text-slate-950 hover:bg-sky-400'
+                : 'bg-amber-500 text-slate-950 hover:bg-amber-400 shadow-md shadow-amber-500/20'
             }`}
           >
-            {serialStatus.connected ? 'Disconnect Port' : 'Select Serial Port ⚡'}
+            {serialStatus.connected ? 'Disconnect Board' : '🔌 Select Robot USB'}
           </button>
         </div>
 
-        {/* Not Connected Warning Banner */}
-        {!serialStatus.connected && (
-          <div className="bg-amber-950/30 border border-amber-500/30 p-3 rounded-xl flex items-center gap-2.5 text-xs text-amber-300">
-            <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0" />
-            <span>No physical USB hardware port is connected. Click "Select Serial Port" above to pair your device.</span>
+        {/* Status Banner */}
+        {!serialStatus.connected ? (
+          <div className="bg-amber-950/30 border border-amber-500/30 p-3.5 rounded-2xl flex items-center gap-3 text-xs text-amber-300">
+            <AlertTriangle className="w-5 h-5 text-amber-400 shrink-0" />
+            <span>Click <strong>"🔌 Select Robot USB"</strong> above to pick your connected Arduino or robot board!</span>
           </div>
-        )}
-
-        {/* Connected Success Banner */}
-        {serialStatus.connected && (
-          <div className="bg-emerald-950/30 border border-emerald-500/30 p-3 rounded-xl flex items-center gap-2.5 text-xs text-emerald-300">
-            <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-            <span>Hardware USB Port is ACTIVE. Ready to flash {targetBoard.toUpperCase()} firmware!</span>
+        ) : (
+          <div className="bg-emerald-950/30 border border-emerald-500/30 p-3.5 rounded-2xl flex items-center gap-3 text-xs text-emerald-300">
+            <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
+            <span>Robot Board is connected and active! Click <strong>"Run My Robot 🚀"</strong> below to start!</span>
           </div>
         )}
 
         {/* Progress Bar */}
         <div className="space-y-2">
-          <div className="flex justify-between text-xs font-semibold">
-            <span className="text-sky-300">{statusMsg}</span>
-            <span className="text-slate-400">{progress}%</span>
+          <div className="flex justify-between text-xs font-bold">
+            <span className="text-amber-300">{statusMsg}</span>
+            <span className="text-slate-400 font-mono">{progress}%</span>
           </div>
 
-          <div className="w-full h-3 bg-slate-950 rounded-full overflow-hidden border border-slate-800 p-0.5">
+          <div className="w-full h-3.5 bg-slate-950 rounded-full overflow-hidden border border-slate-800 p-0.5">
             <div
               style={{ width: `${progress}%` }}
-              className="h-full bg-gradient-to-r from-sky-500 via-indigo-500 to-emerald-400 rounded-full transition-all duration-300 shadow-[0_0_12px_#38bdf8]"
+              className="h-full bg-gradient-to-r from-amber-400 via-sky-400 to-emerald-400 rounded-full transition-all duration-300 shadow-[0_0_12px_#f59e0b]"
             />
           </div>
         </div>
 
-        {/* Serial Terminal Monitor */}
-        <div className="bg-slate-950 p-4 rounded-2xl border border-slate-800 font-mono text-[11px] h-44 overflow-y-auto space-y-1 text-slate-300 shadow-inner relative">
+        {/* Student Monitor */}
+        <div className="bg-slate-950 p-4 rounded-2xl border border-slate-800 font-mono text-[11px] h-36 overflow-y-auto space-y-1 text-slate-300 shadow-inner relative">
           <div className="text-slate-500 text-[10px] uppercase font-bold border-b border-slate-900 pb-1 mb-1 flex items-center justify-between sticky top-0 bg-slate-950 z-10">
-            <span className="flex items-center gap-1 text-sky-400">
-              <Terminal className="w-3 h-3" /> WebSerial REPL & TX/RX Monitor
+            <span className="flex items-center gap-1 text-amber-400">
+              <Bot className="w-3 h-3" /> 💬 Live Robot Talk & Action Monitor
             </span>
             <button onClick={() => setLogs([])} className="text-slate-400 hover:text-slate-100">
-              Clear Console
+              Clear Logs
             </button>
           </div>
 
           {logs.length === 0 ? (
-            <p className="text-slate-500 italic">Connected USB serial stream logs will appear here...</p>
+            <p className="text-slate-500 italic">Logs from your robot will appear here...</p>
           ) : (
             logs.map((log, idx) => (
               <p
                 key={idx}
                 className={
-                  log.includes('ERROR')
-                    ? 'text-red-400 font-bold'
-                    : log.includes('100%') || log.includes('ARDUINO') || log.includes('SYSTEM')
+                  log.includes('100%') || log.includes('ARDUINO') || log.includes('ROBOT READY')
                     ? 'text-emerald-400 font-bold'
-                    : log.includes('[TX]')
-                    ? 'text-amber-300'
                     : 'text-sky-300'
                 }
               >
@@ -253,32 +211,6 @@ export const HardwareDeploy: React.FC<HardwareDeployProps> = ({ code, isOpen, on
           )}
           <div ref={terminalEndRef} />
         </div>
-
-        {/* TX Command Prompt */}
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            handleSendTx();
-          }}
-          className="flex items-center gap-2"
-        >
-          <input
-            type="text"
-            value={txCommand}
-            onChange={(e) => setTxCommand(e.target.value)}
-            disabled={!serialStatus.connected}
-            placeholder={serialStatus.connected ? "Send command to serial port..." : "Connect USB serial port to enable TX command prompt"}
-            className="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-4 py-2 text-xs text-white placeholder-slate-500 font-mono focus:outline-none focus:border-sky-500 disabled:opacity-50"
-          />
-          <button
-            type="submit"
-            disabled={!serialStatus.connected}
-            className="px-4 py-2 rounded-xl bg-slate-900 border border-slate-800 hover:border-sky-500/50 text-sky-400 font-bold text-xs flex items-center gap-1 transition-all disabled:opacity-40"
-          >
-            <Send className="w-3.5 h-3.5" />
-            <span>Send TX</span>
-          </button>
-        </form>
 
         {/* Action Controls */}
         <div className="flex items-center justify-end gap-3 pt-2 border-t border-slate-900">
@@ -292,10 +224,10 @@ export const HardwareDeploy: React.FC<HardwareDeployProps> = ({ code, isOpen, on
           <button
             onClick={handleFlash}
             disabled={flashing || !serialStatus.connected}
-            className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-sky-500 to-indigo-600 hover:from-sky-400 hover:to-indigo-500 text-slate-950 font-extrabold text-xs shadow-lg shadow-sky-500/25 transition-all hover:scale-105 active:scale-95 disabled:opacity-40 cursor-pointer disabled:cursor-not-allowed"
+            className="flex items-center gap-2 px-6 py-3 rounded-2xl bg-gradient-to-r from-amber-400 via-sky-500 to-emerald-500 hover:from-amber-300 hover:to-emerald-400 text-slate-950 font-black text-xs shadow-xl shadow-amber-500/25 transition-all hover:scale-105 active:scale-95 disabled:opacity-40 cursor-pointer disabled:cursor-not-allowed"
           >
-            <Zap className={`w-4 h-4 ${flashing ? 'animate-spin' : ''}`} />
-            <span>{flashing ? 'Flashing USB...' : `Flash ${targetBoard.toUpperCase()} Now ⚡`}</span>
+            <Play className={`w-4 h-4 fill-current ${flashing ? 'animate-spin' : ''}`} />
+            <span>{flashing ? 'Uploading Code...' : 'Run My Robot 🚀'}</span>
           </button>
         </div>
 

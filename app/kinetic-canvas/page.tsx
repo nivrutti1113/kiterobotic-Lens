@@ -2,12 +2,13 @@
 
 import React, { useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { Cpu, Zap, Play, Sparkles, FolderOpen, Save, RefreshCw } from 'lucide-react';
+import { Cpu, Zap, Play, Sparkles, FolderOpen, Save, RefreshCw, Bot } from 'lucide-react';
 import { BlockEditor, BlockItem } from '@/components/kinetic-canvas/BlockEditor';
 import { CodeView } from '@/components/kinetic-canvas/CodeView';
 import { SimulatorCanvas } from '@/components/kinetic-canvas/SimulatorCanvas';
 import { AICopilot } from '@/components/kinetic-canvas/AICopilot';
 import { HardwareDeploy } from '@/components/kinetic-canvas/HardwareDeploy';
+import { BuddyBotGuide } from '@/components/BuddyBotGuide';
 import { PROJECT_TEMPLATES, ProjectTemplate } from '@/lib/projects-data';
 
 function StudioContent() {
@@ -49,17 +50,25 @@ function StudioContent() {
   return (
     <div className="space-y-6">
       
+      {/* BuddyBot 3-Step Interactive Student Guide */}
+      <BuddyBotGuide
+        step1="Pick blocks from left toolbox 🧩"
+        step2="Watch virtual robot move on track 🎮"
+        step3="Plug USB & click 'Run My Robot' 🚀"
+        currentStep={isSimRunning ? 2 : 1}
+      />
+
       {/* Studio Header & Project Template Selector */}
       <div className="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-slate-800">
         <div>
           <h1 className="text-xl font-black text-slate-100 flex items-center gap-2.5">
-            <span>Kinetic Canvas Studio</span>
-            <span className="text-xs bg-indigo-500/10 text-indigo-400 border border-indigo-500/30 px-2.5 py-0.5 rounded-full font-bold">
-              AST Physics Engine Active
+            <span>Fun Robotics Coding Studio</span>
+            <span className="text-xs bg-amber-500/10 text-amber-400 border border-amber-500/30 px-2.5 py-0.5 rounded-full font-bold">
+              Class 3–12 Ready
             </span>
           </h1>
           <p className="text-xs text-slate-400 mt-0.5">
-            Build logic with drag-and-drop blocks or Python/C++, test virtually in simulation, and flash to real hardware via WebSerial.
+            Drag-and-drop colorful blocks to make your robot move, test in 2D simulation, and run on real board!
           </p>
         </div>
 
@@ -85,13 +94,13 @@ function StudioContent() {
             </select>
           </div>
 
-          {/* Flash Hardware Button */}
+          {/* Run on Real Robot Board Button */}
           <button
             onClick={() => setDeployModalOpen(true)}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-sky-500 to-indigo-600 hover:from-sky-400 hover:to-indigo-500 text-slate-950 font-extrabold text-xs shadow-md shadow-sky-500/20 transition-all hover:scale-105"
+            className="flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-gradient-to-r from-amber-400 via-sky-500 to-emerald-500 hover:from-amber-300 hover:to-emerald-400 text-slate-950 font-black text-xs shadow-lg shadow-amber-500/20 transition-all hover:scale-105"
           >
             <Zap className="w-4 h-4" />
-            <span>One-Click Deploy USB ⚡</span>
+            <span>Run My Robot on Board 🚀</span>
           </button>
 
         </div>
@@ -107,7 +116,7 @@ function StudioContent() {
               : 'text-slate-400 hover:text-white'
           }`}
         >
-          Visual Block Coding
+          🧩 Visual Block Coding (Class 3+)
         </button>
 
         <button
@@ -118,7 +127,7 @@ function StudioContent() {
               : 'text-slate-400 hover:text-white'
           }`}
         >
-          Generated Python & C++ Code
+          💻 Generated Python & C++ Code
         </button>
       </div>
 

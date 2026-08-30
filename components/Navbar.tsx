@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Camera, Cpu, Activity, Globe, Zap, Bot, Check, Trophy } from 'lucide-react';
+import { Camera, Cpu, Activity, Globe, Zap, Bot, Check, Trophy, Sparkles, Smile } from 'lucide-react';
 import { LANGUAGES, SupportedLanguage, UI_TRANSLATIONS } from '@/lib/languages';
 
 interface NavbarProps {
@@ -21,6 +21,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 }) => {
   const pathname = usePathname();
   const [langMenuOpen, setLangMenuOpen] = useState(false);
+  const [gradeMode, setGradeMode] = useState<'junior' | 'senior'>('junior');
   const t = UI_TRANSLATIONS[currentLang] || UI_TRANSLATIONS.en;
   const currentLangObj = LANGUAGES.find((l) => l.code === currentLang) || LANGUAGES[0];
 
@@ -31,23 +32,50 @@ export const Navbar: React.FC<NavbarProps> = ({
           
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2.5 group">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-sky-500 via-indigo-600 to-purple-600 p-[1.5px] shadow-sm group-hover:scale-105 transition-transform">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-sky-500 via-indigo-600 to-amber-400 p-[1.5px] shadow-sm group-hover:scale-105 transition-transform">
               <div className="w-full h-full bg-slate-950 rounded-[6px] flex items-center justify-center">
-                <Bot className="w-4.5 h-4.5 text-sky-400" />
+                <Bot className="w-4.5 h-4.5 text-amber-400 animate-pulse" />
               </div>
             </div>
             <div>
               <div className="flex items-center gap-1.5">
                 <span className="font-extrabold text-sm tracking-wider text-slate-100">KITE ROBOTICS</span>
-                <span className="text-[9px] font-bold px-1.5 py-0.2 rounded-full bg-sky-500/10 text-sky-400 border border-sky-500/30">
-                  NEP 2020
+                <span className="text-[9px] font-bold px-1.5 py-0.2 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/30">
+                  Kids Friendly
                 </span>
               </div>
               <p className="text-[10px] text-slate-400 font-medium tracking-tight">STEM Lens & Kinetic Canvas</p>
             </div>
           </Link>
 
-          {/* Compact Pill Navigation Links */}
+          {/* Student Mode Switcher Pill (Junior vs Senior) */}
+          <div className="hidden lg:flex items-center gap-1 bg-slate-900/90 p-1 rounded-xl border border-slate-800/80 text-xs">
+            <button
+              onClick={() => setGradeMode('junior')}
+              className={`flex items-center gap-1 px-2.5 py-1 rounded-lg font-bold transition-all ${
+                gradeMode === 'junior'
+                  ? 'bg-amber-500 text-slate-950 shadow-sm'
+                  : 'text-slate-400 hover:text-slate-100'
+              }`}
+            >
+              <Smile className="w-3.5 h-3.5" />
+              <span>Junior (Class 3-5)</span>
+            </button>
+
+            <button
+              onClick={() => setGradeMode('senior')}
+              className={`flex items-center gap-1 px-2.5 py-1 rounded-lg font-bold transition-all ${
+                gradeMode === 'senior'
+                  ? 'bg-sky-500 text-slate-950 shadow-sm'
+                  : 'text-slate-400 hover:text-slate-100'
+              }`}
+            >
+              <Sparkles className="w-3.5 h-3.5" />
+              <span>Senior (Class 6-12)</span>
+            </button>
+          </div>
+
+          {/* Compact Navigation Links */}
           <nav className="hidden md:flex items-center gap-1 bg-slate-900/90 p-1 rounded-xl border border-slate-800/80">
             <Link
               href="/stem-lens"
@@ -58,7 +86,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               }`}
             >
               <Camera className="w-3.5 h-3.5" />
-              <span>{t.stemLensTab}</span>
+              <span>AI Camera Lens</span>
             </Link>
 
             <Link
@@ -70,7 +98,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               }`}
             >
               <Cpu className="w-3.5 h-3.5" />
-              <span>{t.kineticCanvasTab}</span>
+              <span>Coding Studio</span>
             </Link>
 
             <Link
@@ -82,7 +110,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               }`}
             >
               <Activity className="w-3.5 h-3.5" />
-              <span>{t.hardwareLabTab}</span>
+              <span>Wiring Lab</span>
             </Link>
 
             <Link
@@ -94,7 +122,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               }`}
             >
               <Trophy className="w-3.5 h-3.5 text-amber-400" />
-              <span>Quests</span>
+              <span>Fun Quests</span>
             </Link>
           </nav>
 
@@ -136,7 +164,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               )}
             </div>
 
-            {/* Slim Hardware Connect Button */}
+            {/* Student Hardware Connect Button */}
             <button
               onClick={onConnectHardware}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
@@ -147,7 +175,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             >
               <Zap className={`w-3.5 h-3.5 ${hardwareConnected ? 'animate-pulse text-emerald-400' : 'text-sky-400'}`} />
               <span className="hidden sm:inline">
-                {hardwareConnected ? 'USB Connected' : 'Connect USB'}
+                {hardwareConnected ? '🔌 Robot Connected!' : '🔌 Plug Robot Board'}
               </span>
             </button>
 

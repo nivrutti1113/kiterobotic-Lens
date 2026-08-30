@@ -86,7 +86,7 @@ export const CameraScanner: React.FC<CameraScannerProps> = ({
         <div>
           <div className="flex items-center gap-2">
             <Camera className="w-5 h-5 text-sky-400" />
-            <h2 className="font-bold text-base text-slate-100">STEM Lens AI Scanner</h2>
+            <h2 className="font-extrabold text-base text-slate-100">🔍 Magic AI Camera Scanner (Class 3+)</h2>
             
             {/* API Environment Status Inspector Badge */}
             <button

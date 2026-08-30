@@ -7,22 +7,31 @@ import { ProjectDocExporter } from '@/components/hardware-lab/ProjectDocExporter
 import { PinoutInspector } from '@/components/hardware-lab/PinoutInspector';
 import { HardwareDiagnostics } from '@/components/hardware-lab/HardwareDiagnostics';
 import { WiringExporter } from '@/components/hardware-lab/WiringExporter';
+import { BuddyBotGuide } from '@/components/BuddyBotGuide';
 
 export default function HardwareLabPage() {
   return (
     <div className="space-y-8">
       
+      {/* BuddyBot Student Guide */}
+      <BuddyBotGuide
+        step1="Pick components to view breadboard wiring 🔌"
+        step2="Check 5V vs GND wire safety colors ⚡"
+        step3="Export 1-Click PDF Manual for ATL Fair 📄"
+        currentStep={1}
+      />
+
       {/* Top Banner */}
       <div className="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-slate-800">
         <div>
           <h1 className="text-xl font-black text-slate-100 flex items-center gap-2.5">
-            <span>Kite Hardware Lab & Multi-Component Studio</span>
+            <span>Hardware Wiring Lab & Exhibition Exporter</span>
             <span className="text-xs bg-sky-500/10 text-sky-400 border border-sky-500/30 px-2.5 py-0.5 rounded-full font-bold">
-              WebSerial Active
+              Class 3–12 Ready
             </span>
           </h1>
           <p className="text-xs text-slate-400 mt-1">
-            Real-time WebSerial hardware oscilloscope, multi-component circuit wiring generator, PDF project manual exporter, and diagnostic suite.
+            View easy color-coded breadboard wiring schematics, export printable exhibition project manuals, and test sensor signals!
           </p>
         </div>
       </div>
