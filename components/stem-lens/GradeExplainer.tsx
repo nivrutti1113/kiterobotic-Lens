@@ -17,7 +17,6 @@ export type GradeBandKey = 'grade3_5' | 'grade6_8' | 'grade9_10' | 'grade11_12';
 export const GradeExplainer: React.FC<GradeExplainerProps> = ({
   component,
   currentLang,
-  onOpenKineticCanvas,
 }) => {
   const [selectedGrade, setSelectedGrade] = useState<GradeBandKey>('grade6_8');
 
@@ -31,22 +30,22 @@ export const GradeExplainer: React.FC<GradeExplainerProps> = ({
   const g11_12 = component.grades.grade11_12;
 
   return (
-    <div className="glass-panel p-6 rounded-3xl border border-gray-800 flex flex-col gap-6">
+    <div className="bg-[#FFFDF9] p-6 rounded-3xl border border-[#EEDCD0] flex flex-col gap-6 shadow-sm font-sans">
       
       {/* Grade Selector Tabs */}
-      <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-gray-800">
+      <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-[#EEDCD0]">
         <div className="flex items-center gap-2">
-          <BookOpen className="w-5 h-5 text-cyan-400" />
-          <h3 className="font-bold text-base text-white">Grade-Adaptive AI Explainer</h3>
+          <BookOpen className="w-5 h-5 text-purple-700" />
+          <h3 className="font-black text-base text-[#111827] font-heading">Grade-Adaptive AI Explainer</h3>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 bg-gray-950 p-1.5 rounded-2xl border border-gray-800">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 bg-[#FAF3EC] p-1.5 rounded-2xl border border-[#EEDCD0] font-heading">
           <button
             onClick={() => setSelectedGrade('grade3_5')}
-            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+            className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all ${
               selectedGrade === 'grade3_5'
-                ? 'bg-amber-500 text-gray-950 shadow-md shadow-amber-500/20'
-                : 'text-gray-400 hover:text-white'
+                ? 'bg-amber-500 text-slate-950 shadow-md'
+                : 'text-[#374151] hover:text-purple-900'
             }`}
           >
             Grade 3–5
@@ -54,10 +53,10 @@ export const GradeExplainer: React.FC<GradeExplainerProps> = ({
 
           <button
             onClick={() => setSelectedGrade('grade6_8')}
-            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+            className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all ${
               selectedGrade === 'grade6_8'
-                ? 'bg-cyan-500 text-gray-950 shadow-md shadow-cyan-500/20'
-                : 'text-gray-400 hover:text-white'
+                ? 'bg-cyan-600 text-white shadow-md'
+                : 'text-[#374151] hover:text-purple-900'
             }`}
           >
             Grade 6–8
@@ -65,10 +64,10 @@ export const GradeExplainer: React.FC<GradeExplainerProps> = ({
 
           <button
             onClick={() => setSelectedGrade('grade9_10')}
-            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+            className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all ${
               selectedGrade === 'grade9_10'
-                ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20'
-                : 'text-gray-400 hover:text-white'
+                ? 'bg-blue-700 text-white shadow-md'
+                : 'text-[#374151] hover:text-purple-900'
             }`}
           >
             Grade 9–10
@@ -76,10 +75,10 @@ export const GradeExplainer: React.FC<GradeExplainerProps> = ({
 
           <button
             onClick={() => setSelectedGrade('grade11_12')}
-            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+            className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all ${
               selectedGrade === 'grade11_12'
-                ? 'bg-purple-600 text-white shadow-md shadow-purple-500/20'
-                : 'text-gray-400 hover:text-white'
+                ? 'bg-purple-700 text-white shadow-md'
+                : 'text-[#374151] hover:text-purple-900'
             }`}
           >
             Grade 11–12
@@ -89,13 +88,13 @@ export const GradeExplainer: React.FC<GradeExplainerProps> = ({
 
       {/* Vernacular Language Notice Banner */}
       {translatedData && (
-        <div className="bg-cyan-950/40 border border-cyan-500/40 p-3.5 rounded-2xl flex items-center justify-between text-xs text-cyan-200">
+        <div className="bg-purple-100/70 border border-purple-300 p-3.5 rounded-2xl flex items-center justify-between text-xs text-purple-950 font-semibold">
           <div className="flex items-center gap-2">
-            <Sparkles className="w-4 h-4 text-cyan-400 animate-spin" />
-            <span className="font-bold">{translatedData.name}:</span>
+            <Sparkles className="w-4 h-4 text-purple-700 animate-spin" />
+            <span className="font-black font-heading">{translatedData.name}:</span>
             <span>{translatedData.explanation}</span>
           </div>
-          <span className="text-[10px] px-2 py-0.5 rounded bg-cyan-500/20 uppercase font-semibold">
+          <span className="text-[10px] font-black px-2 py-0.5 rounded bg-purple-200 uppercase tracking-wider font-heading text-purple-950">
             {currentLang} AI Mode
           </span>
         </div>
@@ -104,22 +103,22 @@ export const GradeExplainer: React.FC<GradeExplainerProps> = ({
       {/* Grade 3-5 Content */}
       {selectedGrade === 'grade3_5' && (
         <div className="space-y-4">
-          <div className="bg-amber-950/20 border border-amber-500/30 p-5 rounded-2xl">
-            <h4 className="text-base font-bold text-amber-300 flex items-center gap-2">
-              <Lightbulb className="w-5 h-5 text-amber-400" />
+          <div className="bg-amber-100/80 border border-amber-300 p-5 rounded-2xl">
+            <h4 className="text-base font-black text-amber-950 flex items-center gap-2 font-heading">
+              <Lightbulb className="w-5 h-5 text-amber-700" />
               {g3_5.title}
             </h4>
-            <p className="text-sm text-gray-200 mt-2 leading-relaxed">{g3_5.explanation}</p>
+            <p className="text-sm text-[#374151] mt-2 leading-relaxed font-semibold">{g3_5.explanation}</p>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="bg-gray-900/80 p-4 rounded-2xl border border-gray-800">
-              <span className="text-xs font-bold text-amber-400 uppercase tracking-wider">🎉 Fun Fact</span>
-              <p className="text-xs text-gray-300 mt-1">{g3_5.funFact}</p>
+            <div className="bg-[#FAF3EC] p-4 rounded-2xl border border-[#EEDCD0]">
+              <span className="text-xs font-black text-amber-800 uppercase tracking-wider font-heading">🎉 Fun Fact</span>
+              <p className="text-xs text-[#374151] mt-1 font-semibold">{g3_5.funFact}</p>
             </div>
-            <div className="bg-gray-900/80 p-4 rounded-2xl border border-gray-800">
-              <span className="text-xs font-bold text-cyan-400 uppercase tracking-wider">🚘 Real-World Analogy</span>
-              <p className="text-xs text-gray-300 mt-1">{g3_5.realWorldAnalogy}</p>
+            <div className="bg-[#FAF3EC] p-4 rounded-2xl border border-[#EEDCD0]">
+              <span className="text-xs font-black text-cyan-800 uppercase tracking-wider font-heading">🚘 Real-World Analogy</span>
+              <p className="text-xs text-[#374151] mt-1 font-semibold">{g3_5.realWorldAnalogy}</p>
             </div>
           </div>
         </div>
@@ -128,22 +127,22 @@ export const GradeExplainer: React.FC<GradeExplainerProps> = ({
       {/* Grade 6-8 Content */}
       {selectedGrade === 'grade6_8' && (
         <div className="space-y-4">
-          <div className="bg-cyan-950/20 border border-cyan-500/30 p-5 rounded-2xl">
-            <h4 className="text-base font-bold text-cyan-300 flex items-center gap-2">
-              <Zap className="w-5 h-5 text-cyan-400" />
+          <div className="bg-cyan-100/80 border border-cyan-300 p-5 rounded-2xl">
+            <h4 className="text-base font-black text-cyan-950 flex items-center gap-2 font-heading">
+              <Zap className="w-5 h-5 text-cyan-700" />
               {g6_8.title}
             </h4>
-            <p className="text-sm text-gray-200 mt-2 leading-relaxed">{g6_8.explanation}</p>
+            <p className="text-sm text-[#374151] mt-2 leading-relaxed font-semibold">{g6_8.explanation}</p>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="bg-gray-900/80 p-4 rounded-2xl border border-gray-800">
-              <span className="text-xs font-bold text-cyan-400 uppercase tracking-wider">📥 Input / Output Logic</span>
-              <p className="text-xs text-gray-300 mt-1">{g6_8.inputOutput}</p>
+            <div className="bg-[#FAF3EC] p-4 rounded-2xl border border-[#EEDCD0]">
+              <span className="text-xs font-black text-cyan-800 uppercase tracking-wider font-heading">📥 Input / Output Logic</span>
+              <p className="text-xs text-[#374151] mt-1 font-semibold">{g6_8.inputOutput}</p>
             </div>
-            <div className="bg-gray-900/80 p-4 rounded-2xl border border-gray-800">
-              <span className="text-xs font-bold text-emerald-400 uppercase tracking-wider">⚡ Circuit Tip</span>
-              <p className="text-xs text-gray-300 mt-1">{g6_8.circuitTip}</p>
+            <div className="bg-[#FAF3EC] p-4 rounded-2xl border border-[#EEDCD0]">
+              <span className="text-xs font-black text-emerald-800 uppercase tracking-wider font-heading">⚡ Circuit Tip</span>
+              <p className="text-xs text-[#374151] mt-1 font-semibold">{g6_8.circuitTip}</p>
             </div>
           </div>
         </div>
@@ -152,33 +151,33 @@ export const GradeExplainer: React.FC<GradeExplainerProps> = ({
       {/* Grade 9-10 Content */}
       {selectedGrade === 'grade9_10' && (
         <div className="space-y-4">
-          <div className="bg-blue-950/20 border border-blue-500/30 p-5 rounded-2xl">
-            <h4 className="text-base font-bold text-blue-300 flex items-center gap-2">
-              <ShieldCheck className="w-5 h-5 text-blue-400" />
+          <div className="bg-blue-100/80 border border-blue-300 p-5 rounded-2xl">
+            <h4 className="text-base font-black text-blue-950 flex items-center gap-2 font-heading">
+              <ShieldCheck className="w-5 h-5 text-blue-700" />
               {g9_10.title}
             </h4>
-            <p className="text-sm text-gray-200 mt-2 leading-relaxed">{g9_10.explanation}</p>
+            <p className="text-sm text-[#374151] mt-2 leading-relaxed font-semibold">{g9_10.explanation}</p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="bg-gray-900/80 p-4 rounded-2xl border border-gray-800">
-              <span className="text-xs font-bold text-blue-400 uppercase tracking-wider mb-2 block">Technical Specifications</span>
+            <div className="bg-[#FAF3EC] p-4 rounded-2xl border border-[#EEDCD0]">
+              <span className="text-xs font-black text-blue-900 uppercase tracking-wider mb-2 block font-heading">Technical Specifications</span>
               <ul className="space-y-1">
                 {g9_10.specs.map((spec, i) => (
-                  <li key={i} className="text-xs text-gray-300 flex items-center gap-1.5">
-                    <span className="w-1.5 h-1.5 rounded-full bg-blue-400" /> {spec}
+                  <li key={i} className="text-xs text-[#374151] font-semibold flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-blue-700" /> {spec}
                   </li>
                 ))}
               </ul>
             </div>
 
-            <div className="bg-gray-900/80 p-4 rounded-2xl border border-gray-800">
-              <span className="text-xs font-bold text-purple-400 uppercase tracking-wider mb-2 block">Pinout Breakdown</span>
+            <div className="bg-[#FAF3EC] p-4 rounded-2xl border border-[#EEDCD0]">
+              <span className="text-xs font-black text-purple-900 uppercase tracking-wider mb-2 block font-heading">Pinout Breakdown</span>
               <div className="space-y-1.5">
                 {g9_10.pinout.map((p, i) => (
-                  <div key={i} className="flex items-center justify-between text-xs border-b border-gray-800/60 pb-1">
-                    <span className="font-mono text-cyan-300 font-bold">{p.pin}</span>
-                    <span className="text-gray-400 text-[11px]">{p.function}</span>
+                  <div key={i} className="flex items-center justify-between text-xs border-b border-[#EEDCD0] pb-1 font-semibold">
+                    <span className="font-mono text-purple-900 font-bold">{p.pin}</span>
+                    <span className="text-[#4B5563] text-[11px]">{p.function}</span>
                   </div>
                 ))}
               </div>
@@ -190,19 +189,19 @@ export const GradeExplainer: React.FC<GradeExplainerProps> = ({
       {/* Grade 11-12 Content */}
       {selectedGrade === 'grade11_12' && (
         <div className="space-y-4">
-          <div className="bg-purple-950/20 border border-purple-500/30 p-5 rounded-2xl">
-            <h4 className="text-base font-bold text-purple-300 flex items-center gap-2">
-              <Code className="w-5 h-5 text-purple-400" />
+          <div className="bg-purple-100/80 border border-purple-300 p-5 rounded-2xl">
+            <h4 className="text-base font-black text-purple-950 flex items-center gap-2 font-heading">
+              <Code className="w-5 h-5 text-purple-700" />
               {g11_12.title}
             </h4>
-            <p className="text-sm text-gray-200 mt-2 leading-relaxed">{g11_12.explanation}</p>
+            <p className="text-sm text-[#374151] mt-2 leading-relaxed font-semibold">{g11_12.explanation}</p>
           </div>
 
-          <div className="bg-gray-950 p-4 rounded-2xl border border-gray-800">
-            <span className="text-xs font-bold text-purple-400 uppercase tracking-wider mb-1 block">
+          <div className="bg-[#FAF3EC] p-4 rounded-2xl border border-[#EEDCD0]">
+            <span className="text-xs font-black text-purple-900 uppercase tracking-wider mb-1 block font-heading">
               ROS2 Protocol Topology
             </span>
-            <p className="text-xs text-gray-300 font-mono bg-gray-900 p-2.5 rounded-xl border border-gray-800">
+            <p className="text-xs text-[#111827] font-mono bg-white p-2.5 rounded-xl border border-[#EEDCD0] font-bold">
               {g11_12.ros2Protocol}
             </p>
           </div>
@@ -213,7 +212,7 @@ export const GradeExplainer: React.FC<GradeExplainerProps> = ({
       <div className="pt-2 flex justify-end">
         <Link
           href={`/kinetic-canvas?template=${component.defaultBlocklyProject}`}
-          className="w-full sm:w-auto flex items-center justify-center gap-3 px-6 py-3.5 rounded-2xl bg-gradient-to-r from-cyan-500 via-blue-600 to-purple-600 hover:from-cyan-400 hover:to-purple-500 text-white font-extrabold text-sm shadow-xl shadow-cyan-500/25 transition-all hover:scale-105 active:scale-95"
+          className="w-full sm:w-auto flex items-center justify-center gap-3 px-6 py-3.5 rounded-2xl bg-purple-700 hover:bg-purple-800 text-white font-black text-sm shadow-md transition-all hover:scale-105 active:scale-95 font-heading"
         >
           <span>Build this in Kinetic Canvas 🚀</span>
           <ArrowRight className="w-4 h-4" />

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { MessageSquare, Send, Sparkles, Bot, User, Loader2, Volume2 } from 'lucide-react';
+import { MessageSquare, Send, Bot, User, Loader2, Volume2 } from 'lucide-react';
 import { StemComponent } from '@/lib/stem-data';
 
 interface DoubtSolverChatProps {
@@ -17,7 +17,7 @@ interface ChatMessage {
   source?: string;
 }
 
-export const DoubtSolverChat: React.FC<DoubtSolverChatProps> = ({ component, currentLang = 'en' }) => {
+export const DoubtSolverChat: React.FC<DoubtSolverChatProps> = ({ component }) => {
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       id: 'm1',
@@ -97,20 +97,20 @@ export const DoubtSolverChat: React.FC<DoubtSolverChatProps> = ({ component, cur
   };
 
   return (
-    <div className="glass-panel p-6 rounded-3xl border border-slate-800 flex flex-col h-[480px]">
+    <div className="bg-[#FFFDF9] p-6 rounded-3xl border border-[#EEDCD0] flex flex-col h-[480px] shadow-sm font-sans">
       
       {/* Header */}
-      <div className="flex items-center justify-between pb-4 border-b border-slate-800 shrink-0">
+      <div className="flex items-center justify-between pb-4 border-b border-[#EEDCD0] shrink-0">
         <div className="flex items-center gap-2">
-          <MessageSquare className="w-5 h-5 text-sky-400" />
+          <MessageSquare className="w-5 h-5 text-purple-700" />
           <div>
-            <h3 className="font-bold text-sm text-slate-100 flex items-center gap-2">
+            <h3 className="font-black text-sm text-[#111827] flex items-center gap-2 font-heading">
               <span>Vernacular AI Doubt-Solver</span>
-              <span className="text-[10px] bg-sky-500/10 text-sky-400 border border-sky-500/30 px-2 py-0.5 rounded-full font-semibold">
+              <span className="text-[10px] bg-purple-100 text-purple-900 border border-purple-300 px-2 py-0.5 rounded-full font-black">
                 Instant Q&A
               </span>
             </h3>
-            <p className="text-xs text-slate-400">Asking about: {component.name}</p>
+            <p className="text-xs text-[#374151] font-semibold">Asking about: {component.name}</p>
           </div>
         </div>
       </div>
@@ -123,33 +123,33 @@ export const DoubtSolverChat: React.FC<DoubtSolverChatProps> = ({ component, cur
             className={`flex items-start gap-2.5 ${msg.sender === 'user' ? 'flex-row-reverse' : ''}`}
           >
             <div
-              className={`w-7 h-7 rounded-xl flex items-center justify-center text-xs font-bold shrink-0 ${
-                msg.sender === 'user' ? 'bg-sky-500 text-slate-950' : 'bg-slate-900 border border-slate-800 text-indigo-400'
+              className={`w-7 h-7 rounded-xl flex items-center justify-center text-xs font-black shrink-0 ${
+                msg.sender === 'user' ? 'bg-purple-700 text-white' : 'bg-purple-100 border border-purple-300 text-purple-900'
               }`}
             >
               {msg.sender === 'user' ? <User className="w-4 h-4" /> : <Bot className="w-4 h-4" />}
             </div>
 
             <div
-              className={`max-w-[80%] p-3 rounded-2xl text-xs flex flex-col gap-1.5 ${
+              className={`max-w-[80%] p-3 rounded-2xl text-xs flex flex-col gap-1.5 font-semibold ${
                 msg.sender === 'user'
-                  ? 'bg-sky-500 text-slate-950 font-medium rounded-tr-none'
-                  : 'bg-slate-900 border border-slate-800 text-slate-200 rounded-tl-none'
+                  ? 'bg-purple-700 text-white rounded-tr-none'
+                  : 'bg-[#FAF3EC] border border-[#EEDCD0] text-[#111827] rounded-tl-none'
               }`}
             >
-              <div className="flex items-center justify-between gap-3 text-[10px] opacity-75">
+              <div className="flex items-center justify-between gap-3 text-[10px] opacity-90 font-heading font-black">
                 <span>{msg.sender === 'user' ? 'You' : 'Kite AI Assistant'}</span>
-                {msg.source && <span className="font-mono text-sky-400">[{msg.source}]</span>}
+                {msg.source && <span className="font-mono text-purple-800">[{msg.source}]</span>}
               </div>
               <p className="leading-relaxed">{msg.text}</p>
 
               {msg.sender === 'ai' && (
                 <button
                   onClick={() => handleSpeak(msg.text)}
-                  className="self-end p-1 rounded hover:bg-slate-800 text-slate-400 hover:text-sky-400 transition-colors"
+                  className="self-end p-1 rounded hover:bg-purple-100 text-[#374151] hover:text-purple-900 transition-colors"
                   title="Read aloud with Web Speech TTS"
                 >
-                  <Volume2 className={`w-3.5 h-3.5 ${isSpeaking ? 'text-sky-400 animate-pulse' : ''}`} />
+                  <Volume2 className={`w-3.5 h-3.5 ${isSpeaking ? 'text-purple-700 animate-pulse' : ''}`} />
                 </button>
               )}
             </div>
@@ -157,7 +157,7 @@ export const DoubtSolverChat: React.FC<DoubtSolverChatProps> = ({ component, cur
         ))}
 
         {loading && (
-          <div className="flex items-center gap-2 text-xs text-sky-400 font-mono p-2">
+          <div className="flex items-center gap-2 text-xs text-purple-800 font-mono p-2 font-bold">
             <Loader2 className="w-4 h-4 animate-spin" />
             <span>AI is composing response...</span>
           </div>
@@ -170,19 +170,19 @@ export const DoubtSolverChat: React.FC<DoubtSolverChatProps> = ({ component, cur
           e.preventDefault();
           handleSend();
         }}
-        className="flex items-center gap-2 pt-3 border-t border-slate-800 shrink-0"
+        className="flex items-center gap-2 pt-3 border-t border-[#EEDCD0] shrink-0"
       >
         <input
           type="text"
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          placeholder={`Ask a question about ${component.name} (e.g. How do I wire this?)...`}
-          className="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-sky-500 font-medium"
+          placeholder={`Ask a question about ${component.name}...`}
+          className="flex-1 bg-white border border-[#EEDCD0] rounded-xl px-4 py-2.5 text-xs text-[#111827] placeholder-[#4B5563] focus:outline-none focus:ring-2 focus:ring-purple-600 font-semibold shadow-sm"
         />
         <button
           type="submit"
           disabled={!input.trim() || loading}
-          className="p-2.5 rounded-xl bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold transition-all disabled:opacity-40"
+          className="p-2.5 rounded-xl bg-purple-700 hover:bg-purple-800 text-white font-black transition-all disabled:opacity-40 shadow-sm"
         >
           <Send className="w-4 h-4" />
         </button>

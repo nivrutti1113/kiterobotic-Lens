@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Download, FileText, CheckCircle2, ShieldCheck, Cpu } from 'lucide-react';
+import { Download, FileText } from 'lucide-react';
 import { PROJECT_TEMPLATES } from '@/lib/projects-data';
 
 export const WiringExporter: React.FC = () => {
@@ -17,17 +17,17 @@ export const WiringExporter: React.FC = () => {
   };
 
   return (
-    <div className="glass-panel p-6 rounded-3xl border border-gray-800 flex flex-col gap-6">
+    <div className="bg-[#FFFDF9] p-6 rounded-3xl border border-[#EEDCD0] flex flex-col gap-6 shadow-sm font-sans text-[#374151]">
       
       {/* Header */}
-      <div className="flex items-center justify-between border-b border-gray-800 pb-4">
+      <div className="flex items-center justify-between border-b border-[#EEDCD0] pb-4">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-2xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center">
-            <FileText className="w-5 h-5 text-emerald-400" />
+          <div className="w-10 h-10 rounded-2xl bg-purple-100 border border-purple-300 flex items-center justify-center">
+            <FileText className="w-5 h-5 text-purple-700" />
           </div>
           <div>
-            <h2 className="text-lg font-black text-white">ATL Hardware Project Schematics & BOM Exporter</h2>
-            <p className="text-xs text-gray-400">
+            <h2 className="text-lg font-black text-[#111827] font-heading">ATL Hardware Project Schematics & BOM Exporter</h2>
+            <p className="text-xs text-[#374151] font-semibold">
               Download printable wiring diagrams, Bill of Materials (BOM), and firmware packages for lab kits.
             </p>
           </div>
@@ -37,23 +37,23 @@ export const WiringExporter: React.FC = () => {
       {/* Projects Cards Grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {PROJECT_TEMPLATES.map((proj) => (
-          <div key={proj.id} className="bg-gray-950 p-4 rounded-2xl border border-gray-800 flex flex-col justify-between space-y-4">
+          <div key={proj.id} className="bg-white p-4 rounded-2xl border border-[#EEDCD0] flex flex-col justify-between space-y-4 shadow-sm">
             <div>
               <div className="flex items-center justify-between">
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-cyan-500/20 text-cyan-300">
+                <span className="text-[10px] font-black px-2.5 py-0.5 rounded bg-purple-100 text-purple-950 border border-purple-300 font-heading">
                   {proj.targetGradeBand}
                 </span>
-                <span className="text-[10px] text-gray-400">{proj.category}</span>
+                <span className="text-[10px] text-[#4B5563] font-bold">{proj.category}</span>
               </div>
-              <h3 className="text-sm font-bold text-white mt-2">{proj.title}</h3>
-              <p className="text-xs text-gray-400 mt-1 line-clamp-2">{proj.description}</p>
+              <h3 className="text-sm font-black text-[#111827] mt-2 font-heading">{proj.title}</h3>
+              <p className="text-xs text-[#374151] mt-1 line-clamp-2 font-semibold">{proj.description}</p>
             </div>
 
             <button
               onClick={() => handleDownloadSchematic(proj.title)}
-              className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-gray-900 border border-gray-800 hover:border-emerald-500/50 text-xs font-bold text-emerald-400 hover:text-emerald-300 transition-colors"
+              className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-[#FAF3EC] border border-[#EEDCD0] hover:border-purple-600 hover:bg-purple-50 text-xs font-black text-purple-900 transition-colors font-heading"
             >
-              <Download className="w-4 h-4" />
+              <Download className="w-4 h-4 text-purple-700" />
               <span>Download Wiring & BOM Card</span>
             </button>
           </div>

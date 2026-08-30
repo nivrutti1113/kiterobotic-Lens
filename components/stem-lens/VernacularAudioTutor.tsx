@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Globe, Volume2, BookOpen, Sparkles, Check, Play, Pause, X, Info, FileText } from 'lucide-react';
+import { Globe, Volume2, Sparkles, Play, Pause, X, FileText } from 'lucide-react';
 import { VERNACULAR_DICTIONARY, VernacularTerm } from '@/lib/vernacular-data';
 import { LANGUAGES, SupportedLanguage } from '@/lib/languages';
 
@@ -85,29 +85,29 @@ export const VernacularAudioTutor: React.FC<VernacularAudioTutorProps> = ({ curr
   };
 
   return (
-    <div className="glass-panel p-6 rounded-3xl border border-slate-800 flex flex-col gap-6">
+    <div className="bg-[#FFFDF9] p-6 rounded-3xl border border-[#EEDCD0] flex flex-col gap-6 shadow-sm font-sans">
       
       {/* Header */}
-      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-800 pb-4">
+      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-[#EEDCD0] pb-4">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-2xl bg-purple-500/20 border border-purple-500/40 flex items-center justify-center">
-            <Globe className="w-5 h-5 text-purple-400" />
+          <div className="w-10 h-10 rounded-2xl bg-purple-100 border border-purple-300 flex items-center justify-center">
+            <Globe className="w-5 h-5 text-purple-700" />
           </div>
           <div>
-            <h2 className="text-lg font-black text-slate-100 flex items-center gap-2">
+            <h2 className="text-lg font-black text-[#111827] flex items-center gap-2 font-heading">
               <span>Vernacular In-Depth Audio Tutor (NEP 2020)</span>
-              <span className="text-[10px] bg-purple-500/10 text-purple-400 border border-purple-500/30 px-2.5 py-0.5 rounded-full font-bold">
+              <span className="text-[10px] bg-purple-100 text-purple-950 border border-purple-300 px-2.5 py-0.5 rounded-full font-black">
                 2-Min Audio Masterclasses
               </span>
             </h2>
-            <p className="text-xs text-slate-400">
+            <p className="text-xs text-[#374151] font-semibold">
               Listen to 2-minute comprehensive STEM lessons in English or your regional mother tongue with native Web Speech TTS audio synthesis.
             </p>
           </div>
         </div>
 
         {/* Language Selector Tabs */}
-        <div className="flex flex-wrap items-center gap-1.5 bg-slate-950 p-1 rounded-xl border border-slate-800">
+        <div className="flex flex-wrap items-center gap-1.5 bg-[#FAF3EC] p-1.5 rounded-2xl border border-[#EEDCD0] font-heading">
           {LANGUAGES.map((lang) => (
             <button
               key={lang.code}
@@ -115,10 +115,10 @@ export const VernacularAudioTutor: React.FC<VernacularAudioTutorProps> = ({ curr
                 handleStopAudio();
                 setActiveLang(lang.code);
               }}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
+              className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all flex items-center gap-1.5 ${
                 activeLang === lang.code
-                  ? 'bg-purple-600 text-white shadow-md'
-                  : 'text-slate-400 hover:text-white'
+                  ? 'bg-purple-700 text-white shadow'
+                  : 'text-[#374151] hover:text-purple-900'
               }`}
             >
               <span>{lang.flag}</span>
@@ -134,31 +134,31 @@ export const VernacularAudioTutor: React.FC<VernacularAudioTutorProps> = ({ curr
           const trans = term.translations[langCode] || term.translations.en;
 
           return (
-            <div key={term.componentId} className="bg-slate-950 p-5 rounded-2xl border border-slate-800 flex flex-col justify-between gap-4 shadow-lg group hover:border-purple-500/40 transition-all">
+            <div key={term.componentId} className="bg-white p-5 rounded-2xl border border-[#EEDCD0] flex flex-col justify-between gap-4 shadow-sm group hover:border-purple-500 transition-all">
               
               <div className="space-y-2">
                 <div className="flex justify-between items-start text-xs">
-                  <span className="font-bold text-slate-100">{term.englishTerm}</span>
-                  <span className="text-[10px] text-purple-400 font-mono bg-purple-500/10 px-2 py-0.5 rounded border border-purple-500/30">
+                  <span className="font-black text-[#111827] font-heading">{term.englishTerm}</span>
+                  <span className="text-[10px] text-purple-900 font-mono bg-purple-100 px-2 py-0.5 rounded border border-purple-300 font-bold">
                     {term.category}
                   </span>
                 </div>
 
-                <div className="text-sm font-extrabold text-purple-300 font-sans">
+                <div className="text-sm font-black text-purple-900 font-heading">
                   {trans.term}
                 </div>
 
-                <p className="text-xs text-slate-300 leading-relaxed">
+                <p className="text-xs text-[#374151] leading-relaxed font-semibold">
                   {trans.shortDesc}
                 </p>
               </div>
 
-              <div className="space-y-2 pt-2 border-t border-slate-900">
+              <div className="space-y-2 pt-2 border-t border-[#EEDCD0]">
                 <button
                   onClick={() => handlePlayInDepthAudio(term)}
-                  className="w-full py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-extrabold text-xs flex items-center justify-center gap-2 shadow-md shadow-purple-600/20 transition-all"
+                  className="w-full py-2.5 rounded-xl bg-purple-700 hover:bg-purple-800 text-white font-black text-xs flex items-center justify-center gap-2 shadow-sm transition-all font-heading"
                 >
-                  <Volume2 className="w-4 h-4" />
+                  <Volume2 className="w-4 h-4 text-amber-300" />
                   <span>Play 2-Min Audio Masterclass ({langCode.toUpperCase()}) 🔊</span>
                 </button>
               </div>
@@ -170,17 +170,17 @@ export const VernacularAudioTutor: React.FC<VernacularAudioTutorProps> = ({ curr
 
       {/* Interactive 2-Min Audio Transcript & Player Modal */}
       {activeScriptModal && (
-        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-purple-500/40 p-6 rounded-3xl max-w-xl w-full flex flex-col gap-4 shadow-2xl animate-in fade-in zoom-in duration-200">
+        <div className="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="bg-[#FFFDF9] border border-[#EEDCD0] p-6 rounded-3xl max-w-xl w-full flex flex-col gap-4 shadow-2xl animate-in fade-in zoom-in duration-200">
             
-            <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+            <div className="flex items-center justify-between pb-3 border-b border-[#EEDCD0]">
               <div className="flex items-center gap-2">
-                <FileText className="w-5 h-5 text-purple-400" />
+                <FileText className="w-5 h-5 text-purple-700" />
                 <div>
-                  <h3 className="font-bold text-sm text-slate-100">
+                  <h3 className="font-black text-sm text-[#111827] font-heading">
                     {activeScriptModal.term.englishTerm} — In-Depth Lesson Script
                   </h3>
-                  <span className="text-[10px] text-purple-300 font-mono">
+                  <span className="text-[10px] text-purple-900 font-mono font-bold">
                     Language: {activeLang.toUpperCase()} • Duration: ~2 Mins
                   </span>
                 </div>
@@ -191,33 +191,33 @@ export const VernacularAudioTutor: React.FC<VernacularAudioTutorProps> = ({ curr
                   handleStopAudio();
                   setActiveScriptModal(null);
                 }}
-                className="p-1.5 rounded-lg text-slate-400 hover:text-white"
+                className="p-1.5 rounded-lg text-slate-600 hover:text-slate-900"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             {/* Script Viewer Container */}
-            <div className="bg-slate-950 p-4 rounded-2xl border border-slate-800 font-sans text-xs text-slate-200 leading-relaxed max-h-60 overflow-y-auto space-y-2 shadow-inner">
-              <div className="text-[10px] font-bold uppercase tracking-wider text-purple-400 mb-1 flex items-center gap-1">
-                <Sparkles className="w-3 h-3" /> Live Subtitle Transcript
+            <div className="bg-[#FAF3EC] p-4 rounded-2xl border border-[#EEDCD0] font-sans text-xs text-[#111827] leading-relaxed max-h-60 overflow-y-auto space-y-2 shadow-inner">
+              <div className="text-[10px] font-black uppercase tracking-wider text-purple-900 mb-1 flex items-center gap-1 font-heading">
+                <Sparkles className="w-3 h-3 text-purple-700" /> Live Subtitle Transcript
               </div>
-              <p className="text-slate-200 text-xs font-normal leading-relaxed">{activeScriptModal.script}</p>
+              <p className="text-[#374151] text-xs font-semibold leading-relaxed">{activeScriptModal.script}</p>
             </div>
 
             {/* Audio Control Bar */}
-            <div className="flex items-center justify-between pt-2 border-t border-slate-800">
+            <div className="flex items-center justify-between pt-2 border-t border-[#EEDCD0]">
               <div className="flex items-center gap-2">
-                <span className={`w-2.5 h-2.5 rounded-full ${isPlaying ? 'bg-emerald-400 animate-ping' : 'bg-slate-600'}`} />
-                <span className="text-xs text-slate-400 font-mono">
+                <span className={`w-2.5 h-2.5 rounded-full ${isPlaying ? 'bg-emerald-600 animate-ping' : 'bg-slate-400'}`} />
+                <span className="text-xs text-[#4B5563] font-bold">
                   {isPlaying ? 'TTS Voice Synthesizing Audio...' : 'Audio Paused'}
                 </span>
               </div>
 
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 font-heading">
                 <button
                   onClick={isPlaying ? handleStopAudio : () => handlePlayInDepthAudio(activeScriptModal.term)}
-                  className="px-4 py-2 rounded-xl bg-purple-600 text-white font-bold text-xs flex items-center gap-1.5 hover:bg-purple-500 transition-colors"
+                  className="px-4 py-2 rounded-xl bg-purple-700 text-white font-black text-xs flex items-center gap-1.5 hover:bg-purple-800 transition-colors"
                 >
                   {isPlaying ? <Pause className="w-3.5 h-3.5 fill-current" /> : <Play className="w-3.5 h-3.5 fill-current" />}
                   <span>{isPlaying ? 'Pause Speech' : 'Replay Speech'}</span>
@@ -228,7 +228,7 @@ export const VernacularAudioTutor: React.FC<VernacularAudioTutorProps> = ({ curr
                     handleStopAudio();
                     setActiveScriptModal(null);
                   }}
-                  className="px-4 py-2 rounded-xl bg-slate-800 text-slate-300 font-semibold text-xs hover:text-white"
+                  className="px-4 py-2 rounded-xl bg-[#FAF3EC] text-[#374151] font-black text-xs border border-[#EEDCD0] hover:bg-purple-100"
                 >
                   Close Player
                 </button>

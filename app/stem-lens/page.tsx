@@ -24,7 +24,7 @@ export default function StemLensPage() {
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 font-sans text-[#374151]">
       
       {/* BuddyBot Student Guide */}
       <BuddyBotGuide
@@ -35,15 +35,15 @@ export default function StemLensPage() {
       />
 
       {/* Top Banner */}
-      <div className="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-slate-800">
+      <div className="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-[#EEDCD0]">
         <div>
-          <h1 className="text-xl font-black text-slate-100 flex items-center gap-2.5">
+          <h1 className="text-xl font-black text-[#111827] flex items-center gap-2.5 font-heading">
             <span>Magic Camera & Native Language Audio Tutor</span>
-            <span className="text-xs bg-sky-500/10 text-sky-400 border border-sky-500/30 px-2.5 py-0.5 rounded-full font-bold">
+            <span className="text-xs bg-purple-100 text-purple-900 border border-purple-300 px-2.5 py-0.5 rounded-full font-black">
               NEP 2020 Aligned
             </span>
           </h1>
-          <p className="text-xs text-slate-400 mt-1">
+          <p className="text-xs text-[#374151] mt-1 font-semibold">
             Point camera or select any hardware part to view interactive AR pinouts and listen to audio in 6 Indian languages!
           </p>
         </div>

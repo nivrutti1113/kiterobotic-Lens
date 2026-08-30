@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Award, CheckCircle2, AlertCircle, Play, RotateCcw, Lightbulb, Trophy, ArrowRight, Code } from 'lucide-react';
-import { STEM_QUESTS, STEMQuest } from '@/lib/challenges-data';
+import { Award, CheckCircle2, AlertCircle, Play, RotateCcw, Lightbulb, Trophy, Code } from 'lucide-react';
+import { STEM_QUESTS } from '@/lib/challenges-data';
 
 export const ChallengeEngine: React.FC = () => {
   const [activeQuestIdx, setActiveQuestIdx] = useState(0);
@@ -47,30 +47,30 @@ export const ChallengeEngine: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 font-sans text-[#374151]">
       
       {/* Score Header */}
-      <div className="glass-panel p-5 rounded-3xl border border-slate-800 flex flex-wrap items-center justify-between gap-4">
+      <div className="bg-[#FFFDF9] p-5 rounded-3xl border border-[#EEDCD0] flex flex-wrap items-center justify-between gap-4 shadow-sm">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-2xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center">
-            <Trophy className="w-5 h-5 text-amber-400 animate-pulse" />
+          <div className="w-10 h-10 rounded-2xl bg-amber-100 border border-amber-300 flex items-center justify-center">
+            <Trophy className="w-5 h-5 text-amber-700 animate-pulse" />
           </div>
           <div>
-            <h2 className="font-extrabold text-base text-slate-100 flex items-center gap-2">
+            <h2 className="font-black text-base text-[#111827] flex items-center gap-2 font-heading">
               <span>STEM Debugging Quests & Challenge Arena</span>
-              <span className="text-[10px] bg-amber-500/10 text-amber-400 border border-amber-500/30 px-2.5 py-0.5 rounded-full font-bold">
+              <span className="text-[10px] bg-amber-100 text-amber-950 border border-amber-300 px-2.5 py-0.5 rounded-full font-black">
                 AST Programmatic Evaluator
               </span>
             </h2>
-            <p className="text-xs text-slate-400">Solve real robotics code bugs and circuit flaws to earn XP badges.</p>
+            <p className="text-xs text-[#374151] font-semibold">Solve real robotics code bugs and circuit flaws to earn XP badges.</p>
           </div>
         </div>
 
-        <div className="flex items-center gap-3 font-mono">
-          <div className="bg-slate-900 border border-slate-800 px-4 py-2 rounded-xl text-xs flex items-center gap-2">
-            <Award className="w-4 h-4 text-amber-400" />
-            <span className="text-slate-400">Total Score:</span>
-            <strong className="text-amber-400 font-bold text-sm">{userXP} XP</strong>
+        <div className="flex items-center gap-3 font-heading">
+          <div className="bg-[#FAF3EC] border border-[#EEDCD0] px-4 py-2 rounded-xl text-xs flex items-center gap-2 font-black">
+            <Award className="w-4 h-4 text-amber-700" />
+            <span className="text-[#374151]">Total Score:</span>
+            <strong className="text-amber-800 font-black text-sm">{userXP} XP</strong>
           </div>
         </div>
       </div>
@@ -79,8 +79,8 @@ export const ChallengeEngine: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         
         {/* Left Quest Selector List (4 cols) */}
-        <div className="lg:col-span-4 bg-slate-950 p-4 rounded-2xl border border-slate-800 space-y-3">
-          <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+        <div className="lg:col-span-4 bg-[#FAF3EC] p-4 rounded-2xl border border-[#EEDCD0] space-y-3 shadow-sm">
+          <h3 className="text-xs font-black text-[#111827] uppercase tracking-wider font-heading">
             Available STEM Quests ({STEM_QUESTS.length})
           </h3>
 
@@ -93,16 +93,16 @@ export const ChallengeEngine: React.FC = () => {
                   onClick={() => handleSelectQuest(idx)}
                   className={`w-full p-3 rounded-xl border text-left transition-all flex items-center justify-between ${
                     isActive
-                      ? 'bg-sky-500/10 border-sky-500 text-slate-100 shadow-md shadow-sky-500/10'
-                      : 'bg-slate-900/60 border-slate-800 text-slate-400 hover:text-slate-100 hover:bg-slate-800/50'
+                      ? 'bg-purple-700 border-purple-800 text-white shadow-md font-bold'
+                      : 'bg-white border-[#EEDCD0] text-[#374151] hover:bg-purple-100/50'
                   }`}
                 >
                   <div>
-                    <div className="text-xs font-bold">{q.title}</div>
-                    <div className="text-[10px] text-slate-400 font-mono mt-0.5">{q.category} • +{q.xpPoints} XP</div>
+                    <div className="text-xs font-black font-heading">{q.title}</div>
+                    <div className="text-[10px] opacity-80 font-mono mt-0.5">{q.category} • +{q.xpPoints} XP</div>
                   </div>
-                  <span className={`text-[10px] px-2 py-0.5 rounded font-bold ${
-                    q.difficulty === 'Beginner' ? 'bg-emerald-950 text-emerald-400' : 'bg-purple-950 text-purple-400'
+                  <span className={`text-[10px] px-2 py-0.5 rounded font-black font-heading ${
+                    q.difficulty === 'Beginner' ? 'bg-emerald-100 text-emerald-950 border border-emerald-300' : 'bg-purple-100 text-purple-950 border border-purple-300'
                   }`}>
                     {q.difficulty}
                   </span>
@@ -113,43 +113,43 @@ export const ChallengeEngine: React.FC = () => {
         </div>
 
         {/* Right Code Editor & Evaluator (8 cols) */}
-        <div className="lg:col-span-8 glass-panel p-5 rounded-2xl border border-slate-800 flex flex-col justify-between gap-4">
+        <div className="lg:col-span-8 bg-[#FFFDF9] p-5 rounded-2xl border border-[#EEDCD0] flex flex-col justify-between gap-4 shadow-sm">
           
           <div>
-            <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+            <div className="flex items-center justify-between pb-3 border-b border-[#EEDCD0]">
               <div>
-                <h3 className="text-base font-bold text-slate-100">{quest.title}</h3>
-                <p className="text-xs text-slate-300 mt-1">{quest.description}</p>
+                <h3 className="text-base font-black text-[#111827] font-heading">{quest.title}</h3>
+                <p className="text-xs text-[#374151] mt-1 font-semibold">{quest.description}</p>
               </div>
 
               <button
                 onClick={() => setShowHint(!showHint)}
-                className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-amber-500/10 text-amber-300 border border-amber-500/30 text-xs font-bold hover:bg-amber-500/20 transition-all"
+                className="flex items-center gap-1 px-3.5 py-1.5 rounded-xl bg-amber-100 text-amber-950 border border-amber-300 text-xs font-black hover:bg-amber-200 transition-all font-heading"
               >
-                <Lightbulb className="w-3.5 h-3.5" />
+                <Lightbulb className="w-3.5 h-3.5 text-amber-700" />
                 <span>{showHint ? 'Hide Hint' : 'Show Hint'}</span>
               </button>
             </div>
 
             {showHint && (
-              <div className="bg-amber-950/40 border border-amber-500/40 p-3 rounded-xl text-xs text-amber-200 mt-3 flex items-start gap-2">
-                <Lightbulb className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
-                <span><strong>Hint:</strong> {quest.solutionHint}</span>
+              <div className="bg-amber-100/80 border border-amber-300 p-3 rounded-xl text-xs text-amber-950 mt-3 flex items-start gap-2 font-semibold">
+                <Lightbulb className="w-4 h-4 text-amber-700 shrink-0 mt-0.5" />
+                <span><strong className="font-heading">Hint:</strong> {quest.solutionHint}</span>
               </div>
             )}
           </div>
 
           {/* Code Workbench */}
           <div className="space-y-2">
-            <div className="flex items-center justify-between text-xs text-slate-400 font-mono">
-              <span className="flex items-center gap-1.5">
-                <Code className="w-4 h-4 text-sky-400" /> Edit Python Code Below to Fix the Bug:
+            <div className="flex items-center justify-between text-xs text-[#374151] font-semibold">
+              <span className="flex items-center gap-1.5 font-black text-[#111827] font-heading">
+                <Code className="w-4 h-4 text-purple-700" /> Edit Python Code Below to Fix the Bug:
               </span>
               <button
                 onClick={() => setStudentCode(quest.buggedCode)}
-                className="text-[11px] text-slate-400 hover:text-white flex items-center gap-1"
+                className="text-[11px] text-[#4B5563] hover:text-[#111827] flex items-center gap-1 font-bold"
               >
-                <RotateCcw className="w-3 h-3" /> Reset Code
+                <RotateCcw className="w-3 h-3 text-slate-700" /> Reset Code
               </button>
             </div>
 
@@ -157,7 +157,7 @@ export const ChallengeEngine: React.FC = () => {
               value={studentCode}
               onChange={(e) => setStudentCode(e.target.value)}
               rows={7}
-              className="w-full bg-slate-950 border border-slate-800 rounded-xl p-4 font-mono text-xs text-sky-300 focus:outline-none focus:border-sky-500 leading-relaxed shadow-inner"
+              className="w-full bg-slate-950 border border-[#EEDCD0] rounded-xl p-4 font-mono text-xs text-emerald-300 focus:outline-none focus:ring-2 focus:ring-purple-600 leading-relaxed shadow-inner font-bold"
             />
           </div>
 
@@ -165,21 +165,21 @@ export const ChallengeEngine: React.FC = () => {
           {evalResult && (
             <div className={`p-3 rounded-xl text-xs font-mono font-bold flex items-center gap-2 ${
               evalResult.passed
-                ? 'bg-emerald-950/60 border border-emerald-500/40 text-emerald-300'
-                : 'bg-red-950/60 border border-red-500/40 text-red-300'
+                ? 'bg-emerald-100 text-emerald-950 border border-emerald-300'
+                : 'bg-rose-100 text-rose-950 border border-rose-300'
             }`}>
-              {evalResult.passed ? <CheckCircle2 className="w-4 h-4 text-emerald-400" /> : <AlertCircle className="w-4 h-4 text-red-400" />}
+              {evalResult.passed ? <CheckCircle2 className="w-4 h-4 text-emerald-700" /> : <AlertCircle className="w-4 h-4 text-rose-700" />}
               <span>{evalResult.message}</span>
             </div>
           )}
 
           {/* Action Button */}
-          <div className="flex justify-end pt-2 border-t border-slate-900">
+          <div className="flex justify-end pt-2 border-t border-[#EEDCD0]">
             <button
               onClick={handleEvaluate}
-              className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-sky-500 to-indigo-600 hover:from-sky-400 hover:to-indigo-500 text-slate-950 font-extrabold text-xs shadow-lg shadow-sky-500/25 transition-all hover:scale-105"
+              className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-purple-700 hover:bg-purple-800 text-white font-black text-xs shadow-md transition-all hover:scale-105 font-heading"
             >
-              <Play className="w-4 h-4 fill-current" />
+              <Play className="w-4 h-4 fill-current text-amber-300" />
               <span>Evaluate Solution (Run AST Test) ⚡</span>
             </button>
           </div>

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Terminal, Send, RefreshCw, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Terminal, Send, RefreshCw } from 'lucide-react';
 import { webSerialBridge } from '@/lib/web-serial';
 
 export const HardwareDiagnostics: React.FC = () => {
@@ -70,17 +70,17 @@ export const HardwareDiagnostics: React.FC = () => {
   };
 
   return (
-    <div className="glass-panel p-6 rounded-3xl border border-slate-800 flex flex-col gap-6">
+    <div className="bg-[#FFFDF9] p-6 rounded-3xl border border-[#EEDCD0] flex flex-col gap-6 shadow-sm font-sans text-[#374151]">
       
       {/* Header */}
-      <div className="flex items-center justify-between border-b border-slate-800 pb-4">
+      <div className="flex items-center justify-between border-b border-[#EEDCD0] pb-4">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-2xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center">
-            <Terminal className="w-5 h-5 text-amber-400" />
+          <div className="w-10 h-10 rounded-2xl bg-amber-100 border border-amber-300 flex items-center justify-center">
+            <Terminal className="w-5 h-5 text-amber-800" />
           </div>
           <div>
-            <h2 className="text-lg font-black text-slate-100">Hardware Diagnostic & Benchmark Suite</h2>
-            <p className="text-xs text-slate-400">
+            <h2 className="text-lg font-black text-[#111827] font-heading">Hardware Diagnostic & Benchmark Suite</h2>
+            <p className="text-xs text-[#374151] font-semibold">
               Run real hardware WebSerial connection checks and transmit serial commands.
             </p>
           </div>
@@ -89,14 +89,14 @@ export const HardwareDiagnostics: React.FC = () => {
         <button
           onClick={handleRunDiagnosticTest}
           disabled={testing}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs shadow-lg shadow-amber-500/20 transition-all hover:scale-105 disabled:opacity-50"
+          className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-black text-xs shadow-sm transition-all hover:scale-105 disabled:opacity-50 font-heading"
         >
           <RefreshCw className={`w-4 h-4 ${testing ? 'animate-spin' : ''}`} />
           <span>{testing ? 'Testing Hardware...' : 'Run Diagnostics Test ⚡'}</span>
         </button>
       </div>
 
-      {/* Terminal Viewport */}
+      {/* Dark Terminal Viewport */}
       <div className="bg-slate-950 p-4 rounded-2xl border border-slate-800 font-mono text-xs text-slate-300 h-64 overflow-y-auto space-y-1.5 shadow-inner">
         {consoleLogs.map((log, i) => (
           <div
@@ -105,7 +105,7 @@ export const HardwareDiagnostics: React.FC = () => {
               log.includes('PASS')
                 ? 'text-emerald-400 font-bold'
                 : log.includes('FAIL') || log.includes('[ERR]')
-                ? 'text-red-400 font-bold'
+                ? 'text-rose-400 font-bold'
                 : log.includes('>')
                 ? 'text-sky-300'
                 : 'text-slate-300'
@@ -129,11 +129,11 @@ export const HardwareDiagnostics: React.FC = () => {
           value={commandInput}
           onChange={(e) => setCommandInput(e.target.value)}
           placeholder="Send custom Serial/AT command payload (e.g. AT+RST, PIN13_HIGH)..."
-          className="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-500 font-mono"
+          className="flex-1 bg-white border border-[#EEDCD0] rounded-xl px-4 py-2.5 text-xs text-[#111827] placeholder-[#4B5563] focus:outline-none focus:ring-2 focus:ring-amber-500 font-mono font-semibold shadow-sm"
         />
         <button
           type="submit"
-          className="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold text-xs flex items-center gap-1.5 transition-all"
+          className="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-black text-xs flex items-center gap-1.5 transition-all font-heading shadow-sm"
         >
           <Send className="w-3.5 h-3.5" />
           <span>Send TX</span>

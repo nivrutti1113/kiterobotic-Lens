@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Activity, Play, Pause, RotateCcw, Sliders, Zap, HardDrive, AlertTriangle, Layers, Download } from 'lucide-react';
+import { Activity, RotateCcw, Sliders, Zap, AlertTriangle, Download } from 'lucide-react';
 import { webSerialBridge, SerialStatus } from '@/lib/web-serial';
 
 export const TelemetryGrapher: React.FC = () => {
@@ -10,7 +10,7 @@ export const TelemetryGrapher: React.FC = () => {
   const [ch2Data, setCh2Data] = useState<number[]>([]);
   const [ch3Data, setCh3Data] = useState<number[]>([]);
   
-  const [isPaused, setIsPaused] = useState(false);
+  const [isPaused] = useState(false);
   const [baudRate, setBaudRate] = useState(115200);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
@@ -27,7 +27,7 @@ export const TelemetryGrapher: React.FC = () => {
         const nums = matches.map(Number).filter((n) => !isNaN(n));
         if (nums.length >= 1) setCh1Data((prev) => [...prev.slice(-100), nums[0]].slice(-100));
         if (nums.length >= 2) setCh2Data((prev) => [...prev.slice(-100), nums[1]].slice(-100));
-        if (nums.length >= 3) setCh3Data((prev) => [...prev.slice(-100), nums[2]].slice(-100));
+        if (nums.length >= 3) setCh3Data((prev) => [...prev.slice(-100), nums[3]].slice(-100));
       }
     });
 
@@ -114,64 +114,64 @@ export const TelemetryGrapher: React.FC = () => {
   };
 
   return (
-    <div className="glass-panel p-6 rounded-3xl border border-slate-800 flex flex-col gap-6">
+    <div className="bg-[#FFFDF9] p-6 rounded-3xl border border-[#EEDCD0] flex flex-col gap-6 shadow-sm font-sans text-[#374151]">
       
       {/* Header */}
-      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-800 pb-4">
+      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-[#EEDCD0] pb-4">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-2xl bg-sky-500/20 border border-sky-500/40 flex items-center justify-center">
-            <Activity className="w-5 h-5 text-sky-400 animate-pulse" />
+          <div className="w-10 h-10 rounded-2xl bg-purple-100 border border-purple-300 flex items-center justify-center">
+            <Activity className="w-5 h-5 text-purple-700 animate-pulse" />
           </div>
           <div>
-            <h2 className="text-lg font-black text-slate-100 flex items-center gap-2">
+            <h2 className="text-lg font-black text-[#111827] flex items-center gap-2 font-heading">
               <span>Multi-Channel WebSerial Oscilloscope & Spectrum</span>
-              <span className={`text-[10px] px-2.5 py-0.5 rounded-full font-bold border ${
-                status.connected ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30' : 'bg-red-500/10 text-red-400 border-red-500/30'
+              <span className={`text-[10px] px-2.5 py-0.5 rounded-full font-black border font-heading ${
+                status.connected ? 'bg-emerald-100 text-emerald-950 border-emerald-300' : 'bg-rose-100 text-rose-950 border-rose-300'
               }`}>
                 {status.connected ? 'HARDWARE ACTIVE' : 'DISCONNECTED'}
               </span>
             </h2>
-            <p className="text-xs text-slate-400">
+            <p className="text-xs text-[#374151] font-semibold">
               Simultaneous 3-Channel ADC, PWM, & Ultrasonic pulse timing analysis with CSV data export.
             </p>
           </div>
         </div>
 
         {/* Toolbar Controls */}
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3 font-heading">
           
-          <div className="flex items-center gap-2 bg-slate-900 border border-slate-800 rounded-xl px-3 py-1.5 text-xs">
-            <Sliders className="w-4 h-4 text-sky-400" />
-            <span className="text-slate-400">Baud:</span>
+          <div className="flex items-center gap-2 bg-[#FAF3EC] border border-[#EEDCD0] rounded-xl px-3 py-1.5 text-xs font-black">
+            <Sliders className="w-4 h-4 text-purple-700" />
+            <span className="text-[#374151]">Baud:</span>
             <select
               value={baudRate}
               onChange={(e) => setBaudRate(Number(e.target.value))}
-              className="bg-transparent text-white font-bold focus:outline-none cursor-pointer"
+              className="bg-transparent text-[#111827] font-black focus:outline-none cursor-pointer"
             >
-              <option value={115200} className="bg-slate-900">115200</option>
-              <option value={9600} className="bg-slate-900">9600</option>
-              <option value={57600} className="bg-slate-900">57600</option>
+              <option value={115200} className="bg-white text-slate-900">115200</option>
+              <option value={9600} className="bg-white text-slate-900">9600</option>
+              <option value={57600} className="bg-white text-slate-900">57600</option>
             </select>
           </div>
 
           <button
             onClick={status.connected ? () => webSerialBridge.disconnect() : handleConnect}
-            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-extrabold shadow-lg transition-all ${
+            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-black shadow-sm transition-all ${
               status.connected
-                ? 'bg-red-500/20 text-red-400 border border-red-500/40 hover:bg-red-500/30'
-                : 'bg-gradient-to-r from-sky-500 to-indigo-600 hover:from-sky-400 hover:to-indigo-500 text-slate-950 shadow-sky-500/20'
+                ? 'bg-rose-100 text-rose-950 border border-rose-300 hover:bg-rose-200'
+                : 'bg-purple-700 hover:bg-purple-800 text-white shadow-md'
             }`}
           >
-            <Zap className="w-4 h-4" />
+            <Zap className="w-4 h-4 text-amber-300" />
             <span>{status.connected ? 'Disconnect USB' : 'Connect WebSerial USB ⚡'}</span>
           </button>
 
           <button
             onClick={exportCSV}
-            className="p-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 hover:text-white transition-colors"
+            className="p-2 rounded-xl bg-[#FAF3EC] border border-[#EEDCD0] text-purple-900 hover:bg-purple-100 transition-colors"
             title="Download CSV Telemetry Log"
           >
-            <Download className="w-4 h-4 text-sky-400" />
+            <Download className="w-4 h-4 text-purple-700" />
           </button>
 
           <button
@@ -180,16 +180,16 @@ export const TelemetryGrapher: React.FC = () => {
               setCh2Data([]);
               setCh3Data([]);
             }}
-            className="p-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-400 hover:text-white transition-colors"
+            className="p-2 rounded-xl bg-[#FAF3EC] border border-[#EEDCD0] text-slate-800 hover:bg-purple-100 transition-colors"
             title="Clear Data Buffer"
           >
-            <RotateCcw className="w-4 h-4" />
+            <RotateCcw className="w-4 h-4 text-slate-700" />
           </button>
         </div>
       </div>
 
       {/* Main Canvas Viewport */}
-      <div className="relative aspect-[21/9] w-full rounded-2xl overflow-hidden bg-slate-950 border border-slate-800 shadow-2xl p-4 flex flex-col justify-between">
+      <div className="relative aspect-[21/9] w-full rounded-2xl overflow-hidden bg-slate-950 border border-[#EEDCD0] shadow-xl p-4 flex flex-col justify-between">
         
         <canvas
           ref={canvasRef}
@@ -199,24 +199,24 @@ export const TelemetryGrapher: React.FC = () => {
         />
 
         {!status.connected && (
-          <div className="absolute inset-0 bg-slate-950/80 backdrop-blur-sm flex flex-col items-center justify-center text-center p-6 text-xs text-slate-400 space-y-3 z-10">
+          <div className="absolute inset-0 bg-slate-950/85 backdrop-blur-sm flex flex-col items-center justify-center text-center p-6 text-xs text-slate-300 space-y-3 z-10 font-semibold">
             <AlertTriangle className="w-10 h-10 text-amber-400 animate-pulse" />
-            <h4 className="text-sm font-bold text-slate-100">No Active USB Serial Stream Connected</h4>
-            <p className="max-w-md text-slate-400">
+            <h4 className="text-sm font-black text-white font-heading">No Active USB Serial Stream Connected</h4>
+            <p className="max-w-md text-slate-300">
               Click <strong>"Connect WebSerial USB"</strong> above to pair your physical micro-controller (Arduino, ESP32, Pico) and start plotting live ADC & sensor signals.
             </p>
           </div>
         )}
 
         {/* Multi-Channel Color Legend Badges */}
-        <div className="absolute top-6 left-6 flex items-center gap-3 font-mono text-[11px]">
-          <span className="flex items-center gap-1.5 bg-slate-900/90 border border-sky-500/40 px-2.5 py-1 rounded-lg text-sky-300">
+        <div className="absolute top-6 left-6 flex items-center gap-3 font-mono text-[11px] font-bold">
+          <span className="flex items-center gap-1.5 bg-slate-950/90 border border-sky-400/40 px-2.5 py-1 rounded-lg text-sky-300">
             <span className="w-2.5 h-2.5 rounded-full bg-sky-400" /> Ch1: Sonar Echo (µs)
           </span>
-          <span className="flex items-center gap-1.5 bg-slate-900/90 border border-emerald-500/40 px-2.5 py-1 rounded-lg text-emerald-300">
+          <span className="flex items-center gap-1.5 bg-slate-950/90 border border-emerald-400/40 px-2.5 py-1 rounded-lg text-emerald-300">
             <span className="w-2.5 h-2.5 rounded-full bg-emerald-400" /> Ch2: PWM Motor (%)
           </span>
-          <span className="flex items-center gap-1.5 bg-slate-900/90 border border-amber-500/40 px-2.5 py-1 rounded-lg text-amber-300">
+          <span className="flex items-center gap-1.5 bg-slate-950/90 border border-amber-400/40 px-2.5 py-1 rounded-lg text-amber-300">
             <span className="w-2.5 h-2.5 rounded-full bg-amber-400" /> Ch3: ADC Sensor
           </span>
         </div>

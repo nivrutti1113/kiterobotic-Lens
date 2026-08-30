@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Cpu, Info, ShieldCheck, Zap, Layers, CheckCircle2 } from 'lucide-react';
+import { Cpu, ShieldCheck, Layers, CheckCircle2 } from 'lucide-react';
 
 interface BoardPinout {
   id: string;
@@ -79,32 +79,32 @@ export const PinoutInspector: React.FC = () => {
   };
 
   return (
-    <div className="glass-panel p-6 rounded-3xl border border-gray-800 flex flex-col gap-6">
+    <div className="bg-[#FFFDF9] p-6 rounded-3xl border border-[#EEDCD0] flex flex-col gap-6 shadow-sm font-sans text-[#374151]">
       
       {/* Header & Board Selection Tabs */}
-      <div className="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-gray-800">
+      <div className="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-[#EEDCD0]">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-2xl bg-purple-500/20 border border-purple-500/40 flex items-center justify-center">
-            <Cpu className="w-5 h-5 text-purple-400" />
+          <div className="w-10 h-10 rounded-2xl bg-purple-100 border border-purple-300 flex items-center justify-center">
+            <Cpu className="w-5 h-5 text-purple-700" />
           </div>
           <div>
-            <h2 className="text-lg font-black text-white">Interactive Board Pinout Inspector</h2>
-            <p className="text-xs text-gray-400">
+            <h2 className="text-lg font-black text-[#111827] font-heading">Interactive Board Pinout Inspector</h2>
+            <p className="text-xs text-[#374151] font-semibold">
               Inspect microcontroller pinout specs, electrical safety limits, and circuit wiring paths.
             </p>
           </div>
         </div>
 
         {/* Board Switcher Buttons */}
-        <div className="flex flex-wrap items-center gap-1.5 bg-gray-950 p-1.5 rounded-2xl border border-gray-800">
+        <div className="flex flex-wrap items-center gap-1.5 bg-[#FAF3EC] p-1.5 rounded-2xl border border-[#EEDCD0] font-heading">
           {BOARDS_DATA.map((board) => (
             <button
               key={board.id}
               onClick={() => handleSelectBoard(board)}
-              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+              className={`px-4 py-2 rounded-xl text-xs font-black transition-all ${
                 selectedBoard.id === board.id
-                  ? 'bg-purple-600 text-white shadow-lg shadow-purple-500/20'
-                  : 'text-gray-400 hover:text-white'
+                  ? 'bg-purple-700 text-white shadow-md'
+                  : 'text-[#374151] hover:text-purple-900'
               }`}
             >
               {board.name}
@@ -115,24 +115,24 @@ export const PinoutInspector: React.FC = () => {
 
       {/* Board Hardware Specs Overview Header */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <div className="bg-gray-950 p-3.5 rounded-2xl border border-gray-800">
-          <span className="text-[10px] uppercase font-bold text-gray-400 block">Main Processor</span>
-          <span className="text-xs font-bold text-white mt-0.5 block truncate">{selectedBoard.chip}</span>
+        <div className="bg-[#FAF3EC] p-3.5 rounded-2xl border border-[#EEDCD0]">
+          <span className="text-[10px] uppercase font-black text-[#4B5563] block font-heading">Main Processor</span>
+          <span className="text-xs font-black text-[#111827] mt-0.5 block truncate font-heading">{selectedBoard.chip}</span>
         </div>
 
-        <div className="bg-gray-950 p-3.5 rounded-2xl border border-gray-800">
-          <span className="text-[10px] uppercase font-bold text-gray-400 block">Operating Voltage</span>
-          <span className="text-xs font-bold text-cyan-400 mt-0.5 block">{selectedBoard.operatingVoltage}</span>
+        <div className="bg-[#FAF3EC] p-3.5 rounded-2xl border border-[#EEDCD0]">
+          <span className="text-[10px] uppercase font-black text-[#4B5563] block font-heading">Operating Voltage</span>
+          <span className="text-xs font-black text-purple-900 mt-0.5 block font-heading">{selectedBoard.operatingVoltage}</span>
         </div>
 
-        <div className="bg-gray-950 p-3.5 rounded-2xl border border-gray-800">
-          <span className="text-[10px] uppercase font-bold text-gray-400 block">Clock Frequency</span>
-          <span className="text-xs font-bold text-amber-400 mt-0.5 block">{selectedBoard.clockSpeed}</span>
+        <div className="bg-[#FAF3EC] p-3.5 rounded-2xl border border-[#EEDCD0]">
+          <span className="text-[10px] uppercase font-black text-[#4B5563] block font-heading">Clock Frequency</span>
+          <span className="text-xs font-black text-amber-800 mt-0.5 block font-heading">{selectedBoard.clockSpeed}</span>
         </div>
 
-        <div className="bg-gray-950 p-3.5 rounded-2xl border border-gray-800">
-          <span className="text-[10px] uppercase font-bold text-gray-400 block">Flash Storage</span>
-          <span className="text-xs font-bold text-emerald-400 mt-0.5 block">{selectedBoard.flashMemory}</span>
+        <div className="bg-[#FAF3EC] p-3.5 rounded-2xl border border-[#EEDCD0]">
+          <span className="text-[10px] uppercase font-black text-[#4B5563] block font-heading">Flash Storage</span>
+          <span className="text-xs font-black text-emerald-800 mt-0.5 block font-heading">{selectedBoard.flashMemory}</span>
         </div>
       </div>
 
@@ -140,31 +140,31 @@ export const PinoutInspector: React.FC = () => {
       <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
         
         {/* Left Pin List Selector (5 cols) */}
-        <div className="md:col-span-5 bg-gray-950 p-4 rounded-2xl border border-gray-800 flex flex-col gap-3">
-          <span className="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-2">
-            <Layers className="w-4 h-4 text-purple-400" /> Click Pin to Inspect
+        <div className="md:col-span-5 bg-[#FAF3EC] p-4 rounded-2xl border border-[#EEDCD0] flex flex-col gap-3">
+          <span className="text-xs font-black text-[#111827] uppercase tracking-wider flex items-center gap-2 font-heading">
+            <Layers className="w-4 h-4 text-purple-700" /> Click Pin to Inspect
           </span>
 
-          <div className="space-y-2 overflow-y-auto max-h-[340px] pr-1">
+          <div className="space-y-2 overflow-y-auto max-h-[340px] pr-1 font-semibold">
             {selectedBoard.pins.map((pin, idx) => (
               <button
                 key={idx}
                 onClick={() => setActivePin(pin)}
                 className={`w-full p-3 rounded-xl border text-left flex items-center justify-between transition-all ${
                   activePin.name === pin.name
-                    ? 'bg-purple-950/40 border-purple-500 text-white shadow-lg shadow-purple-500/10'
-                    : 'bg-gray-900/60 border-gray-800/80 text-gray-300 hover:bg-gray-800'
+                    ? 'bg-purple-700 text-white border-purple-800 shadow-md font-bold'
+                    : 'bg-white border-[#EEDCD0] text-[#374151] hover:bg-purple-100/50'
                 }`}
               >
                 <div>
-                  <span className="text-xs font-bold block">{pin.name}</span>
-                  <span className="text-[10px] text-gray-400 font-mono uppercase">{pin.type} • {pin.voltage}</span>
+                  <span className="text-xs font-black block font-heading">{pin.name}</span>
+                  <span className="text-[10px] opacity-80 font-mono uppercase">{pin.type} • {pin.voltage}</span>
                 </div>
-                <span className={`w-2.5 h-2.5 rounded-full ${
-                  pin.type === 'power' ? 'bg-red-400 shadow-[0_0_8px_#f87171]' :
-                  pin.type === 'ground' ? 'bg-gray-400' :
-                  pin.type === 'pwm' ? 'bg-amber-400' :
-                  pin.type === 'analog' ? 'bg-cyan-400' : 'bg-purple-400'
+                <span className={`w-3 h-3 rounded-full border border-slate-300 ${
+                  pin.type === 'power' ? 'bg-rose-500' :
+                  pin.type === 'ground' ? 'bg-slate-700' :
+                  pin.type === 'pwm' ? 'bg-amber-500' :
+                  pin.type === 'analog' ? 'bg-cyan-500' : 'bg-purple-500'
                 }`} />
               </button>
             ))}
@@ -172,42 +172,42 @@ export const PinoutInspector: React.FC = () => {
         </div>
 
         {/* Right Active Pin Deep Dive Info Box (7 cols) */}
-        <div className="md:col-span-7 bg-gray-950 p-6 rounded-2xl border border-purple-500/30 flex flex-col justify-between space-y-4">
+        <div className="md:col-span-7 bg-purple-100/70 p-6 rounded-2xl border border-purple-300 flex flex-col justify-between space-y-4">
           <div className="space-y-3">
-            <div className="flex items-center justify-between pb-3 border-b border-gray-800">
-              <h3 className="text-base font-extrabold text-white flex items-center gap-2">
+            <div className="flex items-center justify-between pb-3 border-b border-purple-300">
+              <h3 className="text-base font-black text-purple-950 flex items-center gap-2 font-heading">
                 <span>{activePin.name}</span>
-                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-purple-500/20 text-purple-300 uppercase">
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-purple-200 text-purple-950 font-black uppercase">
                   {activePin.type}
                 </span>
               </h3>
-              <span className="text-xs font-mono text-cyan-400 font-bold bg-gray-900 px-3 py-1 rounded-lg border border-gray-800">
+              <span className="text-xs font-mono text-purple-950 font-black bg-white px-3 py-1 rounded-lg border border-purple-300">
                 Logic Level: {activePin.voltage}
               </span>
             </div>
 
             <div>
-              <span className="text-xs font-bold text-gray-400 uppercase tracking-wider block mb-1">
+              <span className="text-xs font-black text-purple-900 uppercase tracking-wider block mb-1 font-heading">
                 Function Description
               </span>
-              <p className="text-xs text-gray-200 leading-relaxed bg-gray-900/80 p-3.5 rounded-xl border border-gray-800">
+              <p className="text-xs text-[#374151] leading-relaxed bg-white p-3.5 rounded-xl border border-purple-200 font-semibold shadow-sm">
                 {activePin.description}
               </p>
             </div>
 
-            <div className="bg-amber-950/20 border border-amber-500/30 p-4 rounded-xl flex items-start gap-3">
-              <ShieldCheck className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
+            <div className="bg-amber-100/80 border border-amber-300 p-4 rounded-xl flex items-start gap-3">
+              <ShieldCheck className="w-5 h-5 text-amber-700 shrink-0 mt-0.5" />
               <div>
-                <span className="text-xs font-bold text-amber-300 uppercase tracking-wider block">
+                <span className="text-xs font-black text-amber-950 uppercase tracking-wider block font-heading">
                   Electrical Safety Guideline
                 </span>
-                <p className="text-xs text-gray-300 mt-0.5">{activePin.safetyTip}</p>
+                <p className="text-xs text-[#374151] mt-0.5 font-semibold">{activePin.safetyTip}</p>
               </div>
             </div>
           </div>
 
-          <div className="pt-3 border-t border-gray-900 flex items-center justify-between text-[11px] text-gray-400">
-            <span className="flex items-center gap-1 text-emerald-400">
+          <div className="pt-3 border-t border-purple-300 flex items-center justify-between text-[11px] text-[#4B5563] font-bold">
+            <span className="flex items-center gap-1 text-emerald-800 font-black">
               <CheckCircle2 className="w-3.5 h-3.5" /> Verified Hardware Layout
             </span>
             <span>Kite Robotics Hardware Standard</span>

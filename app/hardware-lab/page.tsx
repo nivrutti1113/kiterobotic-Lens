@@ -11,7 +11,7 @@ import { BuddyBotGuide } from '@/components/BuddyBotGuide';
 
 export default function HardwareLabPage() {
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 font-sans text-[#374151]">
       
       {/* BuddyBot Student Guide */}
       <BuddyBotGuide
@@ -22,15 +22,15 @@ export default function HardwareLabPage() {
       />
 
       {/* Top Banner */}
-      <div className="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-slate-800">
+      <div className="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-[#EEDCD0]">
         <div>
-          <h1 className="text-xl font-black text-slate-100 flex items-center gap-2.5">
+          <h1 className="text-xl font-black text-[#111827] flex items-center gap-2.5 font-heading">
             <span>Hardware Wiring Lab & Exhibition Exporter</span>
-            <span className="text-xs bg-sky-500/10 text-sky-400 border border-sky-500/30 px-2.5 py-0.5 rounded-full font-bold">
+            <span className="text-xs bg-purple-100 text-purple-950 border border-purple-300 px-2.5 py-0.5 rounded-full font-black">
               Class 3–12 Ready
             </span>
           </h1>
-          <p className="text-xs text-slate-400 mt-1">
+          <p className="text-xs text-[#374151] mt-1 font-semibold">
             View easy color-coded breadboard wiring schematics, export printable exhibition project manuals, and test sensor signals!
           </p>
         </div>

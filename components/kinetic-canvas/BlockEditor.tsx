@@ -179,32 +179,32 @@ export const BlockEditor: React.FC<BlockEditorProps> = ({
   };
 
   return (
-    <div className="glass-panel p-5 rounded-3xl border border-slate-800 flex flex-col gap-4 h-[600px]">
+    <div className="bg-[#FFFDF9] p-5 rounded-3xl border border-[#EEDCD0] flex flex-col gap-4 h-[600px] shadow-sm font-sans text-[#374151]">
       
       {/* Header */}
-      <div className="flex items-center justify-between pb-3 border-b border-slate-800 shrink-0">
+      <div className="flex items-center justify-between pb-3 border-b border-[#EEDCD0] shrink-0">
         <div className="flex items-center gap-2">
-          <Blocks className="w-5 h-5 text-amber-400" />
-          <h3 className="font-bold text-sm text-slate-100">Visual Block-Code Canvas</h3>
-          <span className="text-[10px] bg-amber-500/10 text-amber-400 border border-amber-500/30 px-2 py-0.5 rounded-full font-semibold">
+          <Blocks className="w-5 h-5 text-purple-700" />
+          <h3 className="font-black text-sm text-[#111827] font-heading">Visual Block-Code Canvas</h3>
+          <span className="text-[10px] bg-purple-100 text-purple-950 border border-purple-300 px-2 py-0.5 rounded-full font-black font-heading">
             Live AST Compiler
           </span>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 font-heading">
           <button
             onClick={handleClearBlocks}
-            className="p-1.5 rounded-xl bg-slate-900 border border-slate-800 text-slate-400 hover:text-slate-100 transition-colors"
+            className="p-1.5 rounded-xl bg-[#FAF3EC] border border-[#EEDCD0] text-slate-800 hover:bg-purple-100 transition-colors"
             title="Clear Workspace"
           >
-            <RotateCcw className="w-3.5 h-3.5" />
+            <RotateCcw className="w-3.5 h-3.5 text-slate-700" />
           </button>
 
           <button
             onClick={onRunSimulation}
-            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-emerald-500 text-slate-950 font-bold text-xs shadow-md hover:bg-emerald-400 transition-all"
+            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-emerald-600 text-white font-black text-xs shadow-md hover:bg-emerald-700 transition-all"
           >
-            <Play className="w-3.5 h-3.5 fill-current" />
+            <Play className="w-3.5 h-3.5 fill-current text-amber-300" />
             <span>Run Logic</span>
           </button>
         </div>
@@ -213,8 +213,8 @@ export const BlockEditor: React.FC<BlockEditorProps> = ({
       <div className="grid grid-cols-1 md:grid-cols-12 gap-4 flex-1 overflow-hidden">
         
         {/* Block Palette (Left 4 cols) */}
-        <div className="md:col-span-4 bg-slate-950 p-3.5 rounded-2xl border border-slate-800 flex flex-col gap-3 overflow-y-auto">
-          <span className="text-[11px] font-bold uppercase text-slate-400 tracking-wider">
+        <div className="md:col-span-4 bg-[#FAF3EC] p-3.5 rounded-2xl border border-[#EEDCD0] flex flex-col gap-3 overflow-y-auto shadow-sm">
+          <span className="text-[11px] font-black uppercase text-[#111827] tracking-wider font-heading">
             Block Toolbox (Click to Add)
           </span>
 
@@ -223,44 +223,44 @@ export const BlockEditor: React.FC<BlockEditorProps> = ({
               <button
                 key={block.id}
                 onClick={() => handleAddBlock(block)}
-                className={`w-full p-2.5 rounded-xl ${block.color} text-white text-xs font-bold text-left flex items-center justify-between shadow-md hover:scale-[1.02] transition-transform`}
+                className={`w-full p-2.5 rounded-xl ${block.color} text-white text-xs font-black text-left flex items-center justify-between shadow-md hover:scale-[1.02] transition-transform font-heading`}
               >
                 <span className="truncate">{block.label}</span>
-                <Plus className="w-4 h-4 shrink-0 opacity-80" />
+                <Plus className="w-4 h-4 shrink-0 opacity-90" />
               </button>
             ))}
           </div>
         </div>
 
         {/* Workspace Canvas Stack (Right 8 cols) */}
-        <div className="md:col-span-8 bg-slate-950 p-4 rounded-2xl border border-slate-800 flex flex-col gap-3 overflow-y-auto bg-grid-pattern relative">
+        <div className="md:col-span-8 bg-[#FAF3EC] p-4 rounded-2xl border border-[#EEDCD0] flex flex-col gap-3 overflow-y-auto bg-grid-pattern relative shadow-sm">
           
-          <div className="flex items-center justify-between text-xs text-slate-400 pb-2 border-b border-slate-900">
-            <span>Program Execution Stack ({activeBlocks.length} blocks)</span>
-            <span className="text-[10px] text-sky-400 font-mono">AST Real-Time Linked</span>
+          <div className="flex items-center justify-between text-xs text-[#374151] pb-2 border-b border-[#EEDCD0] font-semibold">
+            <span className="font-black text-[#111827] font-heading">Program Execution Stack ({activeBlocks.length} blocks)</span>
+            <span className="text-[10px] text-purple-900 font-mono font-bold">AST Real-Time Linked</span>
           </div>
 
           <div className="space-y-2.5 flex-1">
             {activeBlocks.length === 0 ? (
-              <div className="h-full flex flex-col items-center justify-center text-slate-500 text-xs py-12">
-                <Blocks className="w-10 h-10 text-slate-700 mb-2 animate-bounce" />
+              <div className="h-full flex flex-col items-center justify-center text-slate-600 text-xs py-12 font-semibold">
+                <Blocks className="w-10 h-10 text-purple-700 mb-2 animate-bounce" />
                 <p>Your workspace is empty! Click blocks on the left to start coding your robot.</p>
               </div>
             ) : (
               activeBlocks.map((block, idx) => (
                 <div
                   key={block.id}
-                  className={`p-3 rounded-xl ${block.color} text-white font-bold text-xs flex items-center justify-between shadow-lg border border-white/10`}
+                  className={`p-3 rounded-xl ${block.color} text-white font-black text-xs flex items-center justify-between shadow-md border border-white/20 font-heading`}
                 >
                   <div className="flex items-center gap-3 flex-1">
-                    <span className="w-5 h-5 rounded-full bg-black/30 flex items-center justify-center text-[10px]">
+                    <span className="w-5 h-5 rounded-full bg-black/30 flex items-center justify-center text-[10px] font-mono">
                       {idx + 1}
                     </span>
                     <span>{block.label}</span>
 
                     {/* Editable parameter input if block has numeric value */}
                     {block.value !== undefined && (
-                      <div className="flex items-center gap-1 bg-black/40 px-2 py-0.5 rounded border border-white/20 text-[11px] ml-auto mr-2">
+                      <div className="flex items-center gap-1 bg-black/40 px-2 py-0.5 rounded border border-white/30 text-[11px] ml-auto mr-2">
                         <Sliders className="w-3 h-3 text-amber-300" />
                         <input
                           type="number"
@@ -274,7 +274,7 @@ export const BlockEditor: React.FC<BlockEditorProps> = ({
 
                   <button
                     onClick={() => handleRemoveBlock(block.id)}
-                    className="p-1 rounded bg-black/20 hover:bg-red-500/80 transition-colors"
+                    className="p-1 rounded bg-black/20 hover:bg-rose-600 transition-colors"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
                   </button>
