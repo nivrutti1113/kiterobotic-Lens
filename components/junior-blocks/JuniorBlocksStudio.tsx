@@ -21,7 +21,6 @@ import { PythonCodeDrawer } from './PythonCodeDrawer';
 export function JuniorBlocksStudio() {
   const [project, setProject] = useState<Project>(createDefaultProject);
   const [activeSpriteId, setActiveSpriteId] = useState<string>('');
-  const [gradeMode, setGradeMode] = useState<'junior' | 'senior'>('junior');
   const [isRunning, setIsRunning] = useState<boolean>(false);
   const [askPrompt, setAskPrompt] = useState<string | null>(null);
   const [helpOpen, setHelpOpen] = useState<boolean>(false);
@@ -171,9 +170,7 @@ export function JuniorBlocksStudio() {
       {/* Top Header Bar */}
       <TopBar
         project={project}
-        gradeMode={gradeMode}
         showPythonDrawer={showPythonDrawer}
-        onGradeModeChange={setGradeMode}
         onTogglePythonDrawer={() => setShowPythonDrawer(!showPythonDrawer)}
         onNewProject={() => {
           const fresh = createDefaultProject();
@@ -190,16 +187,15 @@ export function JuniorBlocksStudio() {
         onOpenHelp={() => setHelpOpen(true)}
       />
 
-      {/* Studio Core Body: Responsive 3-Column / Stacking Layout */}
+      {/* Studio Core Body */}
       <div className="flex-1 flex flex-col md:flex-row overflow-hidden p-3 gap-3">
         
         {/* Left Palette & Center Workspace Container */}
-        <div className="flex-1 flex flex-col sm:flex-row bg-white rounded-2xl border-2 border-slate-200 shadow-lg overflow-hidden min-h-[500px]">
+        <div className="flex-1 flex flex-col sm:flex-row bg-[#FFFDF9] rounded-2xl border-2 border-[#EEDCD0] shadow-lg overflow-hidden min-h-[500px]">
           
           {/* Palette Column */}
           <div className="w-full sm:w-72 h-72 sm:h-auto shrink-0">
             <BlockPalette
-              gradeMode={gradeMode}
               onDragStartBlockTemplate={handleDragStartBlockTemplate}
             />
           </div>
@@ -213,7 +209,7 @@ export function JuniorBlocksStudio() {
                 onInputChange={handleBlockInputChange}
               />
             ) : (
-              <div className="flex items-center justify-center h-full text-slate-400">
+              <div className="flex items-center justify-center h-full text-slate-500 font-bold">
                 Select a sprite to start coding
               </div>
             )}
@@ -269,8 +265,8 @@ export function JuniorBlocksStudio() {
 
         </div>
 
-        {/* Senior Mode Read-Only Python Drawer */}
-        {gradeMode === 'senior' && activeSprite && (
+        {/* Read-Only Python Code Drawer */}
+        {activeSprite && (
           <PythonCodeDrawer
             activeSprite={activeSprite}
             isOpen={showPythonDrawer}
