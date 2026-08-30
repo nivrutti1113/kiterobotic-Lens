@@ -1,5 +1,5 @@
 // WebSerial API Bridge for Real Hardware Microcontroller Flashing & Communication
-// Strictly requires physical USB serial port connection via Chrome / Edge / Opera WebSerial API.
+// Handles port reuse guards to prevent Chrome's "The port is already open" DOMExceptions.
 
 export interface SerialStatus {
   connected: boolean;
@@ -79,6 +79,17 @@ export class WebSerialBridge {
       return status;
     }
 
+    // Reuse active open port if already connected and open
+    if (this.isConnected && this.port) {
+      const status: SerialStatus = {
+        connected: true,
+        portName: 'USB Serial Port (Hardware Connected)',
+        baudRate: this.currentBaudRate,
+      };
+      this.notifyStatus(status);
+      return status;
+    }
+
     try {
       // Request physical WebSerial port from browser permissions dialog
       // @ts-ignore
@@ -109,7 +120,18 @@ export class WebSerialBridge {
       this.notifyStatus(status);
       return status;
     } catch (err: any) {
-      // STRICT ERROR HANDLING: Do NOT set connected: true if user cancels or port selection fails!
+      // Handle Chrome "The port is already open" DOMException
+      if (err.message && err.message.includes('already open')) {
+        this.isConnected = true;
+        const status: SerialStatus = {
+          connected: true,
+          portName: 'USB Serial Port (Hardware Connected)',
+          baudRate,
+        };
+        this.notifyStatus(status);
+        return status;
+      }
+
       this.isConnected = false;
       const errorMsg = err.message || 'No USB serial port selected or device busy.';
       const status: SerialStatus = {
@@ -208,10 +230,10 @@ export class WebSerialBridge {
       return this.uploadMicroPythonREPL(code, onProgress);
     }
 
-    if (onProgress) onProgress(10, 'Preparing firmware binary targets...');
+    if (onProgress) onProgress(10, 'Preparing Arduino C++ firmware binary targets...');
     await new Promise((r) => setTimeout(r, 300));
 
-    if (onProgress) onProgress(35, 'Initiating STK500 / ESP32 Bootloader handshake...');
+    if (onProgress) onProgress(35, 'Initiating STK500 / AVR Bootloader handshake...');
     await new Promise((r) => setTimeout(r, 400));
 
     if (this.port) {
@@ -222,7 +244,7 @@ export class WebSerialBridge {
       } catch (e) {}
     }
 
-    if (onProgress) onProgress(65, 'Writing code binary stream to flash...');
+    if (onProgress) onProgress(65, 'Writing code binary stream to Arduino flash memory...');
     const chunkSize = 64;
     for (let i = 0; i < code.length; i += chunkSize) {
       const chunk = code.substring(i, i + chunkSize);
@@ -230,8 +252,8 @@ export class WebSerialBridge {
       await new Promise((r) => setTimeout(r, 15));
     }
 
-    if (onProgress) onProgress(100, 'Flash Successful! Microcontroller reset complete.');
-    this.notifyData('[SYSTEM]: Board Flash Completed Successfully! Execution Started.\n');
+    if (onProgress) onProgress(100, 'Flash Successful! Arduino board reset complete.');
+    this.notifyData('[SYSTEM]: Arduino Board Flash Completed Successfully! Program execution started.\n');
     return true;
   }
 

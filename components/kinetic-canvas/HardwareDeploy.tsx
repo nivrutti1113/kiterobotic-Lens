@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Zap, Cpu, Terminal, X, Send, Sliders, HardDrive, AlertTriangle } from 'lucide-react';
+import { Zap, Cpu, Terminal, X, Send, Sliders, HardDrive, AlertTriangle, CheckCircle2 } from 'lucide-react';
 import { webSerialBridge, SerialStatus } from '@/lib/web-serial';
 
 interface HardwareDeployProps {
@@ -13,24 +13,43 @@ interface HardwareDeployProps {
 export const HardwareDeploy: React.FC<HardwareDeployProps> = ({ code, isOpen, onClose }) => {
   const [flashing, setFlashing] = useState(false);
   const [progress, setProgress] = useState(0);
-  const [statusMsg, setStatusMsg] = useState('Select and connect physical USB serial port to upload firmware.');
+  const [statusMsg, setStatusMsg] = useState('');
   const [logs, setLogs] = useState<string[]>([]);
   const [txCommand, setTxCommand] = useState('');
   const [baudRate, setBaudRate] = useState(115200);
-  const [targetBoard, setTargetBoard] = useState<'esp32' | 'arduino' | 'pico'>('esp32');
+  const [targetBoard, setTargetBoard] = useState<'esp32' | 'arduino' | 'pico'>('arduino');
   const [serialStatus, setSerialStatus] = useState<SerialStatus>(webSerialBridge.getStatus());
 
   const terminalEndRef = useRef<HTMLDivElement | null>(null);
 
+  // Auto-detect target microcontroller from code signature
+  useEffect(() => {
+    if (code.includes('setup()') || code.includes('#include') || code.includes('void loop()')) {
+      setTargetBoard('arduino');
+    } else if (code.includes('import ') || code.includes('machine.')) {
+      setTargetBoard('esp32');
+    }
+  }, [code]);
+
   useEffect(() => {
     if (!isOpen) return;
+
+    const initialStatus = webSerialBridge.getStatus();
+    setSerialStatus(initialStatus);
+
+    if (initialStatus.connected) {
+      setStatusMsg(`Hardware Port Active (${initialStatus.baudRate} baud). Ready to flash.`);
+      setLogs((prev) => [...prev, `[SYSTEM]: Active hardware USB serial port detected.`]);
+    } else {
+      setStatusMsg('No USB hardware port connected. Please pair your board.');
+    }
 
     const unsubStatus = webSerialBridge.subscribeStatus((newStatus) => {
       setSerialStatus(newStatus);
       if (!newStatus.connected) {
         setStatusMsg(newStatus.error || 'Hardware USB Disconnected. Please pair USB port.');
       } else {
-        setStatusMsg(`Hardware Port Connected (${newStatus.baudRate} baud). Ready to flash.`);
+        setStatusMsg(`Hardware Port Active (${newStatus.baudRate} baud). Ready to flash.`);
       }
     });
 
@@ -53,9 +72,9 @@ export const HardwareDeploy: React.FC<HardwareDeployProps> = ({ code, isOpen, on
   const handleConnectPort = async () => {
     const res = await webSerialBridge.connect(baudRate);
     if (res.connected) {
-      setLogs((prev) => [...prev, `[SYSTEM]: Connected to physical ${res.portName} at ${res.baudRate} baud.`]);
+      setLogs((prev) => [...prev, `[SYSTEM]: Connected to ${res.portName} at ${res.baudRate} baud.`]);
     } else {
-      setLogs((prev) => [...prev, `[ERROR]: Hardware connection failed: ${res.error || 'User cancelled port selection'}`]);
+      setLogs((prev) => [...prev, `[ERROR]: Connection failed: ${res.error || 'User cancelled port selection'}`]);
     }
   };
 
@@ -90,7 +109,7 @@ export const HardwareDeploy: React.FC<HardwareDeployProps> = ({ code, isOpen, on
       });
     } catch (e: any) {
       setLogs((prev) => [...prev, `[ERROR]: Flash failed: ${e.message}`]);
-    } fontally: {
+    } finally {
       setFlashing(false);
     }
   };
@@ -107,14 +126,14 @@ export const HardwareDeploy: React.FC<HardwareDeployProps> = ({ code, isOpen, on
             </div>
             <div>
               <h3 className="font-bold text-base text-slate-100 flex items-center gap-2">
-                <span>WebSerial Hardware Flasher & MicroPython REPL</span>
+                <span>WebSerial Hardware Flasher</span>
                 <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold border ${
                   serialStatus.connected ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30' : 'bg-red-500/10 text-red-400 border-red-500/30'
                 }`}>
                   {serialStatus.connected ? 'PORT ACTIVE' : 'DISCONNECTED'}
                 </span>
               </h3>
-              <p className="text-xs text-slate-400">Target Microcontroller: ESP32 / Arduino UNO / Raspberry Pi Pico</p>
+              <p className="text-xs text-slate-400">Target Microcontroller: Arduino UNO / ESP32 / Raspberry Pi Pico</p>
             </div>
           </div>
 
@@ -126,7 +145,7 @@ export const HardwareDeploy: React.FC<HardwareDeployProps> = ({ code, isOpen, on
           </button>
         </div>
 
-        {/* Board Selection & Baud Rate Settings */}
+        {/* Board Selection & Connection Toolbar */}
         <div className="flex flex-wrap items-center justify-between gap-3 bg-slate-950 p-3 rounded-2xl border border-slate-800 text-xs">
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-1.5">
@@ -137,9 +156,9 @@ export const HardwareDeploy: React.FC<HardwareDeployProps> = ({ code, isOpen, on
                 onChange={(e) => setTargetBoard(e.target.value as any)}
                 className="bg-slate-900 border border-slate-800 rounded-lg px-2 py-1 text-slate-100 font-bold cursor-pointer"
               >
+                <option value="arduino">Arduino UNO (STK500 C++)</option>
                 <option value="esp32">ESP32 (MicroPython REPL)</option>
                 <option value="pico">Raspberry Pi Pico (MicroPython)</option>
-                <option value="arduino">Arduino UNO (STK500 C++)</option>
               </select>
             </div>
 
@@ -160,9 +179,9 @@ export const HardwareDeploy: React.FC<HardwareDeployProps> = ({ code, isOpen, on
 
           <button
             onClick={serialStatus.connected ? () => webSerialBridge.disconnect() : handleConnectPort}
-            className={`px-3 py-1.5 rounded-xl font-bold text-xs transition-all ${
+            className={`px-3.5 py-1.5 rounded-xl font-bold text-xs transition-all ${
               serialStatus.connected
-                ? 'bg-red-500/20 text-red-400 border border-red-500/40'
+                ? 'bg-red-500/20 text-red-400 border border-red-500/40 hover:bg-red-500/30'
                 : 'bg-sky-500 text-slate-950 hover:bg-sky-400'
             }`}
           >
@@ -178,6 +197,14 @@ export const HardwareDeploy: React.FC<HardwareDeployProps> = ({ code, isOpen, on
           </div>
         )}
 
+        {/* Connected Success Banner */}
+        {serialStatus.connected && (
+          <div className="bg-emerald-950/30 border border-emerald-500/30 p-3 rounded-xl flex items-center gap-2.5 text-xs text-emerald-300">
+            <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+            <span>Hardware USB Port is ACTIVE and connected. Ready to flash {targetBoard.toUpperCase()} firmware!</span>
+          </div>
+        )}
+
         {/* Progress Bar */}
         <div className="space-y-2">
           <div className="flex justify-between text-xs font-semibold">
@@ -185,7 +212,7 @@ export const HardwareDeploy: React.FC<HardwareDeployProps> = ({ code, isOpen, on
             <span className="text-slate-400">{progress}%</span>
           </div>
 
-          <div className="w-full h-3 bg-slate-900 rounded-full overflow-hidden border border-slate-800 p-0.5">
+          <div className="w-full h-3 bg-slate-950 rounded-full overflow-hidden border border-slate-800 p-0.5">
             <div
               style={{ width: `${progress}%` }}
               className="h-full bg-gradient-to-r from-sky-500 via-indigo-500 to-emerald-400 rounded-full transition-all duration-300 shadow-[0_0_12px_#38bdf8]"
@@ -194,7 +221,7 @@ export const HardwareDeploy: React.FC<HardwareDeployProps> = ({ code, isOpen, on
         </div>
 
         {/* Serial Terminal Monitor */}
-        <div className="bg-slate-950 p-4 rounded-2xl border border-slate-800 font-mono text-[11px] h-48 overflow-y-auto space-y-1 text-slate-300 shadow-inner relative">
+        <div className="bg-slate-950 p-4 rounded-2xl border border-slate-800 font-mono text-[11px] h-44 overflow-y-auto space-y-1 text-slate-300 shadow-inner relative">
           <div className="text-slate-500 text-[10px] uppercase font-bold border-b border-slate-900 pb-1 mb-1 flex items-center justify-between sticky top-0 bg-slate-950 z-10">
             <span className="flex items-center gap-1 text-sky-400">
               <Terminal className="w-3 h-3" /> WebSerial REPL & TX/RX Monitor
@@ -205,7 +232,7 @@ export const HardwareDeploy: React.FC<HardwareDeployProps> = ({ code, isOpen, on
           </div>
 
           {logs.length === 0 ? (
-            <p className="text-slate-500 italic">Connect hardware USB serial port to stream live TX/RX console data...</p>
+            <p className="text-slate-500 italic">Connected USB serial stream logs will appear here...</p>
           ) : (
             logs.map((log, idx) => (
               <p
@@ -240,7 +267,7 @@ export const HardwareDeploy: React.FC<HardwareDeployProps> = ({ code, isOpen, on
             value={txCommand}
             onChange={(e) => setTxCommand(e.target.value)}
             disabled={!serialStatus.connected}
-            placeholder={serialStatus.connected ? "Send command to serial port (e.g. print('Hello'), machine.reset())..." : "Connect USB serial port to enable TX command prompt"}
+            placeholder={serialStatus.connected ? "Send command to serial port..." : "Connect USB serial port to enable TX command prompt"}
             className="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-4 py-2 text-xs text-white placeholder-slate-500 font-mono focus:outline-none focus:border-sky-500 disabled:opacity-50"
           />
           <button
