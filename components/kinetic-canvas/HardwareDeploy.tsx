@@ -102,7 +102,7 @@ export const HardwareDeploy: React.FC<HardwareDeployProps> = ({ code, isOpen, on
     setLogs((prev) => [...prev, `[HARDWARE]: Starting ${targetBoard.toUpperCase()} WebSerial firmware deployment...`]);
 
     try {
-      await webSerialBridge.sendCode(code, (pct, msg) => {
+      await webSerialBridge.sendCode(code, targetBoard, (pct, msg) => {
         setProgress(pct);
         setStatusMsg(msg);
         setLogs((prev) => [...prev, `[PROGRESS ${pct}%]: ${msg}`]);
@@ -201,7 +201,7 @@ export const HardwareDeploy: React.FC<HardwareDeployProps> = ({ code, isOpen, on
         {serialStatus.connected && (
           <div className="bg-emerald-950/30 border border-emerald-500/30 p-3 rounded-xl flex items-center gap-2.5 text-xs text-emerald-300">
             <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-            <span>Hardware USB Port is ACTIVE and connected. Ready to flash {targetBoard.toUpperCase()} firmware!</span>
+            <span>Hardware USB Port is ACTIVE. Ready to flash {targetBoard.toUpperCase()} firmware!</span>
           </div>
         )}
 
@@ -240,7 +240,7 @@ export const HardwareDeploy: React.FC<HardwareDeployProps> = ({ code, isOpen, on
                 className={
                   log.includes('ERROR')
                     ? 'text-red-400 font-bold'
-                    : log.includes('100%') || log.includes('MICROPYTHON') || log.includes('SYSTEM')
+                    : log.includes('100%') || log.includes('ARDUINO') || log.includes('SYSTEM')
                     ? 'text-emerald-400 font-bold'
                     : log.includes('[TX]')
                     ? 'text-amber-300'
@@ -295,7 +295,7 @@ export const HardwareDeploy: React.FC<HardwareDeployProps> = ({ code, isOpen, on
             className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-sky-500 to-indigo-600 hover:from-sky-400 hover:to-indigo-500 text-slate-950 font-extrabold text-xs shadow-lg shadow-sky-500/25 transition-all hover:scale-105 active:scale-95 disabled:opacity-40 cursor-pointer disabled:cursor-not-allowed"
           >
             <Zap className={`w-4 h-4 ${flashing ? 'animate-spin' : ''}`} />
-            <span>{flashing ? 'Flashing USB...' : 'Flash Hardware Now ⚡'}</span>
+            <span>{flashing ? 'Flashing USB...' : `Flash ${targetBoard.toUpperCase()} Now ⚡`}</span>
           </button>
         </div>
 

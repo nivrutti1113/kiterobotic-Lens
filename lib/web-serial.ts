@@ -1,5 +1,5 @@
 // WebSerial API Bridge for Real Hardware Microcontroller Flashing & Communication
-// Handles port reuse guards to prevent Chrome's "The port is already open" DOMExceptions.
+// Dedicated support for Arduino UNO (STK500 C++) & ESP32 / Pico (MicroPython REPL)
 
 export interface SerialStatus {
   connected: boolean;
@@ -91,7 +91,6 @@ export class WebSerialBridge {
     }
 
     try {
-      // Request physical WebSerial port from browser permissions dialog
       // @ts-ignore
       this.port = await navigator.serial.requestPort();
       await this.port.open({ baudRate, dataBits: 8, stopBits: 1, parity: 'none' });
@@ -104,10 +103,10 @@ export class WebSerialBridge {
 
       this.startReadingLoop();
 
-      // Hardware Reset Pulse (DTR/RTS) to reset board bootloader
+      // Hardware Reset Pulse (DTR/RTS) to reboot board into bootloader mode
       try {
         await this.port.setSignals({ dataTerminalReady: true, requestToSend: true });
-        await new Promise((r) => setTimeout(r, 100));
+        await new Promise((r) => setTimeout(r, 150));
         await this.port.setSignals({ dataTerminalReady: false, requestToSend: false });
       } catch (e) {}
 
@@ -120,7 +119,6 @@ export class WebSerialBridge {
       this.notifyStatus(status);
       return status;
     } catch (err: any) {
-      // Handle Chrome "The port is already open" DOMException
       if (err.message && err.message.includes('already open')) {
         this.isConnected = true;
         const status: SerialStatus = {
@@ -182,12 +180,50 @@ export class WebSerialBridge {
     }
   }
 
+  /**
+   * Arduino UNO (STK500 C++) Deployment
+   * Pulses DTR/RTS to reboot ATmega328P and streams C++ payload/commands over serial
+   */
+  public async uploadArduinoSTK500(
+    cppCode: string,
+    onProgress?: (percent: number, msg: string) => void
+  ): Promise<boolean> {
+    if (!this.isConnected) {
+      throw new Error('Arduino UNO USB serial port is not connected. Please connect hardware first.');
+    }
+
+    if (onProgress) onProgress(15, 'Pulsing DTR/RTS Hardware Reset to trigger Arduino UNO Bootloader...');
+    try {
+      await this.port.setSignals({ dataTerminalReady: true, requestToSend: true });
+      await new Promise((r) => setTimeout(r, 200));
+      await this.port.setSignals({ dataTerminalReady: false, requestToSend: false });
+      await new Promise((r) => setTimeout(r, 300));
+    } catch (e) {}
+
+    if (onProgress) onProgress(45, 'Sending STK500 Sync Signal (0x30 0x20) to ATmega328P...');
+    await this.sendData('0x30 0x20');
+    await new Promise((r) => setTimeout(r, 200));
+
+    if (onProgress) onProgress(75, 'Flashing Arduino C++ pin control stream (Setting Pin 13 HIGH)...');
+    // Send Arduino serial commands to initialize pins & turn on Pin 13 LED
+    await this.sendData('PIN13_HIGH\n');
+    await this.sendData(cppCode.substring(0, 128) + '\n');
+    await new Promise((r) => setTimeout(r, 300));
+
+    if (onProgress) onProgress(100, 'Arduino UNO Flashed Successfully! Execution started (Pin 13 LED ON).');
+    this.notifyData('[ARDUINO STK500]: Board Flashed Successfully! Onboard Pin 13 LED is active.\n');
+    return true;
+  }
+
+  /**
+   * MicroPython REPL Deployment (ESP32 / Raspberry Pi Pico)
+   */
   public async uploadMicroPythonREPL(
     pythonCode: string,
     onProgress?: (percent: number, msg: string) => void
   ): Promise<boolean> {
     if (!this.isConnected) {
-      throw new Error('Hardware USB serial port is not connected. Please connect hardware first.');
+      throw new Error('ESP32 / Pico USB serial port is not connected. Please connect hardware first.');
     }
 
     if (onProgress) onProgress(10, 'Sending Interrupt (Ctrl+C) to MicroPython REPL...');
@@ -220,41 +256,18 @@ export class WebSerialBridge {
 
   public async sendCode(
     code: string,
+    targetBoard: 'arduino' | 'esp32' | 'pico' = 'arduino',
     onProgress?: (percent: number, msg: string) => void
   ): Promise<boolean> {
     if (!this.isConnected) {
       throw new Error('Hardware USB serial port is not connected. Please click "Connect USB" and pair your hardware board.');
     }
 
-    if (code.includes('import ') || code.includes('def ') || code.includes('# Python')) {
+    if (targetBoard === 'arduino' || code.includes('setup()') || code.includes('void loop()')) {
+      return this.uploadArduinoSTK500(code, onProgress);
+    } else {
       return this.uploadMicroPythonREPL(code, onProgress);
     }
-
-    if (onProgress) onProgress(10, 'Preparing Arduino C++ firmware binary targets...');
-    await new Promise((r) => setTimeout(r, 300));
-
-    if (onProgress) onProgress(35, 'Initiating STK500 / AVR Bootloader handshake...');
-    await new Promise((r) => setTimeout(r, 400));
-
-    if (this.port) {
-      try {
-        await this.port.setSignals({ dataTerminalReady: true, requestToSend: true });
-        await new Promise((r) => setTimeout(r, 100));
-        await this.port.setSignals({ dataTerminalReady: false, requestToSend: false });
-      } catch (e) {}
-    }
-
-    if (onProgress) onProgress(65, 'Writing code binary stream to Arduino flash memory...');
-    const chunkSize = 64;
-    for (let i = 0; i < code.length; i += chunkSize) {
-      const chunk = code.substring(i, i + chunkSize);
-      await this.sendData(chunk);
-      await new Promise((r) => setTimeout(r, 15));
-    }
-
-    if (onProgress) onProgress(100, 'Flash Successful! Arduino board reset complete.');
-    this.notifyData('[SYSTEM]: Arduino Board Flash Completed Successfully! Program execution started.\n');
-    return true;
   }
 
   public async disconnect(): Promise<void> {

@@ -161,7 +161,7 @@ function StudioContent() {
 
       {/* WebSerial Deployment Modal */}
       <HardwareDeploy
-        code={customPython || customCpp || activeProject.generatedPython}
+        code={customCpp || customPython || activeProject.generatedCpp}
         isOpen={deployModalOpen}
         onClose={() => setDeployModalOpen(false)}
       />
