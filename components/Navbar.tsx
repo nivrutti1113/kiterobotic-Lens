@@ -22,40 +22,39 @@ export const Navbar: React.FC<NavbarProps> = ({
   const pathname = usePathname();
   const [langMenuOpen, setLangMenuOpen] = useState(false);
   const [gradeMode, setGradeMode] = useState<'junior' | 'senior'>('junior');
-  const t = UI_TRANSLATIONS[currentLang] || UI_TRANSLATIONS.en;
   const currentLangObj = LANGUAGES.find((l) => l.code === currentLang) || LANGUAGES[0];
 
   return (
-    <header className="sticky top-0 z-50 bg-slate-950/90 border-b border-slate-800/80 backdrop-blur-md">
+    <header className="sticky top-0 z-50 bg-[#FAF3EC]/95 border-b border-[#EEDCD0] backdrop-blur-md shadow-sm">
       <div className="max-w-7xl mx-auto px-3 sm:px-6">
-        <div className="flex items-center justify-between h-13 py-1">
+        <div className="flex items-center justify-between h-14 py-1">
           
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2.5 group">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-sky-500 via-indigo-600 to-amber-400 p-[1.5px] shadow-sm group-hover:scale-105 transition-transform">
-              <div className="w-full h-full bg-slate-950 rounded-[6px] flex items-center justify-center">
-                <Bot className="w-4.5 h-4.5 text-amber-400 animate-pulse" />
+            <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-purple-600 via-indigo-600 to-amber-500 p-[2px] shadow-sm group-hover:scale-105 transition-transform">
+              <div className="w-full h-full bg-[#FFFDF9] rounded-[10px] flex items-center justify-center">
+                <Bot className="w-4.5 h-4.5 text-purple-700 animate-pulse" />
               </div>
             </div>
             <div>
               <div className="flex items-center gap-1.5">
-                <span className="font-extrabold text-sm tracking-wider text-slate-100">KITE ROBOTICS</span>
-                <span className="text-[9px] font-bold px-1.5 py-0.2 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/30">
-                  Kids Friendly
+                <span className="font-black text-sm tracking-tight text-purple-950">KITE ROBOTICS</span>
+                <span className="text-[9px] font-black px-2 py-0.2 rounded-full bg-purple-100 text-purple-700 border border-purple-200">
+                  KMS Studio
                 </span>
               </div>
-              <p className="text-[10px] text-slate-400 font-medium tracking-tight">STEM Lens & Kinetic Canvas</p>
+              <p className="text-[10px] text-slate-500 font-semibold tracking-tight">STEM Lens & Coding Canvas</p>
             </div>
           </Link>
 
           {/* Student Mode Switcher Pill (Junior vs Senior) */}
-          <div className="hidden lg:flex items-center gap-1 bg-slate-900/90 p-1 rounded-xl border border-slate-800/80 text-xs">
+          <div className="hidden lg:flex items-center gap-1 bg-[#FFFDF9] p-1 rounded-xl border border-[#EEDCD0] text-xs shadow-inner">
             <button
               onClick={() => setGradeMode('junior')}
-              className={`flex items-center gap-1 px-2.5 py-1 rounded-lg font-bold transition-all ${
+              className={`flex items-center gap-1 px-3 py-1 rounded-lg font-black transition-all ${
                 gradeMode === 'junior'
-                  ? 'bg-amber-500 text-slate-950 shadow-sm'
-                  : 'text-slate-400 hover:text-slate-100'
+                  ? 'bg-purple-600 text-white shadow-sm'
+                  : 'text-slate-600 hover:text-purple-700'
               }`}
             >
               <Smile className="w-3.5 h-3.5" />
@@ -64,10 +63,10 @@ export const Navbar: React.FC<NavbarProps> = ({
 
             <button
               onClick={() => setGradeMode('senior')}
-              className={`flex items-center gap-1 px-2.5 py-1 rounded-lg font-bold transition-all ${
+              className={`flex items-center gap-1 px-3 py-1 rounded-lg font-black transition-all ${
                 gradeMode === 'senior'
-                  ? 'bg-sky-500 text-slate-950 shadow-sm'
-                  : 'text-slate-400 hover:text-slate-100'
+                  ? 'bg-purple-600 text-white shadow-sm'
+                  : 'text-slate-600 hover:text-purple-700'
               }`}
             >
               <Sparkles className="w-3.5 h-3.5" />
@@ -75,26 +74,26 @@ export const Navbar: React.FC<NavbarProps> = ({
             </button>
           </div>
 
-          {/* Compact Navigation Links */}
-          <nav className="hidden md:flex items-center gap-1 bg-slate-900/90 p-1 rounded-xl border border-slate-800/80">
+          {/* Clean Navigation Links */}
+          <nav className="hidden md:flex items-center gap-1 bg-[#FFFDF9] p-1 rounded-xl border border-[#EEDCD0] shadow-sm">
             <Link
               href="/stem-lens"
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-black transition-all ${
                 pathname.startsWith('/stem-lens')
-                  ? 'bg-sky-500 text-slate-950 font-bold shadow-sm'
-                  : 'text-slate-400 hover:text-slate-100 hover:bg-slate-800/50'
+                  ? 'bg-purple-600 text-white shadow-sm'
+                  : 'text-slate-700 hover:text-purple-700 hover:bg-purple-50/60'
               }`}
             >
               <Camera className="w-3.5 h-3.5" />
-              <span>AI Camera Lens</span>
+              <span>Camera Lens</span>
             </Link>
 
             <Link
               href="/kinetic-canvas"
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-black transition-all ${
                 pathname.startsWith('/kinetic-canvas')
-                  ? 'bg-sky-500 text-slate-950 font-bold shadow-sm'
-                  : 'text-slate-400 hover:text-slate-100 hover:bg-slate-800/50'
+                  ? 'bg-purple-600 text-white shadow-sm'
+                  : 'text-slate-700 hover:text-purple-700 hover:bg-purple-50/60'
               }`}
             >
               <Cpu className="w-3.5 h-3.5" />
@@ -103,10 +102,10 @@ export const Navbar: React.FC<NavbarProps> = ({
 
             <Link
               href="/hardware-lab"
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-black transition-all ${
                 pathname.startsWith('/hardware-lab')
-                  ? 'bg-sky-500 text-slate-950 font-bold shadow-sm'
-                  : 'text-slate-400 hover:text-slate-100 hover:bg-slate-800/50'
+                  ? 'bg-purple-600 text-white shadow-sm'
+                  : 'text-slate-700 hover:text-purple-700 hover:bg-purple-50/60'
               }`}
             >
               <Activity className="w-3.5 h-3.5" />
@@ -115,13 +114,13 @@ export const Navbar: React.FC<NavbarProps> = ({
 
             <Link
               href="/challenges"
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-black transition-all ${
                 pathname.startsWith('/challenges')
-                  ? 'bg-amber-500 text-slate-950 font-bold shadow-sm'
-                  : 'text-slate-400 hover:text-slate-100 hover:bg-slate-800/50'
+                  ? 'bg-amber-500 text-slate-950 shadow-sm'
+                  : 'text-slate-700 hover:text-purple-700 hover:bg-purple-50/60'
               }`}
             >
-              <Trophy className="w-3.5 h-3.5 text-amber-400" />
+              <Trophy className="w-3.5 h-3.5 text-amber-500" />
               <span>Fun Quests</span>
             </Link>
           </nav>
@@ -133,15 +132,15 @@ export const Navbar: React.FC<NavbarProps> = ({
             <div className="relative">
               <button
                 onClick={() => setLangMenuOpen(!langMenuOpen)}
-                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-slate-900 border border-slate-800 hover:border-sky-500/40 text-[11px] font-semibold text-slate-300 hover:text-slate-100 transition-colors"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#FFFDF9] border border-[#EEDCD0] hover:border-purple-400 text-xs font-black text-slate-700 hover:text-purple-700 transition-colors shadow-sm"
               >
-                <Globe className="w-3.5 h-3.5 text-sky-400" />
+                <Globe className="w-3.5 h-3.5 text-purple-600" />
                 <span>{currentLangObj.flag} {currentLangObj.nativeName}</span>
               </button>
 
               {langMenuOpen && (
-                <div className="absolute right-0 mt-1.5 w-44 rounded-xl bg-slate-900 border border-slate-800 shadow-2xl py-1.5 z-50 backdrop-blur-lg">
-                  <div className="px-2.5 py-1 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                <div className="absolute right-0 mt-1.5 w-44 rounded-2xl bg-[#FFFDF9] border border-[#EEDCD0] shadow-2xl py-1.5 z-50 backdrop-blur-lg">
+                  <div className="px-3 py-1 text-[10px] font-black text-slate-400 uppercase tracking-wider">
                     Select Language / भाषा
                   </div>
                   {LANGUAGES.map((lang) => (
@@ -151,13 +150,13 @@ export const Navbar: React.FC<NavbarProps> = ({
                         onLanguageChange(lang.code);
                         setLangMenuOpen(false);
                       }}
-                      className="w-full flex items-center justify-between px-2.5 py-1.5 text-xs text-left hover:bg-slate-800 text-slate-300 hover:text-sky-400 transition-colors"
+                      className="w-full flex items-center justify-between px-3 py-1.5 text-xs text-left hover:bg-purple-50 text-slate-700 hover:text-purple-700 transition-colors font-bold"
                     >
                       <span className="flex items-center gap-1.5">
                         <span>{lang.flag}</span>
-                        <span className="font-medium">{lang.nativeName}</span>
+                        <span>{lang.nativeName}</span>
                       </span>
-                      {currentLang === lang.code && <Check className="w-3.5 h-3.5 text-sky-400" />}
+                      {currentLang === lang.code && <Check className="w-3.5 h-3.5 text-purple-600" />}
                     </button>
                   ))}
                 </div>
@@ -167,13 +166,13 @@ export const Navbar: React.FC<NavbarProps> = ({
             {/* Student Hardware Connect Button */}
             <button
               onClick={onConnectHardware}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-black transition-all shadow-sm ${
                 hardwareConnected
-                  ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 shadow-sm'
-                  : 'bg-slate-900 border border-slate-800 text-sky-400 hover:border-sky-500/50 hover:bg-sky-500/10'
+                  ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
+                  : 'bg-purple-600 hover:bg-purple-700 text-white shadow-purple-600/20'
               }`}
             >
-              <Zap className={`w-3.5 h-3.5 ${hardwareConnected ? 'animate-pulse text-emerald-400' : 'text-sky-400'}`} />
+              <Zap className={`w-3.5 h-3.5 ${hardwareConnected ? 'animate-pulse text-emerald-600' : 'text-amber-300'}`} />
               <span className="hidden sm:inline">
                 {hardwareConnected ? '🔌 Robot Connected!' : '🔌 Plug Robot Board'}
               </span>

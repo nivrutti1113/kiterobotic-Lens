@@ -24,8 +24,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   };
 
   return (
-    <html lang={currentLang} className="dark">
-      <body className="bg-gray-950 text-white min-h-screen flex flex-col antialiased selection:bg-cyan-500 selection:text-gray-950">
+    <html lang={currentLang}>
+      <body className="bg-[#FAF3EC] text-slate-900 min-h-screen flex flex-col antialiased selection:bg-purple-500 selection:text-white">
         <Navbar
           currentLang={currentLang}
           onLanguageChange={setCurrentLang}

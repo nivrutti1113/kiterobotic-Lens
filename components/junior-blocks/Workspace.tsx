@@ -1,0 +1,299 @@
+'use client';
+
+import React, { useState, useRef } from 'react';
+import { BlockInstance, Sprite } from '@/lib/junior-blocks/types';
+import { BLOCK_DEFINITIONS } from '@/lib/junior-blocks/blocks-def';
+import { BlockView } from './BlockView';
+import { ZoomIn, ZoomOut, Maximize2, RotateCcw, RotateCw, Trash2, Copy, Sparkles } from 'lucide-react';
+
+interface WorkspaceProps {
+  activeSprite: Sprite;
+  onUpdateSpriteScripts: (spriteId: string, scripts: BlockInstance[]) => void;
+  onInputChange: (blockId: string, inputName: string, value: number | string | BlockInstance) => void;
+}
+
+export const Workspace: React.FC<WorkspaceProps> = ({
+  activeSprite,
+  onUpdateSpriteScripts,
+  onInputChange,
+}) => {
+  const [zoom, setZoom] = useState<number>(1.0);
+  const [history, setHistory] = useState<BlockInstance[][]>([activeSprite.scripts]);
+  const [historyIndex, setHistoryIndex] = useState<number>(0);
+  const [contextMenu, setContextMenu] = useState<{ x: number; y: number; scriptId: string } | null>(null);
+  const workspaceRef = useRef<HTMLDivElement>(null);
+
+  const saveHistory = (newScripts: BlockInstance[]) => {
+    const updatedHistory = history.slice(0, historyIndex + 1);
+    updatedHistory.push(newScripts);
+    setHistory(updatedHistory);
+    setHistoryIndex(updatedHistory.length - 1);
+    onUpdateSpriteScripts(activeSprite.id, newScripts);
+  };
+
+  const handleUndo = () => {
+    if (historyIndex > 0) {
+      const prev = history[historyIndex - 1];
+      setHistoryIndex(historyIndex - 1);
+      onUpdateSpriteScripts(activeSprite.id, prev);
+    }
+  };
+
+  const handleRedo = () => {
+    if (historyIndex < history.length - 1) {
+      const next = history[historyIndex + 1];
+      setHistoryIndex(historyIndex + 1);
+      onUpdateSpriteScripts(activeSprite.id, next);
+    }
+  };
+
+  const handleDropOnWorkspace = (e: React.DragEvent) => {
+    e.preventDefault();
+    setContextMenu(null);
+
+    const rect = workspaceRef.current?.getBoundingClientRect();
+    const dropX = rect ? (e.clientX - rect.left) / zoom : 40;
+    const dropY = rect ? (e.clientY - rect.top) / zoom : 40;
+
+    const blockType = e.dataTransfer.getData('kms/block_type');
+    const existingBlockId = e.dataTransfer.getData('kms/existing_block_id');
+
+    if (blockType) {
+      // Adding new block from palette
+      const def = BLOCK_DEFINITIONS[blockType];
+      if (!def) return;
+
+      const sampleInputs: Record<string, number | string | BlockInstance> = {};
+      if (def.inputs) {
+        Object.entries(def.inputs).forEach(([k, v]) => {
+          sampleInputs[k] = v.defaultValue;
+        });
+      }
+
+      const newBlock: BlockInstance = {
+        id: `block_${Date.now()}_${Math.floor(Math.random() * 1000)}`,
+        type: blockType,
+        category: def.category,
+        inputs: sampleInputs,
+        x: Math.max(20, Math.round(dropX)),
+        y: Math.max(20, Math.round(dropY)),
+      };
+
+      // Check if snapping below existing script
+      const scripts = [...activeSprite.scripts];
+      const targetScriptIndex = scripts.findIndex((s) => {
+        const rootX = s.x || 40;
+        const rootY = s.y || 40;
+        return Math.abs(dropX - rootX) < 120 && Math.abs(dropY - rootY) < 180;
+      });
+
+      if (targetScriptIndex !== -1) {
+        // Snap to bottom of chain
+        let tail = scripts[targetScriptIndex];
+        while (tail.next) {
+          tail = tail.next;
+        }
+        tail.next = newBlock;
+      } else {
+        scripts.push(newBlock);
+      }
+
+      saveHistory(scripts);
+    } else if (existingBlockId) {
+      // Repositioning existing root script
+      const scripts = activeSprite.scripts.map((s) => {
+        if (s.id === existingBlockId) {
+          return { ...s, x: Math.max(20, Math.round(dropX)), y: Math.max(20, Math.round(dropY)) };
+        }
+        return s;
+      });
+      saveHistory(scripts);
+    }
+  };
+
+  const handleContextMenu = (e: React.MouseEvent, scriptId: string) => {
+    e.preventDefault();
+    setContextMenu({ x: e.clientX, y: e.clientY, scriptId });
+  };
+
+  const handleDuplicateScript = (scriptId: string) => {
+    const script = activeSprite.scripts.find((s) => s.id === scriptId);
+    if (!script) return;
+
+    const cloned: BlockInstance = JSON.parse(JSON.stringify(script));
+    cloned.id = `block_${Date.now()}`;
+    cloned.x = (script.x || 40) + 40;
+    cloned.y = (script.y || 40) + 40;
+
+    const updated = [...activeSprite.scripts, cloned];
+    saveHistory(updated);
+    setContextMenu(null);
+  };
+
+  const handleDeleteScript = (scriptId: string) => {
+    const updated = activeSprite.scripts.filter((s) => s.id !== scriptId);
+    saveHistory(updated);
+    setContextMenu(null);
+  };
+
+  const handleCleanUp = () => {
+    let currentY = 30;
+    const updated = activeSprite.scripts.map((s) => {
+      const reordered = { ...s, x: 40, y: currentY };
+      currentY += 160;
+      return reordered;
+    });
+    saveHistory(updated);
+    setContextMenu(null);
+  };
+
+  const handleDragStartExisting = (e: React.DragEvent, block: BlockInstance) => {
+    e.dataTransfer.setData('kms/existing_block_id', block.id);
+  };
+
+  return (
+    <div
+      ref={workspaceRef}
+      onDragOver={(e) => e.preventDefault()}
+      onDrop={handleDropOnWorkspace}
+      onClick={() => setContextMenu(null)}
+      className="relative flex-1 bg-white h-full overflow-auto shadow-inner rounded-r-2xl border-l border-slate-200"
+      style={{
+        backgroundImage: `radial-gradient(#CBD5E1 1.5px, transparent 1.5px)`,
+        backgroundSize: `${24 * zoom}px ${24 * zoom}px`,
+      }}
+    >
+      
+      {/* Top Right Workspace Toolbar Controls */}
+      <div className="absolute top-3 right-3 z-30 flex items-center gap-1.5 bg-white/90 p-1.5 rounded-2xl shadow-lg border border-slate-200 backdrop-blur-md">
+        <button
+          onClick={() => setZoom((z) => Math.min(2.0, z + 0.1))}
+          className="p-1.5 hover:bg-purple-100 rounded-xl text-slate-700 transition-colors"
+          title="Zoom In"
+          aria-label="Zoom In"
+        >
+          <ZoomIn className="w-4 h-4 text-purple-700" />
+        </button>
+
+        <button
+          onClick={() => setZoom((z) => Math.max(0.5, z - 0.1))}
+          className="p-1.5 hover:bg-purple-100 rounded-xl text-slate-700 transition-colors"
+          title="Zoom Out"
+          aria-label="Zoom Out"
+        >
+          <ZoomOut className="w-4 h-4 text-purple-700" />
+        </button>
+
+        <button
+          onClick={() => setZoom(1.0)}
+          className="px-2 py-1 hover:bg-purple-100 rounded-xl text-[11px] font-extrabold text-purple-700 transition-colors"
+          title="Reset Zoom"
+          aria-label="Reset Zoom"
+        >
+          <Maximize2 className="w-3.5 h-3.5" />
+        </button>
+
+        <div className="w-[1px] h-4 bg-slate-300 mx-0.5" />
+
+        <button
+          onClick={handleUndo}
+          disabled={historyIndex <= 0}
+          className="p-1.5 hover:bg-purple-100 disabled:opacity-40 rounded-xl text-slate-700 transition-colors"
+          title="Undo"
+          aria-label="Undo"
+        >
+          <RotateCcw className="w-4 h-4 text-purple-700" />
+        </button>
+
+        <button
+          onClick={handleRedo}
+          disabled={historyIndex >= history.length - 1}
+          className="p-1.5 hover:bg-purple-100 disabled:opacity-40 rounded-xl text-slate-700 transition-colors"
+          title="Redo"
+          aria-label="Redo"
+        >
+          <RotateCw className="w-4 h-4 text-purple-700" />
+        </button>
+
+        <button
+          onClick={handleCleanUp}
+          className="px-2 py-1 bg-purple-100 hover:bg-purple-200 text-purple-900 rounded-xl text-xs font-bold transition-colors flex items-center gap-1"
+          title="Auto Arrange Scripts"
+          aria-label="Auto Arrange Scripts"
+        >
+          <Sparkles className="w-3.5 h-3.5 text-purple-600" />
+          <span>Clean Up</span>
+        </button>
+      </div>
+
+      {/* Workspace Scripts Container */}
+      <div
+        className="min-w-[1200px] min-h-[900px] p-8 relative transform-origin-top-left transition-transform duration-75"
+        style={{ transform: `scale(${zoom})` }}
+      >
+        {activeSprite.scripts.map((script) => (
+          <div
+            key={script.id}
+            onContextMenu={(e) => handleContextMenu(e, script.id)}
+            className="absolute cursor-grab active:cursor-grabbing hover:ring-2 hover:ring-purple-400 rounded-xl transition-shadow"
+            style={{ left: `${script.x || 40}px`, top: `${script.y || 40}px` }}
+          >
+            <BlockView
+              block={script}
+              onInputChange={onInputChange}
+              onDragStart={(e) => handleDragStartExisting(e, script)}
+            />
+          </div>
+        ))}
+
+        {activeSprite.scripts.length === 0 && (
+          <div className="absolute inset-0 flex flex-col items-center justify-center text-slate-400 pointer-events-none">
+            <div className="w-16 h-16 rounded-full bg-purple-50 flex items-center justify-center mb-3">
+              <Sparkles className="w-8 h-8 text-purple-400" />
+            </div>
+            <p className="font-extrabold text-sm text-slate-600">Workspace is Empty</p>
+            <p className="text-xs text-slate-400 mt-1">Drag blocks from the left palette to start coding {activeSprite.name}!</p>
+          </div>
+        )}
+      </div>
+
+      {/* Right-Click Context Menu */}
+      {contextMenu && (
+        <div
+          className="fixed z-50 bg-white border border-slate-200 rounded-2xl shadow-2xl py-1.5 w-44 text-xs font-bold text-slate-700"
+          style={{ top: `${contextMenu.y}px`, left: `${contextMenu.x}px` }}
+        >
+          <button
+            onClick={() => handleDuplicateScript(contextMenu.scriptId)}
+            className="w-full px-3 py-2 text-left hover:bg-purple-50 hover:text-purple-700 flex items-center gap-2"
+          >
+            <Copy className="w-3.5 h-3.5 text-purple-600" />
+            <span>Duplicate Script</span>
+          </button>
+          <button
+            onClick={() => handleDeleteScript(contextMenu.scriptId)}
+            className="w-full px-3 py-2 text-left hover:bg-rose-50 hover:text-rose-600 text-rose-600 flex items-center gap-2 border-t border-slate-100"
+          >
+            <Trash2 className="w-3.5 h-3.5" />
+            <span>Delete Script</span>
+          </button>
+        </div>
+      )}
+
+      {/* Bottom Trash Drop Zone */}
+      <div
+        onDragOver={(e) => e.preventDefault()}
+        onDrop={(e) => {
+          e.preventDefault();
+          const existingBlockId = e.dataTransfer.getData('kms/existing_block_id');
+          if (existingBlockId) handleDeleteScript(existingBlockId);
+        }}
+        className="absolute bottom-4 left-4 z-20 flex items-center gap-2 px-4 py-2 bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 rounded-2xl shadow-sm text-xs font-bold transition-colors"
+      >
+        <Trash2 className="w-4 h-4 text-rose-500" />
+        <span>Drag here to delete</span>
+      </div>
+
+    </div>
+  );
+};
