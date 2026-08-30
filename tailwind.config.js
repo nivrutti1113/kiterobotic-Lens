@@ -8,6 +8,10 @@ module.exports = {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ['var(--font-inter)', 'system-ui', 'sans-serif'],
+        heading: ['var(--font-[#poppins])', 'var(--font-poppins)', 'system-ui', 'sans-serif'],
+      },
       colors: {
         kite: {
           50: '#f0f9ff',

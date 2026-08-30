@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import '@/app/globals.css';
+import { poppins, inter } from '@/lib/fonts';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { SupportedLanguage } from '@/lib/languages';
@@ -24,8 +25,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   };
 
   return (
-    <html lang={currentLang}>
-      <body className="bg-[#FAF3EC] text-slate-900 min-h-screen flex flex-col antialiased selection:bg-purple-500 selection:text-white">
+    <html lang={currentLang} className={`${poppins.variable} ${inter.variable}`}>
+      <body className="bg-[#FAF3EC] text-slate-900 font-sans min-h-screen flex flex-col antialiased selection:bg-purple-600 selection:text-white">
         <Navbar
           currentLang={currentLang}
           onLanguageChange={setCurrentLang}

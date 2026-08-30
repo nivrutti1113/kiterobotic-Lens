@@ -157,7 +157,7 @@ export const Workspace: React.FC<WorkspaceProps> = ({
       onDragOver={(e) => e.preventDefault()}
       onDrop={handleDropOnWorkspace}
       onClick={() => setContextMenu(null)}
-      className="relative flex-1 bg-white h-full overflow-auto shadow-inner rounded-r-2xl border-l border-slate-200"
+      className="relative flex-1 bg-white h-full overflow-auto shadow-inner rounded-r-2xl border-l border-[#EEDCD0] font-sans"
       style={{
         backgroundImage: `radial-gradient(#CBD5E1 1.5px, transparent 1.5px)`,
         backgroundSize: `${24 * zoom}px ${24 * zoom}px`,
@@ -165,28 +165,28 @@ export const Workspace: React.FC<WorkspaceProps> = ({
     >
       
       {/* Top Right Workspace Toolbar Controls */}
-      <div className="absolute top-3 right-3 z-30 flex items-center gap-1.5 bg-white/90 p-1.5 rounded-2xl shadow-lg border border-slate-200 backdrop-blur-md">
+      <div className="absolute top-3 right-3 z-30 flex items-center gap-1.5 bg-[#FFFDF9] p-1.5 rounded-2xl shadow-lg border border-[#EEDCD0] backdrop-blur-md">
         <button
           onClick={() => setZoom((z) => Math.min(2.0, z + 0.1))}
-          className="p-1.5 hover:bg-purple-100 rounded-xl text-slate-700 transition-colors"
+          className="p-1.5 hover:bg-purple-100 rounded-xl text-purple-900 transition-colors"
           title="Zoom In"
           aria-label="Zoom In"
         >
-          <ZoomIn className="w-4 h-4 text-purple-700" />
+          <ZoomIn className="w-4 h-4 text-purple-800" />
         </button>
 
         <button
           onClick={() => setZoom((z) => Math.max(0.5, z - 0.1))}
-          className="p-1.5 hover:bg-purple-100 rounded-xl text-slate-700 transition-colors"
+          className="p-1.5 hover:bg-purple-100 rounded-xl text-purple-900 transition-colors"
           title="Zoom Out"
           aria-label="Zoom Out"
         >
-          <ZoomOut className="w-4 h-4 text-purple-700" />
+          <ZoomOut className="w-4 h-4 text-purple-800" />
         </button>
 
         <button
           onClick={() => setZoom(1.0)}
-          className="px-2 py-1 hover:bg-purple-100 rounded-xl text-[11px] font-extrabold text-purple-700 transition-colors"
+          className="px-2 py-1 hover:bg-purple-100 rounded-xl text-[11px] font-black text-purple-900 transition-colors font-heading"
           title="Reset Zoom"
           aria-label="Reset Zoom"
         >
@@ -198,30 +198,30 @@ export const Workspace: React.FC<WorkspaceProps> = ({
         <button
           onClick={handleUndo}
           disabled={historyIndex <= 0}
-          className="p-1.5 hover:bg-purple-100 disabled:opacity-40 rounded-xl text-slate-700 transition-colors"
+          className="p-1.5 hover:bg-purple-100 disabled:opacity-40 rounded-xl text-purple-900 transition-colors"
           title="Undo"
           aria-label="Undo"
         >
-          <RotateCcw className="w-4 h-4 text-purple-700" />
+          <RotateCcw className="w-4 h-4 text-purple-800" />
         </button>
 
         <button
           onClick={handleRedo}
           disabled={historyIndex >= history.length - 1}
-          className="p-1.5 hover:bg-purple-100 disabled:opacity-40 rounded-xl text-slate-700 transition-colors"
+          className="p-1.5 hover:bg-purple-100 disabled:opacity-40 rounded-xl text-purple-900 transition-colors"
           title="Redo"
           aria-label="Redo"
         >
-          <RotateCw className="w-4 h-4 text-purple-700" />
+          <RotateCw className="w-4 h-4 text-purple-800" />
         </button>
 
         <button
           onClick={handleCleanUp}
-          className="px-2 py-1 bg-purple-100 hover:bg-purple-200 text-purple-900 rounded-xl text-xs font-bold transition-colors flex items-center gap-1"
+          className="px-2.5 py-1 bg-purple-100 hover:bg-purple-200 text-purple-950 rounded-xl text-xs font-black transition-colors flex items-center gap-1 font-heading border border-purple-300"
           title="Auto Arrange Scripts"
           aria-label="Auto Arrange Scripts"
         >
-          <Sparkles className="w-3.5 h-3.5 text-purple-600" />
+          <Sparkles className="w-3.5 h-3.5 text-purple-700" />
           <span>Clean Up</span>
         </button>
       </div>
@@ -235,7 +235,7 @@ export const Workspace: React.FC<WorkspaceProps> = ({
           <div
             key={script.id}
             onContextMenu={(e) => handleContextMenu(e, script.id)}
-            className="absolute cursor-grab active:cursor-grabbing hover:ring-2 hover:ring-purple-400 rounded-xl transition-shadow"
+            className="absolute cursor-grab active:cursor-grabbing hover:ring-2 hover:ring-purple-500 rounded-xl transition-shadow"
             style={{ left: `${script.x || 40}px`, top: `${script.y || 40}px` }}
           >
             <BlockView
@@ -247,12 +247,12 @@ export const Workspace: React.FC<WorkspaceProps> = ({
         ))}
 
         {activeSprite.scripts.length === 0 && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center text-slate-400 pointer-events-none">
-            <div className="w-16 h-16 rounded-full bg-purple-50 flex items-center justify-center mb-3">
-              <Sparkles className="w-8 h-8 text-purple-400" />
+          <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+            <div className="w-16 h-16 rounded-3xl bg-purple-100 text-purple-800 flex items-center justify-center mb-3 shadow-inner">
+              <Sparkles className="w-8 h-8 text-purple-700" />
             </div>
-            <p className="font-extrabold text-sm text-slate-600">Workspace is Empty</p>
-            <p className="text-xs text-slate-400 mt-1">Drag blocks from the left palette to start coding {activeSprite.name}!</p>
+            <p className="font-black text-base text-slate-950 font-heading">Workspace is Empty</p>
+            <p className="text-xs text-slate-700 font-bold mt-1">Drag blocks from the left palette to start coding {activeSprite.name}!</p>
           </div>
         )}
       </div>
@@ -260,21 +260,21 @@ export const Workspace: React.FC<WorkspaceProps> = ({
       {/* Right-Click Context Menu */}
       {contextMenu && (
         <div
-          className="fixed z-50 bg-white border border-slate-200 rounded-2xl shadow-2xl py-1.5 w-44 text-xs font-bold text-slate-700"
+          className="fixed z-50 bg-[#FFFDF9] border border-[#EEDCD0] rounded-2xl shadow-2xl py-1.5 w-48 text-xs font-black text-slate-950 font-heading"
           style={{ top: `${contextMenu.y}px`, left: `${contextMenu.x}px` }}
         >
           <button
             onClick={() => handleDuplicateScript(contextMenu.scriptId)}
-            className="w-full px-3 py-2 text-left hover:bg-purple-50 hover:text-purple-700 flex items-center gap-2"
+            className="w-full px-3.5 py-2 text-left hover:bg-purple-100 hover:text-purple-900 flex items-center gap-2"
           >
-            <Copy className="w-3.5 h-3.5 text-purple-600" />
+            <Copy className="w-4 h-4 text-purple-700" />
             <span>Duplicate Script</span>
           </button>
           <button
             onClick={() => handleDeleteScript(contextMenu.scriptId)}
-            className="w-full px-3 py-2 text-left hover:bg-rose-50 hover:text-rose-600 text-rose-600 flex items-center gap-2 border-t border-slate-100"
+            className="w-full px-3.5 py-2 text-left hover:bg-rose-100 text-rose-900 flex items-center gap-2 border-t border-slate-100"
           >
-            <Trash2 className="w-3.5 h-3.5" />
+            <Trash2 className="w-4 h-4 text-rose-700" />
             <span>Delete Script</span>
           </button>
         </div>
@@ -288,9 +288,9 @@ export const Workspace: React.FC<WorkspaceProps> = ({
           const existingBlockId = e.dataTransfer.getData('kms/existing_block_id');
           if (existingBlockId) handleDeleteScript(existingBlockId);
         }}
-        className="absolute bottom-4 left-4 z-20 flex items-center gap-2 px-4 py-2 bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 rounded-2xl shadow-sm text-xs font-bold transition-colors"
+        className="absolute bottom-4 left-4 z-20 flex items-center gap-2 px-4 py-2.5 bg-rose-100/80 hover:bg-rose-200 text-rose-950 border border-rose-300 rounded-2xl shadow-md text-xs font-black transition-colors font-heading"
       >
-        <Trash2 className="w-4 h-4 text-rose-500" />
+        <Trash2 className="w-4 h-4 text-rose-700" />
         <span>Drag here to delete</span>
       </div>
 
