@@ -146,14 +146,56 @@ export const Workspace: React.FC<WorkspaceProps> = ({
 
       saveHistory(scripts);
     } else if (existingBlockId) {
-      // Repositioning existing root script
-      const scripts = activeSprite.scripts.map((s) => {
-        if (s.id === existingBlockId) {
-          return { ...s, x: Math.max(20, Math.round(dropX)), y: Math.max(20, Math.round(dropY)) };
+      // Check if block exists as a root script
+      const rootIndex = activeSprite.scripts.findIndex((s) => s.id === existingBlockId);
+      if (rootIndex !== -1) {
+        // Repositioning existing root script
+        const scripts = activeSprite.scripts.map((s) => {
+          if (s.id === existingBlockId) {
+            return { ...s, x: Math.max(20, Math.round(dropX)), y: Math.max(20, Math.round(dropY)) };
+          }
+          return s;
+        });
+        saveHistory(scripts);
+      } else {
+        // Detach nested block from inside a stack or C-block loop
+        let extractedBlock: BlockInstance | null = null;
+
+        const removeFromTree = (blocks: BlockInstance[]): BlockInstance[] => {
+          const result: BlockInstance[] = [];
+          for (let b of blocks) {
+            if (b.id === existingBlockId) {
+              extractedBlock = {
+                ...b,
+                next: undefined,
+                x: Math.max(20, Math.round(dropX)),
+                y: Math.max(20, Math.round(dropY)),
+              };
+              if (b.next) {
+                result.push(b.next);
+              }
+              continue;
+            }
+            let updated = { ...b };
+            if (updated.next) {
+              updated.next = removeFromTree([updated.next])[0] || undefined;
+            }
+            if (updated.children) {
+              updated.children = removeFromTree(updated.children);
+            }
+            if (updated.elseChildren) {
+              updated.elseChildren = removeFromTree(updated.elseChildren);
+            }
+            result.push(updated);
+          }
+          return result;
+        };
+
+        const cleanedScripts = removeFromTree(activeSprite.scripts);
+        if (extractedBlock) {
+          saveHistory([...cleanedScripts, extractedBlock]);
         }
-        return s;
-      });
-      saveHistory(scripts);
+      }
     }
   };
 

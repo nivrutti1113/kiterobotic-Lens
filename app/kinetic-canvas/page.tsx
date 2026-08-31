@@ -101,65 +101,65 @@ export default function KineticCanvasDashboard() {
               </Link>
             </div>
 
-            {/* Card 3: Arduino Coding (HONEST COMING SOON) */}
-            <div className="bg-[#FFFDF9] rounded-2xl border-2 border-[#EEDCD0] p-5 shadow-sm flex flex-col justify-between">
+            {/* Card 3: Arduino Coding (ACTIVE INTERACTIVE STUDIO) */}
+            <div className="bg-[#FFFDF9] rounded-2xl border-2 border-amber-300 hover:border-amber-600 p-5 shadow-sm hover:shadow-xl transition-all hover:-translate-y-1 flex flex-col justify-between group">
               <div>
                 <div className="flex items-center justify-between mb-3">
                   <div className="w-10 h-10 rounded-2xl bg-amber-600 text-white flex items-center justify-center font-bold shadow-sm">
                     <Cpu className="w-6 h-6" />
                   </div>
-                  <span className="text-[11px] font-black px-2.5 py-1 rounded-full bg-slate-200 text-slate-900 border border-slate-300 font-heading">
+                  <span className="text-[11px] font-black px-2.5 py-1 rounded-full bg-amber-100 text-amber-950 border border-amber-300 font-heading">
                     Ages 10+
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <h3 className="text-base font-black text-slate-950 font-heading">Arduino Coding</h3>
-                  <span className="text-[10px] font-black px-2 py-0.5 rounded bg-amber-100 text-amber-950 border border-amber-300 font-heading">
-                    Coming Soon
+                  <h3 className="text-base font-black text-slate-950 font-heading group-hover:text-amber-700 transition-colors">Arduino C++ Studio</h3>
+                  <span className="text-[10px] font-black px-2 py-0.5 rounded bg-emerald-100 text-emerald-950 border border-emerald-300 font-heading">
+                    Active
                   </span>
                 </div>
-                <p className="text-xs text-slate-700 mt-1.5 leading-relaxed font-semibold">
-                  Code with Arduino C++ and build real-world microcontroller projects.
+                <p className="text-xs text-slate-800 mt-1.5 leading-relaxed font-bold">
+                  Code with Arduino C++, connect WebSerial USB, and flash microcontroller boards live!
                 </p>
               </div>
 
               <Link
                 href="/kinetic-canvas/arduino"
-                className="mt-5 w-full flex items-center justify-between px-4 py-2.5 rounded-xl bg-[#FAF3EC] hover:bg-purple-100 text-slate-900 font-black text-xs transition-colors border border-[#EEDCD0] font-heading"
+                className="mt-5 w-full flex items-center justify-between px-4 py-2.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-black text-xs shadow-md transition-colors font-heading"
               >
-                <span>View Overview</span>
-                <Clock className="w-4 h-4 text-slate-700" />
+                <span>Open Arduino Studio</span>
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </Link>
             </div>
 
-            {/* Card 4: Science Experiment (HONEST COMING SOON) */}
-            <div className="bg-[#FFFDF9] rounded-2xl border-2 border-[#EEDCD0] p-5 shadow-sm flex flex-col justify-between">
+            {/* Card 4: Science Experiment (ACTIVE INTERACTIVE PHYSICS) */}
+            <div className="bg-[#FFFDF9] rounded-2xl border-2 border-emerald-300 hover:border-emerald-600 p-5 shadow-sm hover:shadow-xl transition-all hover:-translate-y-1 flex flex-col justify-between group">
               <div>
                 <div className="flex items-center justify-between mb-3">
                   <div className="w-10 h-10 rounded-2xl bg-emerald-600 text-white flex items-center justify-center font-bold shadow-sm">
                     <Sparkles className="w-6 h-6" />
                   </div>
-                  <span className="text-[11px] font-black px-2.5 py-1 rounded-full bg-slate-200 text-slate-900 border border-slate-300 font-heading">
+                  <span className="text-[11px] font-black px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-950 border border-emerald-300 font-heading">
                     Ages 10+
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <h3 className="text-base font-black text-slate-950 font-heading">Science Experiment</h3>
+                  <h3 className="text-base font-black text-slate-950 font-heading group-hover:text-emerald-700 transition-colors">Science Experiment</h3>
                   <span className="text-[10px] font-black px-2 py-0.5 rounded bg-emerald-100 text-emerald-950 border border-emerald-300 font-heading">
-                    Coming Soon
+                    Active
                   </span>
                 </div>
-                <p className="text-xs text-slate-700 mt-1.5 leading-relaxed font-semibold">
-                  Perform virtual science experiments and kinetic physics simulations.
+                <p className="text-xs text-slate-800 mt-1.5 leading-relaxed font-bold">
+                  Perform 2D physics simulations, pendulum harmonic motion, and force vector analysis!
                 </p>
               </div>
 
               <Link
                 href="/kinetic-canvas/science"
-                className="mt-5 w-full flex items-center justify-between px-4 py-2.5 rounded-xl bg-[#FAF3EC] hover:bg-purple-100 text-slate-900 font-black text-xs transition-colors border border-[#EEDCD0] font-heading"
+                className="mt-5 w-full flex items-center justify-between px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs shadow-md transition-colors font-heading"
               >
-                <span>View Overview</span>
-                <Clock className="w-4 h-4 text-slate-700" />
+                <span>Open Physics Lab</span>
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </Link>
             </div>
 
@@ -190,23 +190,23 @@ export default function KineticCanvasDashboard() {
             ].map((tool) => (
               <div
                 key={tool.id}
-                className="bg-[#FFFDF9] rounded-2xl border border-[#EEDCD0] p-4 shadow-sm flex flex-col justify-between"
+                className="bg-[#FFFDF9] rounded-2xl border border-purple-200 hover:border-purple-500 p-4 shadow-sm hover:shadow-md transition-all flex flex-col justify-between group"
               >
                 <div>
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-[11px] font-black text-slate-700 font-heading">{tool.age}</span>
-                    <span className="text-[9px] font-black px-2 py-0.5 rounded bg-slate-200 text-slate-900 border border-slate-300 font-heading">
-                      Coming Soon
+                    <span className="text-[9px] font-black px-2 py-0.5 rounded bg-emerald-100 text-emerald-900 border border-emerald-300 font-heading">
+                      Active
                     </span>
                   </div>
-                  <h4 className="font-black text-base text-slate-950 font-heading">{tool.title}</h4>
-                  <p className="text-xs text-slate-700 mt-1.5 leading-snug font-semibold">{tool.desc}</p>
+                  <h4 className="font-black text-base text-slate-950 group-hover:text-purple-700 transition-colors font-heading">{tool.title}</h4>
+                  <p className="text-xs text-slate-800 mt-1.5 leading-snug font-bold">{tool.desc}</p>
                 </div>
                 <Link
                   href={`/kinetic-canvas/${tool.id}`}
-                  className="mt-4 text-center py-2 rounded-xl bg-[#FAF3EC] hover:bg-purple-100 text-slate-950 text-xs font-black block border border-[#EEDCD0] font-heading"
+                  className="mt-4 text-center py-2 rounded-xl bg-purple-700 hover:bg-purple-800 text-white text-xs font-black block shadow-sm transition-colors font-heading"
                 >
-                  Details
+                  Open {tool.title}
                 </Link>
               </div>
             ))}
@@ -244,8 +244,8 @@ export default function KineticCanvasDashboard() {
               >
                 {chip.icon}
                 <span>{chip.title}</span>
-                <span className="text-[10px] font-black text-slate-700 bg-slate-200 px-2 py-0.5 rounded-full border border-slate-300">
-                  Soon
+                <span className="text-[10px] font-black text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded-full border border-emerald-300">
+                  Ready
                 </span>
               </Link>
             ))}
