@@ -13,6 +13,13 @@ export const ChallengeEngine: React.FC = () => {
   const [evalResult, setEvalResult] = useState<{ passed: boolean; message: string } | null>(null);
   const [userXP, setUserXP] = useState(0);
 
+  React.useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const savedXP = localStorage.getItem('kms_student_xp');
+      if (savedXP) setUserXP(Number(savedXP));
+    }
+  }, []);
+
   const handleSelectQuest = (idx: number) => {
     setActiveQuestIdx(idx);
     setStudentCode(STEM_QUESTS[idx].buggedCode);
@@ -33,11 +40,15 @@ export const ChallengeEngine: React.FC = () => {
     }
 
     if (passed) {
+      const newXP = userXP + quest.xpPoints;
+      setUserXP(newXP);
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('kms_student_xp', String(newXP));
+      }
       setEvalResult({
         passed: true,
         message: `🎉 Quest Solved! AST Verification Passed. +${quest.xpPoints} XP Earned!`,
       });
-      setUserXP((prev) => prev + quest.xpPoints);
     } else {
       setEvalResult({
         passed: false,

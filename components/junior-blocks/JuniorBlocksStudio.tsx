@@ -165,7 +165,7 @@ export function JuniorBlocksStudio() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-[#FAF3EC] text-slate-900 font-sans select-none">
+    <div className="flex flex-col h-screen w-full bg-[#FAF3EC] text-slate-900 font-sans select-none fixed inset-0 z-40 overflow-hidden">
       
       {/* Top Header Bar */}
       <TopBar

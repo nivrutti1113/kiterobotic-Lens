@@ -27,6 +27,7 @@ export const StageCanvas: React.FC<StageCanvasProps> = ({
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [answerInput, setAnswerInput] = React.useState('');
 
+  const imageCacheRef = useRef<Map<string, HTMLImageElement>>(new Map());
   const activeBackdrop = BACKDROP_CATALOG.find((b) => b.id === project.backdropUrl) || BACKDROP_CATALOG[0];
 
   useEffect(() => {
@@ -53,7 +54,6 @@ export const StageCanvas: React.FC<StageCanvasProps> = ({
         ctx.strokeStyle = '#E2E8F0';
         ctx.lineWidth = 1;
 
-        // Grid lines (20 grid steps across 400px width = 20px per cell)
         const cellSize = 20;
         for (let x = 0; x <= width; x += cellSize) {
           ctx.beginPath();
@@ -78,7 +78,6 @@ export const StageCanvas: React.FC<StageCanvasProps> = ({
         ctx.lineTo(width, centerY);
         ctx.stroke();
 
-        // Axis numbers (0 to 20 grid numbers on top and left edge)
         ctx.fillStyle = '#64748B';
         ctx.font = 'bold 9px sans-serif';
         for (let i = 0; i <= 20; i++) {
@@ -99,15 +98,20 @@ export const StageCanvas: React.FC<StageCanvasProps> = ({
         const scale = (sprite.size || 100) / 100;
         ctx.scale(scale, scale);
 
-        // Render SVG costume
-        const img = new Image();
+        // Cached SVG costume image lookup
         const svgString = sprite.costumeUrl || sprite.costumes[0]?.svg || '';
-        img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svgString);
+        let cachedImg = imageCacheRef.current.get(svgString);
 
-        if (img.complete && img.naturalWidth !== 0) {
-          ctx.drawImage(img, -35, -35, 70, 70);
+        if (!cachedImg && svgString) {
+          cachedImg = new Image();
+          cachedImg.src = svgString.startsWith('data:') ? svgString : 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svgString);
+          imageCacheRef.current.set(svgString, cachedImg);
+        }
+
+        if (cachedImg && cachedImg.complete && cachedImg.naturalWidth !== 0) {
+          ctx.drawImage(cachedImg, -35, -35, 70, 70);
         } else {
-          // Fallback shape while loading
+          // Fallback shape only while image is initially loading
           ctx.fillStyle = '#5B21B6';
           ctx.beginPath();
           ctx.arc(0, 0, 25, 0, Math.PI * 2);

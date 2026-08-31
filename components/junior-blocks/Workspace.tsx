@@ -47,6 +47,52 @@ export const Workspace: React.FC<WorkspaceProps> = ({
     }
   };
 
+  const handleDropInsideCBlock = (e: React.DragEvent, parentBlockId: string, isElseSlot: boolean = false) => {
+    const blockType = e.dataTransfer.getData('kms/block_type');
+    if (!blockType) return;
+    const def = BLOCK_DEFINITIONS[blockType];
+    if (!def) return;
+
+    const sampleInputs: Record<string, number | string | BlockInstance> = {};
+    if (def.inputs) {
+      Object.entries(def.inputs).forEach(([k, v]) => {
+        sampleInputs[k] = v.defaultValue;
+      });
+    }
+
+    const newBlock: BlockInstance = {
+      id: `block_${Date.now()}_${Math.floor(Math.random() * 1000)}`,
+      type: blockType,
+      category: def.category,
+      inputs: sampleInputs,
+    };
+
+    const insertIntoTree = (blocks: BlockInstance[]): BlockInstance[] => {
+      return blocks.map((b) => {
+        if (b.id === parentBlockId) {
+          if (isElseSlot) {
+            return { ...b, elseChildren: [...(b.elseChildren || []), newBlock] };
+          }
+          return { ...b, children: [...(b.children || []), newBlock] };
+        }
+        let updated = { ...b };
+        if (updated.next) {
+          updated.next = insertIntoTree([updated.next])[0];
+        }
+        if (updated.children) {
+          updated.children = insertIntoTree(updated.children);
+        }
+        if (updated.elseChildren) {
+          updated.elseChildren = insertIntoTree(updated.elseChildren);
+        }
+        return updated;
+      });
+    };
+
+    const updated = insertIntoTree(activeSprite.scripts);
+    saveHistory(updated);
+  };
+
   const handleDropOnWorkspace = (e: React.DragEvent) => {
     e.preventDefault();
     setContextMenu(null);
@@ -79,16 +125,16 @@ export const Workspace: React.FC<WorkspaceProps> = ({
         y: Math.max(20, Math.round(dropY)),
       };
 
-      // Check if snapping below existing script
+      // Check magnetic snap to bottom of existing script
       const scripts = [...activeSprite.scripts];
       const targetScriptIndex = scripts.findIndex((s) => {
         const rootX = s.x || 40;
         const rootY = s.y || 40;
-        return Math.abs(dropX - rootX) < 120 && Math.abs(dropY - rootY) < 180;
+        return Math.abs(dropX - rootX) < 100 && Math.abs(dropY - rootY) < 220;
       });
 
       if (targetScriptIndex !== -1) {
-        // Snap to bottom of chain
+        // Magnetic snap to bottom of chain
         let tail = scripts[targetScriptIndex];
         while (tail.next) {
           tail = tail.next;
@@ -242,6 +288,7 @@ export const Workspace: React.FC<WorkspaceProps> = ({
               block={script}
               onInputChange={onInputChange}
               onDragStart={(e) => handleDragStartExisting(e, script)}
+              onDropInsideCBlock={handleDropInsideCBlock}
             />
           </div>
         ))}

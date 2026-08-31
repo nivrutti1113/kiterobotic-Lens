@@ -70,11 +70,51 @@ export const CameraScanner: React.FC<CameraScannerProps> = ({
       const reader = new FileReader();
       reader.onload = (event) => {
         if (event.target?.result) {
-          setUploadedImage(event.target.result as string);
-          onTriggerScan();
+          const resultStr = event.target.result as string;
+          setUploadedImage(resultStr);
+          handleExecuteScan(resultStr);
         }
       };
       reader.readAsDataURL(file);
+    }
+  };
+
+  const handleExecuteScan = async (overrideImage?: string) => {
+    onTriggerScan();
+    let frameData: string | null = overrideImage || null;
+
+    if (!frameData && scanMode === 'webcam' && videoRef.current) {
+      try {
+        const canvas = document.createElement('canvas');
+        canvas.width = videoRef.current.videoWidth || 640;
+        canvas.height = videoRef.current.videoHeight || 480;
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+          ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
+          frameData = canvas.toDataURL('image/jpeg', 0.8);
+        }
+      } catch (err) {
+        console.warn('Frame capture failed:', err);
+      }
+    } else if (!frameData && scanMode === 'upload' && uploadedImage) {
+      frameData = uploadedImage;
+    }
+
+    try {
+      const res = await fetch('/api/lens/analyze', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          componentId: selectedComponent.id,
+          imageData: frameData,
+        }),
+      });
+      const data = await res.json();
+      if (data.success && data.component) {
+        onSelectComponent(data.component);
+      }
+    } catch (e) {
+      console.error('Scan API call error:', e);
     }
   };
 
@@ -220,7 +260,7 @@ export const CameraScanner: React.FC<CameraScannerProps> = ({
             </div>
 
             <button
-              onClick={onTriggerScan}
+              onClick={() => handleExecuteScan()}
               disabled={isScanning}
               className="flex items-center gap-2 px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-black text-xs shadow-md transition-all hover:scale-105 active:scale-95 disabled:opacity-50 font-heading"
             >
