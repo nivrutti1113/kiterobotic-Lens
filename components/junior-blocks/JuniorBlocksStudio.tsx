@@ -25,6 +25,7 @@ export function JuniorBlocksStudio() {
   const [askPrompt, setAskPrompt] = useState<string | null>(null);
   const [helpOpen, setHelpOpen] = useState<boolean>(false);
   const [showPythonDrawer, setShowPythonDrawer] = useState<boolean>(false);
+  const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
 
   // Load project on mount
   useEffect(() => {
@@ -33,6 +34,14 @@ export function JuniorBlocksStudio() {
     if (loaded.sprites.length > 0) {
       setActiveSpriteId(loaded.sprites[0].id);
     }
+
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+    };
   }, []);
 
   // Subscribe to interpreter engine state updates
@@ -40,7 +49,6 @@ export function JuniorBlocksStudio() {
     interpreterEngine.subscribeStateChange((running) => setIsRunning(running));
     interpreterEngine.subscribeAskPrompt((prompt) => setAskPrompt(prompt));
 
-    // Listen for physical keyboard key presses to trigger 'When key pressed' blocks
     const handleKeyDown = (e: KeyboardEvent) => {
       interpreterEngine.runProject(
         project,
@@ -164,10 +172,26 @@ export function JuniorBlocksStudio() {
     setActiveSpriteId(remaining[0].id);
   };
 
+  const handleToggleFullscreen = () => {
+    if (document.fullscreenElement) {
+      document.exitFullscreen().catch(() => {});
+      setIsFullscreen(false);
+    } else {
+      document.documentElement.requestFullscreen().catch(() => {});
+      setIsFullscreen(true);
+    }
+  };
+
   return (
-    <div className="flex flex-col h-screen w-full bg-[#FAF3EC] text-slate-900 font-sans select-none fixed inset-0 z-40 overflow-hidden">
+    <div
+      className={
+        isFullscreen
+          ? 'fixed inset-0 z-50 bg-[#FAF3EC] w-screen h-screen flex flex-col overflow-hidden select-none'
+          : 'flex flex-col h-[calc(100vh-6rem)] min-h-[680px] w-full bg-[#FAF3EC] text-slate-900 font-sans select-none rounded-3xl border-2 border-[#EEDCD0] shadow-xl overflow-hidden'
+      }
+    >
       
-      {/* Top Header Bar */}
+      {/* Top Header Bar with File Menu, Example Projects & Fullscreen Minimize Toggle */}
       <TopBar
         project={project}
         showPythonDrawer={showPythonDrawer}
@@ -185,23 +209,25 @@ export function JuniorBlocksStudio() {
           if (exProj.sprites.length > 0) setActiveSpriteId(exProj.sprites[0].id);
         }}
         onOpenHelp={() => setHelpOpen(true)}
+        isFullscreen={isFullscreen}
+        onToggleFullscreen={handleToggleFullscreen}
       />
 
       {/* Studio Core Body */}
-      <div className="flex-1 flex flex-col md:flex-row overflow-hidden p-3 gap-3">
+      <div className="flex-1 flex flex-col md:flex-row overflow-hidden p-2.5 gap-2.5 min-h-0">
         
         {/* Left Palette & Center Workspace Container */}
-        <div className="flex-1 flex flex-col sm:flex-row bg-[#FFFDF9] rounded-2xl border-2 border-[#EEDCD0] shadow-lg overflow-hidden min-h-[500px]">
+        <div className="flex-1 flex flex-col sm:flex-row bg-[#FFFDF9] rounded-2xl border-2 border-[#EEDCD0] shadow-sm overflow-hidden min-h-0">
           
           {/* Palette Column */}
-          <div className="w-full sm:w-72 h-72 sm:h-auto shrink-0">
+          <div className="w-full sm:w-72 h-64 sm:h-full shrink-0 border-r border-[#EEDCD0] overflow-hidden">
             <BlockPalette
               onDragStartBlockTemplate={handleDragStartBlockTemplate}
             />
           </div>
 
           {/* Workspace Column */}
-          <div className="flex-1 h-96 sm:h-auto">
+          <div className="flex-1 h-full min-h-0 relative overflow-hidden">
             {activeSprite ? (
               <Workspace
                 activeSprite={activeSprite}
@@ -218,7 +244,7 @@ export function JuniorBlocksStudio() {
         </div>
 
         {/* Right Column: Stage & Sprite Panel */}
-        <div className="w-full md:w-[420px] flex flex-col gap-3 shrink-0">
+        <div className="w-full md:w-[400px] flex flex-col gap-2.5 shrink-0 overflow-y-auto max-h-full">
           
           <StageCanvas
             project={project}
@@ -253,14 +279,7 @@ export function JuniorBlocksStudio() {
             onRestart={handleRestart}
             onTakeScreenshot={handleTakeScreenshot}
             onToggleGrid={() => setProject((prev) => ({ ...prev, gridVisible: !prev.gridVisible }))}
-            onToggleFullscreen={() => {
-              const el = document.documentElement;
-              if (document.fullscreenElement) {
-                document.exitFullscreen();
-              } else {
-                el.requestFullscreen();
-              }
-            }}
+            onToggleFullscreen={handleToggleFullscreen}
           />
 
         </div>

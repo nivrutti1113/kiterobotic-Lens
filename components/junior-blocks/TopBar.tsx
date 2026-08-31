@@ -1,10 +1,8 @@
-'use client';
-
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { Project } from '@/lib/junior-blocks/types';
 import { EXAMPLE_PROJECTS } from '@/lib/junior-blocks/example-projects';
-import { Bot, Folder, Sparkles, HelpCircle, ArrowLeft, Download, FilePlus, Save, Upload, Code } from 'lucide-react';
+import { Bot, Folder, Sparkles, HelpCircle, ArrowLeft, Download, FilePlus, Save, Upload, Code, Maximize2, Minimize2 } from 'lucide-react';
 
 interface TopBarProps {
   project: Project;
@@ -16,6 +14,8 @@ interface TopBarProps {
   onExportProject: () => void;
   onLoadExampleProject: (proj: Project) => void;
   onOpenHelp: () => void;
+  isFullscreen?: boolean;
+  onToggleFullscreen?: () => void;
 }
 
 export const TopBar: React.FC<TopBarProps> = ({
@@ -28,15 +28,17 @@ export const TopBar: React.FC<TopBarProps> = ({
   onExportProject,
   onLoadExampleProject,
   onOpenHelp,
+  isFullscreen = false,
+  onToggleFullscreen,
 }) => {
   const [fileMenuOpen, setFileMenuOpen] = useState(false);
   const [exampleMenuOpen, setExampleMenuOpen] = useState(false);
 
   return (
-    <header className="bg-[#FFFDF9] border-b-2 border-[#EEDCD0] px-4 py-2 flex items-center justify-between shadow-sm z-30 relative">
+    <header className="bg-[#FFFDF9] border-b-2 border-[#EEDCD0] px-4 py-2 flex items-center justify-between shadow-sm z-30 relative shrink-0">
       
       {/* Left Branding & Menus */}
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-3 sm:gap-4 flex-wrap">
         
         {/* Back to Dashboard Link */}
         <Link
@@ -44,7 +46,7 @@ export const TopBar: React.FC<TopBarProps> = ({
           className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-purple-100/90 hover:bg-purple-200 text-purple-950 font-black text-xs transition-colors border border-purple-300 shadow-sm"
         >
           <ArrowLeft className="w-4 h-4 text-purple-700" />
-          <span>← Back to Dashboard</span>
+          <span className="hidden sm:inline">← Back to Dashboard</span>
         </Link>
 
         {/* KMS-AI Wordmark Logo */}
@@ -56,10 +58,10 @@ export const TopBar: React.FC<TopBarProps> = ({
             <div className="flex items-center gap-1.5">
               <span className="font-black text-sm text-slate-950 tracking-tight">KMS-AI</span>
               <span className="text-[10px] font-black px-2 py-0.2 rounded-full bg-purple-100 text-purple-800 border border-purple-300">
-                Junior Blocks Studio
+                Junior Studio
               </span>
             </div>
-            <p className="text-[11px] font-bold text-slate-600">Kite Maker Studio IDE</p>
+            <p className="text-[11px] font-bold text-slate-600 hidden sm:block">Kite Maker Studio IDE</p>
           </div>
         </div>
 
@@ -70,14 +72,14 @@ export const TopBar: React.FC<TopBarProps> = ({
               setFileMenuOpen(!fileMenuOpen);
               setExampleMenuOpen(false);
             }}
-            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-[#FAF3EC] hover:bg-purple-100 text-slate-900 font-black text-xs transition-colors border border-[#EEDCD0] shadow-sm"
+            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-[#FAF3EC] hover:bg-purple-100 text-slate-900 font-black text-xs transition-colors border border-[#EEDCD0] shadow-sm font-heading"
           >
             <Folder className="w-3.5 h-3.5 text-purple-700" />
             <span>File</span>
           </button>
 
           {fileMenuOpen && (
-            <div className="absolute left-0 mt-2 w-48 bg-[#FFFDF9] border border-[#EEDCD0] rounded-2xl shadow-2xl py-1.5 z-50 text-xs font-black text-slate-800">
+            <div className="absolute left-0 mt-2 w-48 bg-[#FFFDF9] border border-[#EEDCD0] rounded-2xl shadow-2xl py-1.5 z-50 text-xs font-black text-slate-800 font-heading">
               <button
                 onClick={() => {
                   onNewProject();
@@ -132,14 +134,14 @@ export const TopBar: React.FC<TopBarProps> = ({
               setExampleMenuOpen(!exampleMenuOpen);
               setFileMenuOpen(false);
             }}
-            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-purple-100/90 hover:bg-purple-200 text-purple-950 font-black text-xs transition-colors border border-purple-300 shadow-sm"
+            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-purple-100/90 hover:bg-purple-200 text-purple-950 font-black text-xs transition-colors border border-purple-300 shadow-sm font-heading"
           >
             <Sparkles className="w-3.5 h-3.5 text-purple-700" />
             <span>Example Projects</span>
           </button>
 
           {exampleMenuOpen && (
-            <div className="absolute left-0 mt-2 w-64 bg-[#FFFDF9] border border-[#EEDCD0] rounded-2xl shadow-2xl py-1.5 z-50 text-xs font-black text-slate-800">
+            <div className="absolute left-0 mt-2 w-64 bg-[#FFFDF9] border border-[#EEDCD0] rounded-2xl shadow-2xl py-1.5 z-50 text-xs font-black text-slate-800 font-heading">
               <div className="px-3.5 py-1 text-[10px] font-black text-slate-500 uppercase tracking-wider">
                 Pre-built Student Examples
               </div>
@@ -163,19 +165,19 @@ export const TopBar: React.FC<TopBarProps> = ({
       </div>
 
       {/* Right Controls */}
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2 sm:gap-3">
         
         {/* Python Code Drawer Toggle */}
         <button
           onClick={onTogglePythonDrawer}
-          className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl font-black text-xs transition-all shadow-sm ${
+          className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl font-black text-xs transition-all shadow-sm font-heading ${
             showPythonDrawer
               ? 'bg-emerald-600 text-white shadow'
               : 'bg-[#FAF3EC] text-slate-900 border border-[#EEDCD0] hover:bg-purple-50'
           }`}
         >
           <Code className="w-4 h-4 text-emerald-600" />
-          <span>View Python Code</span>
+          <span className="hidden sm:inline">View Python Code</span>
         </button>
 
         {/* Help "?" Button */}
@@ -187,6 +189,22 @@ export const TopBar: React.FC<TopBarProps> = ({
         >
           <HelpCircle className="w-4.5 h-4.5 text-purple-700" />
         </button>
+
+        {/* Fullscreen / Minimize Toggle Button */}
+        {onToggleFullscreen && (
+          <button
+            onClick={onToggleFullscreen}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-black text-xs transition-all shadow-sm font-heading ${
+              isFullscreen
+                ? 'bg-amber-500 hover:bg-amber-600 text-slate-950 border border-amber-600'
+                : 'bg-purple-600 hover:bg-purple-700 text-white shadow-purple-600/20'
+            }`}
+            title={isFullscreen ? 'Minimize / Exit Fullscreen Mode' : 'Expand Fullscreen Mode'}
+          >
+            {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
+            <span className="hidden sm:inline">{isFullscreen ? 'Exit Fullscreen' : 'Fullscreen'}</span>
+          </button>
+        )}
 
       </div>
 
