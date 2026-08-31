@@ -78,6 +78,70 @@ void loop() {
   }
 }`,
   },
+  {
+    id: 'rgb',
+    name: '4. RGB Color LED Fader (PWM Pins 9,10,11)',
+    code: `// KMS-AI RGB Color Fader
+const int redPin = 9;
+const int greenPin = 10;
+const int bluePin = 11;
+
+void setup() {
+  pinMode(redPin, OUTPUT);
+  pinMode(greenPin, OUTPUT);
+  pinMode(bluePin, OUTPUT);
+  Serial.begin(9600);
+  Serial.println("RGB Color Fader Initialized");
+}
+
+void loop() {
+  // Red
+  analogWrite(redPin, 255); analogWrite(greenPin, 0); analogWrite(bluePin, 0);
+  Serial.println("Color: Red (RGB 255, 0, 0)");
+  delay(1000);
+
+  // Green
+  analogWrite(redPin, 0); analogWrite(greenPin, 255); analogWrite(bluePin, 0);
+  Serial.println("Color: Green (RGB 0, 255, 0)");
+  delay(1000);
+
+  // Blue
+  analogWrite(redPin, 0); analogWrite(greenPin, 0); analogWrite(bluePin, 255);
+  Serial.println("Color: Blue (RGB 0, 0, 255)");
+  delay(1000);
+}`,
+  },
+  {
+    id: 'temp',
+    name: '5. LM35 Temperature Heat Alarm',
+    code: `// KMS-AI Temperature Sensor & Buzzer Alarm
+const int tempPin = A0;
+const int buzzerPin = 8;
+
+void setup() {
+  pinMode(buzzerPin, OUTPUT);
+  Serial.begin(9600);
+  Serial.println("LM35 Heat Monitor Starting...");
+}
+
+void loop() {
+  int rawValue = analogRead(tempPin);
+  float voltage = rawValue * (5.0 / 1023.0);
+  float tempC = voltage * 100.0; // 10mV per degree C
+
+  Serial.print("Temperature: ");
+  Serial.print(tempC);
+  Serial.println(" °C");
+
+  if (tempC > 35.0) {
+    digitalWrite(buzzerPin, HIGH);
+    Serial.println("⚠️ HIGH TEMPERATURE ALARM!");
+  } else {
+    digitalWrite(buzzerPin, LOW);
+  }
+  delay(1000);
+}`,
+  },
 ];
 
 export default function ArduinoStudioPage() {

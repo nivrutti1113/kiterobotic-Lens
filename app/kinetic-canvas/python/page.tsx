@@ -81,6 +81,41 @@ for i in range(36):
 print("Turtle Canvas Drawing Completed!")
 `,
   },
+  {
+    id: 'dict',
+    name: '4. Student Dictionary Data Structure',
+    code: `# KMS-AI Python Dictionary Data Structure
+students_db = {
+    "101": "Ananya Patel - Robotics Lead",
+    "102": "Rohan Verma - AI Vision Specialist",
+    "103": "Priya Nair - Hardware Architect"
+}
+
+print("School Student Registry Database:")
+for roll, info in students_db.items():
+    print("Roll No", roll, ":", info)
+
+print("Total Students Registered:", len(students_db))
+`,
+  },
+  {
+    id: 'mandala',
+    name: '5. Turtle Hexagon Mandala Pattern',
+    code: `# KMS-AI Turtle Hexagon Pattern Art
+import turtle
+
+print("Drawing 12-Sided Mandala Geometry...")
+turtle.color("#10B981")
+
+for step in range(12):
+    for i in range(6):
+        turtle.forward(60)
+        turtle.right(60)
+    turtle.right(30)
+
+print("Mandala Pattern Rendered Successfully!")
+`,
+  },
 ];
 
 export default function PythonStudioPage() {

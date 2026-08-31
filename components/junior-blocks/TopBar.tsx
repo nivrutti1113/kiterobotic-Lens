@@ -14,6 +14,7 @@ interface TopBarProps {
   onExportProject: () => void;
   onLoadExampleProject: (proj: Project) => void;
   onOpenHelp: () => void;
+  onOpenMissions?: () => void;
   isFullscreen?: boolean;
   onToggleFullscreen?: () => void;
 }
@@ -28,6 +29,7 @@ export const TopBar: React.FC<TopBarProps> = ({
   onExportProject,
   onLoadExampleProject,
   onOpenHelp,
+  onOpenMissions,
   isFullscreen = false,
   onToggleFullscreen,
 }) => {
@@ -167,6 +169,18 @@ export const TopBar: React.FC<TopBarProps> = ({
       {/* Right Controls */}
       <div className="flex items-center gap-2 sm:gap-3">
         
+        {/* Student Missions Button */}
+        {onOpenMissions && (
+          <button
+            onClick={onOpenMissions}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-black text-xs transition-all shadow-sm font-heading border border-amber-600"
+            title="Student Coding Missions & Challenges"
+          >
+            <Sparkles className="w-4 h-4 text-purple-950" />
+            <span className="hidden sm:inline">🎯 Missions (+50 XP)</span>
+          </button>
+        )}
+
         {/* Python Code Drawer Toggle */}
         <button
           onClick={onTogglePythonDrawer}
