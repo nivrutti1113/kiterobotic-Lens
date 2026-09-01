@@ -84,8 +84,14 @@ export const BlockPalette: React.FC<BlockPaletteProps> = ({
           return (
             <div
               key={def.type}
-              className="hover:scale-[1.02] transition-transform cursor-grab active:cursor-grabbing"
-              onDragStart={(e) => onDragStartBlockTemplate(e, def.type)}
+              draggable={true}
+              onDragStart={(e) => {
+                e.dataTransfer.setData('kms/block_type', def.type);
+                e.dataTransfer.setData('text/plain', def.type);
+                e.dataTransfer.effectAllowed = 'copy';
+                onDragStartBlockTemplate(e, def.type);
+              }}
+              className="hover:scale-[1.02] transition-transform cursor-grab active:cursor-grabbing select-none"
             >
               <BlockView block={templateBlock} isTemplate={true} />
             </div>

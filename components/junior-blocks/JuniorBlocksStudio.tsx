@@ -232,13 +232,13 @@ export function JuniorBlocksStudio() {
       />
 
       {/* Studio Core Body */}
-      <div className="flex-1 flex flex-col md:flex-row overflow-hidden p-2.5 gap-2.5 min-h-0">
+      <div className="flex-1 flex flex-col md:flex-row overflow-hidden p-2 gap-2 min-h-0">
         
         {/* Left Palette & Center Workspace Container */}
         <div className="flex-1 flex flex-col sm:flex-row bg-[#FFFDF9] rounded-2xl border-2 border-[#EEDCD0] shadow-sm overflow-hidden min-h-0">
           
           {/* Palette Column */}
-          <div className="w-full sm:w-72 h-64 sm:h-full shrink-0 border-r border-[#EEDCD0] overflow-hidden">
+          <div className="w-full sm:w-64 h-56 sm:h-full shrink-0 border-r border-[#EEDCD0] overflow-hidden">
             <BlockPalette
               onDragStartBlockTemplate={handleDragStartBlockTemplate}
             />
@@ -263,7 +263,7 @@ export function JuniorBlocksStudio() {
         </div>
 
         {/* Right Column: Stage & Sprite Panel */}
-        <div className="w-full md:w-[400px] flex flex-col gap-2.5 shrink-0 overflow-y-auto max-h-full">
+        <div className="w-full md:w-[320px] lg:w-[340px] flex flex-col gap-2 shrink-0 overflow-y-auto max-h-full">
           
           <StageCanvas
             project={project}

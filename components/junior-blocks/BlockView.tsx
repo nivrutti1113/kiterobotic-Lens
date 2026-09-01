@@ -91,13 +91,21 @@ export const BlockView: React.FC<BlockViewProps> = ({
 
   const textContrastClass = isDarkText ? 'text-slate-950 font-black' : 'text-white font-black drop-shadow-sm';
 
+  const handleDragStartBlock = (e: React.DragEvent) => {
+    e.stopPropagation();
+    e.dataTransfer.setData('kms/existing_block_id', block.id);
+    e.dataTransfer.setData('text/plain', block.id);
+    e.dataTransfer.effectAllowed = 'move';
+    if (onDragStart) onDragStart(e, block);
+  };
+
   // Render block element by shape
   const renderSingleBlock = () => {
     if (def.shape === 'hat') {
       return (
         <div
           draggable={!isTemplate}
-          onDragStart={(e) => onDragStart && onDragStart(e, block)}
+          onDragStart={handleDragStartBlock}
           className={`relative cursor-grab active:cursor-grabbing select-none ${textContrastClass} text-xs px-4 py-2.5 rounded-t-2xl rounded-b-md shadow-md flex items-center gap-1.5 border-t-2 border-l-2 border-r-2 border-white/40`}
           style={{ backgroundColor: categoryColor.hex }}
         >
@@ -110,7 +118,7 @@ export const BlockView: React.FC<BlockViewProps> = ({
       return (
         <div
           draggable={!isTemplate}
-          onDragStart={(e) => onDragStart && onDragStart(e, block)}
+          onDragStart={handleDragStartBlock}
           className={`relative cursor-grab active:cursor-grabbing select-none ${textContrastClass} text-xs shadow-md rounded-lg overflow-hidden border border-white/30`}
           style={{ backgroundColor: categoryColor.hex }}
         >
@@ -216,7 +224,7 @@ export const BlockView: React.FC<BlockViewProps> = ({
       return (
         <div
           draggable={!isTemplate}
-          onDragStart={(e) => onDragStart && onDragStart(e, block)}
+          onDragStart={handleDragStartBlock}
           className={`inline-flex items-center gap-1 cursor-grab active:cursor-grabbing select-none ${textContrastClass} text-[11px] px-3 py-1 shadow-sm ${
             def.shape === 'boolean' ? 'rounded-full border-2 border-emerald-300' : 'rounded-xl border border-white/40'
           }`}
@@ -231,7 +239,7 @@ export const BlockView: React.FC<BlockViewProps> = ({
     return (
       <div
         draggable={!isTemplate}
-        onDragStart={(e) => onDragStart && onDragStart(e, block)}
+        onDragStart={handleDragStartBlock}
         className={`relative cursor-grab active:cursor-grabbing select-none ${textContrastClass} text-xs px-3.5 py-2 rounded-lg shadow-md flex items-center gap-1.5 border border-white/30`}
         style={{ backgroundColor: categoryColor.hex }}
       >
