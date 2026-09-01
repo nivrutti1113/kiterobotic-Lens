@@ -40,53 +40,62 @@ export const BlockView: React.FC<BlockViewProps> = ({
     onInputChange(block.id, inputName, val);
   };
 
-  // Render label parts with inputs inserted
+  // Render label parts with inputs inserted in a strict horizontal flex row
   const renderLabel = () => {
     const parts = def.label.split(/(\{[\w]+\})/g);
-    return parts.map((part, idx) => {
-      if (part.startsWith('{') && part.endsWith('}')) {
-        const inputName = part.slice(1, -1);
-        const inputDef = def.inputs?.[inputName];
-        const val = block.inputs?.[inputName] !== undefined ? block.inputs[inputName] : inputDef?.defaultValue ?? '';
+    return (
+      <div className="relative z-10 flex items-center justify-start flex-row gap-2 whitespace-nowrap leading-none">
+        {parts.map((part, idx) => {
+          if (!part) return null;
+          if (part.startsWith('{') && part.endsWith('}')) {
+            const inputName = part.slice(1, -1);
+            const inputDef = def.inputs?.[inputName];
+            const val = block.inputs?.[inputName] !== undefined ? block.inputs[inputName] : inputDef?.defaultValue ?? '';
 
-        if (typeof val === 'object' && val !== null) {
-          // Nested operator block
+            if (typeof val === 'object' && val !== null) {
+              // Nested operator block
+              return (
+                <span key={idx} className="inline-flex items-center shrink-0">
+                  <BlockView block={val as BlockInstance} onInputChange={onInputChange} isTemplate={false} />
+                </span>
+              );
+            }
+
+            if (inputDef?.type === 'select') {
+              return (
+                <select
+                  key={idx}
+                  value={String(val)}
+                  onChange={(e) => onInputChange && onInputChange(block.id, inputName, e.target.value)}
+                  className="bg-white/95 text-slate-950 font-black px-2 py-1 rounded-md text-xs focus:outline-none cursor-pointer border border-slate-300 shadow-sm shrink-0 my-0"
+                >
+                  {inputDef.options?.map((opt) => (
+                    <option key={opt.value} value={opt.value} className="bg-slate-900 text-white font-bold">
+                      {opt.label}
+                    </option>
+                  ))}
+                </select>
+              );
+            }
+
+            return (
+              <input
+                key={idx}
+                type="text"
+                value={String(val)}
+                onChange={(e) => handleTextOrNumChange(inputName, e.target.value)}
+                className="w-14 bg-white/95 text-slate-950 font-black px-1.5 py-1 rounded-md text-xs border border-slate-300 focus:outline-none focus:ring-2 focus:ring-purple-600 text-center shadow-sm shrink-0 my-0"
+              />
+            );
+          }
           return (
-            <span key={idx} className="inline-block mx-1">
-              <BlockView block={val as BlockInstance} onInputChange={onInputChange} isTemplate={false} />
+            <span key={idx} className="whitespace-nowrap font-black inline-block text-xs leading-none">
+              {part}
             </span>
           );
-        }
-
-        if (inputDef?.type === 'select') {
-          return (
-            <select
-              key={idx}
-              value={String(val)}
-              onChange={(e) => onInputChange && onInputChange(block.id, inputName, e.target.value)}
-              className="bg-white/90 text-slate-950 font-black px-2 py-0.5 rounded-md text-xs focus:outline-none cursor-pointer border border-slate-300 mx-1 shadow-sm"
-            >
-              {inputDef.options?.map((opt) => (
-                <option key={opt.value} value={opt.value} className="bg-slate-900 text-white font-bold">
-                  {opt.label}
-                </option>
-              ))}
-            </select>
-          );
-        }
-
-        return (
-          <input
-            key={idx}
-            type="text"
-            value={String(val)}
-            onChange={(e) => handleTextOrNumChange(inputName, e.target.value)}
-            className="w-14 bg-white/90 text-slate-950 font-black px-1.5 py-0.5 rounded-md text-xs border border-slate-300 focus:outline-none focus:ring-2 focus:ring-purple-600 text-center mx-1 shadow-sm"
-          />
-        );
-      }
-      return <span key={idx} className="whitespace-pre">{part}</span>;
-    });
+        })}
+      </div>
+    );
   };
 
   const textContrastClass = isDarkText ? 'text-slate-950 font-black' : 'text-white font-black drop-shadow-sm';
@@ -107,7 +116,7 @@ export const BlockView: React.FC<BlockViewProps> = ({
         <div
           draggable={!isTemplate}
           onDragStart={handleDragStartBlock}
-          className={`relative cursor-grab active:cursor-grabbing select-none ${textContrastClass} text-xs px-4 pt-4 pb-3 flex items-center gap-1.5 filter drop-shadow-md group`}
+          className={`relative cursor-grab active:cursor-grabbing select-none ${textContrastClass} text-xs px-4 pt-4 pb-3 flex items-center justify-start flex-row gap-2 filter drop-shadow-md group`}
           style={{ minWidth: '150px' }}
         >
           {/* Hat SVG Path Background */}
@@ -119,7 +128,7 @@ export const BlockView: React.FC<BlockViewProps> = ({
               strokeWidth="1.5"
             />
           </svg>
-          <span className="relative z-10 flex items-center gap-1 mt-1">{renderLabel()}</span>
+          <div className="mt-1">{renderLabel()}</div>
         </div>
       );
     }
@@ -135,12 +144,12 @@ export const BlockView: React.FC<BlockViewProps> = ({
         >
           {/* C-Block Top Header Bar */}
           <div
-            className="px-3 pt-2 pb-2.5 flex items-center gap-1 relative rounded-t-lg"
+            className="px-3 pt-2 pb-2.5 flex items-center justify-start flex-row gap-2 relative rounded-t-lg"
             style={{ backgroundColor: categoryColor.hex }}
           >
             {/* Top Notch SVG Tab */}
             <div className="absolute top-0 left-3 w-4 h-1 bg-white/40 rounded-b-sm" />
-            <span className="relative z-10">{renderLabel()}</span>
+            {renderLabel()}
           </div>
 
           {/* C-Block Main Loop Body Slot */}
@@ -187,7 +196,7 @@ export const BlockView: React.FC<BlockViewProps> = ({
           {def.shape === 'c_block_else' && (
             <>
               <div
-                className="px-3 py-1.5 font-black text-white relative flex items-center"
+                className="px-3 py-1.5 font-black text-white relative flex items-center justify-start flex-row gap-2"
                 style={{ backgroundColor: categoryColor.hex }}
               >
                 <span>Else</span>
@@ -251,7 +260,7 @@ export const BlockView: React.FC<BlockViewProps> = ({
         <div
           draggable={!isTemplate}
           onDragStart={handleDragStartBlock}
-          className={`inline-flex items-center gap-1 cursor-grab active:cursor-grabbing select-none ${textContrastClass} text-[11px] px-3.5 py-1.5 shadow-sm border border-black/20 ${
+          className={`inline-flex items-center justify-start flex-row gap-2 cursor-grab active:cursor-grabbing select-none ${textContrastClass} text-[11px] px-3.5 py-1.5 shadow-sm border border-black/20 ${
             def.shape === 'boolean' ? 'rounded-full border-2 border-emerald-300' : 'rounded-full'
           }`}
           style={{ backgroundColor: categoryColor.hex }}
@@ -266,7 +275,7 @@ export const BlockView: React.FC<BlockViewProps> = ({
       <div
         draggable={!isTemplate}
         onDragStart={handleDragStartBlock}
-        className={`relative cursor-grab active:cursor-grabbing select-none ${textContrastClass} text-xs px-4 pt-2.5 pb-3 flex items-center gap-1.5 filter drop-shadow-md group`}
+        className={`relative cursor-grab active:cursor-grabbing select-none ${textContrastClass} text-xs px-4 pt-2.5 pb-3 flex items-center justify-start flex-row gap-2 filter drop-shadow-md group`}
         style={{ minWidth: '140px' }}
       >
         {/* Puzzle Block Top Notch + Bottom Socket SVG Layer */}
@@ -279,7 +288,7 @@ export const BlockView: React.FC<BlockViewProps> = ({
           />
         </svg>
 
-        <span className="relative z-10 flex items-center gap-1">{renderLabel()}</span>
+        {renderLabel()}
       </div>
     );
   };

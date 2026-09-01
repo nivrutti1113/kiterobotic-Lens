@@ -5,6 +5,8 @@ const LOCAL_STORAGE_KEY = "kms-ai-project";
 
 export function createDefaultProject(): Project {
   const defaultSprite = SPRITE_CATALOG[0]; // KMS Kite Bot
+  const teddySprite = SPRITE_CATALOG.find((s) => s.id === 'friendly_bear') || SPRITE_CATALOG[2];
+
   return {
     id: "proj_" + Date.now(),
     name: "My First Robot Project",
@@ -17,7 +19,7 @@ export function createDefaultProject(): Project {
         costumeUrl: defaultSprite.svg,
         costumes: defaultSprite.costumes,
         currentCostumeIndex: 0,
-        x: 0,
+        x: -40,
         y: 0,
         rotation: 0,
         size: 100,
@@ -70,6 +72,19 @@ export function createDefaultProject(): Project {
             },
           },
         ],
+      },
+      {
+        id: "sprite_teddy_bear",
+        name: teddySprite.name,
+        costumeUrl: teddySprite.svg,
+        costumes: teddySprite.costumes,
+        currentCostumeIndex: 0,
+        x: 40,
+        y: 0,
+        rotation: 0,
+        size: 90,
+        visible: true,
+        scripts: [],
       },
     ],
   };
