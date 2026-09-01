@@ -10,14 +10,14 @@ interface BlockPaletteProps {
   onDragStartBlockTemplate: (e: React.DragEvent, blockType: string) => void;
 }
 
-const CATEGORY_TABS: { id: Category; label: string; icon: React.ReactNode; color: string }[] = [
-  { id: 'movement', label: 'Movement', icon: <Navigation className="w-3.5 h-3.5" />, color: '#7C3AED' },
-  { id: 'looks', label: 'Looks', icon: <Eye className="w-3.5 h-3.5" />, color: '#7C3AED' },
-  { id: 'events', label: 'Events', icon: <Zap className="w-3.5 h-3.5" />, color: '#7C3AED' },
-  { id: 'control', label: 'Control', icon: <Sliders className="w-3.5 h-3.5" />, color: '#7C3AED' },
-  { id: 'sound', label: 'Sound', icon: <Volume2 className="w-3.5 h-3.5" />, color: '#7C3AED' },
-  { id: 'sensing', label: 'Sensing', icon: <Radio className="w-3.5 h-3.5" />, color: '#7C3AED' },
-  { id: 'operators', label: 'Operators', icon: <Calculator className="w-3.5 h-3.5" />, color: '#7C3AED' },
+const CATEGORY_TABS: { id: Category; label: string; icon: React.ReactNode }[] = [
+  { id: 'movement', label: 'Movement', icon: <Navigation className="w-3.5 h-3.5" /> },
+  { id: 'looks', label: 'Looks', icon: <Eye className="w-3.5 h-3.5" /> },
+  { id: 'events', label: 'Events', icon: <Zap className="w-3.5 h-3.5" /> },
+  { id: 'control', label: 'Control', icon: <Sliders className="w-3.5 h-3.5" /> },
+  { id: 'sound', label: 'Sound', icon: <Volume2 className="w-3.5 h-3.5" /> },
+  { id: 'sensing', label: 'Sensing', icon: <Radio className="w-3.5 h-3.5" /> },
+  { id: 'operators', label: 'Operators', icon: <Calculator className="w-3.5 h-3.5" /> },
 ];
 
 export const BlockPalette: React.FC<BlockPaletteProps> = ({
@@ -30,17 +30,20 @@ export const BlockPalette: React.FC<BlockPaletteProps> = ({
   );
 
   return (
-    <div className="flex flex-col h-full bg-[#FFFDF9] border-r border-[#EEDCD0] rounded-l-2xl shadow-sm overflow-hidden">
+    <div className="flex flex-col h-full w-full bg-[#FFFDF9] font-sans overflow-hidden">
       
-      {/* Category Selection Tabs - Fully Legible Scrollable Row */}
-      <div className="p-2 bg-[#FAF3EC] border-b border-[#EEDCD0] flex items-center gap-1.5 overflow-x-auto shrink-0 scrollbar-thin">
+      {/* Category Selection Tabs - Horizontal Header across Top of Bottom Dock */}
+      <div className="px-3 py-2 bg-[#FAF3EC] border-b border-[#EEDCD0] flex items-center gap-2 overflow-x-auto shrink-0 scrollbar-none">
+        <span className="text-[11px] font-black text-purple-900 uppercase tracking-wider font-heading shrink-0 mr-1">
+          Block Categories:
+        </span>
         {CATEGORY_TABS.map((tab) => {
           const isActive = activeCategory === tab.id;
           return (
             <button
               key={tab.id}
               onClick={() => setActiveCategory(tab.id)}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl transition-all font-heading shrink-0 ${
+              className={`flex items-center gap-1.5 px-3 py-1 rounded-xl transition-all font-heading shrink-0 ${
                 isActive
                   ? 'bg-purple-700 text-white shadow-sm ring-2 ring-purple-400 font-black'
                   : 'bg-white text-slate-800 hover:bg-purple-100 border border-[#EEDCD0] font-bold'
@@ -48,7 +51,7 @@ export const BlockPalette: React.FC<BlockPaletteProps> = ({
               title={tab.label}
               aria-label={tab.label}
             >
-              <div className={`p-1 rounded-md ${isActive ? 'bg-white/20 text-white' : 'bg-purple-100 text-purple-800'}`}>
+              <div className={`p-0.5 rounded ${isActive ? 'text-white' : 'text-purple-800'}`}>
                 {tab.icon}
               </div>
               <span className="text-xs whitespace-nowrap">
@@ -59,13 +62,8 @@ export const BlockPalette: React.FC<BlockPaletteProps> = ({
         })}
       </div>
 
-      {/* Block List Palette */}
-      <div className="flex-1 p-3 overflow-y-auto space-y-3 bg-[#FFFDF9]">
-        <div className="text-[11px] font-black text-slate-700 uppercase tracking-wider mb-2 flex items-center justify-between">
-          <span>{activeCategory.toUpperCase()} BLOCKS</span>
-          <span className="text-[11px] text-purple-700 font-extrabold">Drag to Workspace ➔</span>
-        </div>
-
+      {/* Horizontal Scrollable Tray for Draggable Blocks */}
+      <div className="flex-1 px-4 py-2.5 overflow-x-auto overflow-y-hidden bg-[#FFFDF9] flex items-center gap-5 scrollbar-thin">
         {categoryBlocks.map((def) => {
           const sampleInputs: Record<string, number | string | BlockInstance> = {};
           if (def.inputs) {
@@ -91,13 +89,14 @@ export const BlockPalette: React.FC<BlockPaletteProps> = ({
                 e.dataTransfer.effectAllowed = 'copy';
                 onDragStartBlockTemplate(e, def.type);
               }}
-              className="hover:scale-[1.02] transition-transform cursor-grab active:cursor-grabbing select-none"
+              className="hover:scale-105 transition-transform cursor-grab active:cursor-grabbing select-none shrink-0"
             >
               <BlockView block={templateBlock} isTemplate={true} />
             </div>
           );
         })}
       </div>
+
     </div>
   );
 };
