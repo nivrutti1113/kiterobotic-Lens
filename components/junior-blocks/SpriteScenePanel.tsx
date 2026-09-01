@@ -92,17 +92,18 @@ export const SpriteScenePanel: React.FC<SpriteScenePanelProps> = ({
             <div
               key={sprite.id}
               onClick={() => onSelectSprite(sprite.id)}
-              className={`relative group cursor-pointer border-2 rounded-2xl p-1.5 w-20 h-20 shrink-0 flex flex-col items-center justify-between transition-all ${
+              title={sprite.name}
+              className={`relative group cursor-pointer border-2 rounded-2xl p-1.5 min-w-[88px] h-20 shrink-0 flex flex-col items-center justify-between transition-all ${
                 isSelected
                   ? 'border-purple-700 bg-purple-100/70 ring-4 ring-purple-500/20 shadow-md scale-105'
                   : 'border-[#EEDCD0] bg-white hover:border-purple-400'
               }`}
             >
               <div
-                className="w-10 h-10 flex items-center justify-center"
+                className="w-10 h-10 flex items-center justify-center shrink-0"
                 dangerouslySetInnerHTML={{ __html: sprite.costumeUrl || '' }}
               />
-              <span className="text-[10px] font-black text-slate-950 truncate w-full text-center font-heading">
+              <span className="text-[11px] font-black text-slate-950 truncate w-full text-center font-heading px-1">
                 {sprite.name}
               </span>
 

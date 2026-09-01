@@ -27,11 +27,6 @@ export default function XRStudioPage() {
             </div>
           </div>
         </div>
-
-        <span className="text-xs font-black px-3 py-1 rounded-full bg-emerald-100 text-emerald-950 border border-emerald-300 font-heading flex items-center gap-1">
-          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-          <span>Production Ready</span>
-        </span>
       </header>
 
       <div className="flex-1 p-4 flex flex-col overflow-hidden">

@@ -11,13 +11,13 @@ interface BlockPaletteProps {
 }
 
 const CATEGORY_TABS: { id: Category; label: string; icon: React.ReactNode; color: string }[] = [
-  { id: 'movement', label: 'Movement', icon: <Navigation className="w-4 h-4" />, color: '#3B82F6' },
-  { id: 'looks', label: 'Looks', icon: <Eye className="w-4 h-4" />, color: '#8B5CF6' },
-  { id: 'events', label: 'Events', icon: <Zap className="w-4 h-4 text-slate-900" />, color: '#F5C518' },
-  { id: 'control', label: 'Control', icon: <Sliders className="w-4 h-4" />, color: '#F97316' },
-  { id: 'sound', label: 'Sound', icon: <Volume2 className="w-4 h-4" />, color: '#EC4899' },
-  { id: 'sensing', label: 'Sensing', icon: <Radio className="w-4 h-4 text-slate-900" />, color: '#06B6D4' },
-  { id: 'operators', label: 'Operators', icon: <Calculator className="w-4 h-4" />, color: '#22C55E' },
+  { id: 'movement', label: 'Movement', icon: <Navigation className="w-3.5 h-3.5" />, color: '#7C3AED' },
+  { id: 'looks', label: 'Looks', icon: <Eye className="w-3.5 h-3.5" />, color: '#7C3AED' },
+  { id: 'events', label: 'Events', icon: <Zap className="w-3.5 h-3.5" />, color: '#7C3AED' },
+  { id: 'control', label: 'Control', icon: <Sliders className="w-3.5 h-3.5" />, color: '#7C3AED' },
+  { id: 'sound', label: 'Sound', icon: <Volume2 className="w-3.5 h-3.5" />, color: '#7C3AED' },
+  { id: 'sensing', label: 'Sensing', icon: <Radio className="w-3.5 h-3.5" />, color: '#7C3AED' },
+  { id: 'operators', label: 'Operators', icon: <Calculator className="w-3.5 h-3.5" />, color: '#7C3AED' },
 ];
 
 export const BlockPalette: React.FC<BlockPaletteProps> = ({
@@ -32,29 +32,26 @@ export const BlockPalette: React.FC<BlockPaletteProps> = ({
   return (
     <div className="flex flex-col h-full bg-[#FFFDF9] border-r border-[#EEDCD0] rounded-l-2xl shadow-sm overflow-hidden">
       
-      {/* Category Selection Circular Tabs */}
-      <div className="p-2.5 bg-[#FAF3EC] border-b border-[#EEDCD0] flex items-center justify-between gap-1 overflow-x-auto">
+      {/* Category Selection Tabs - Fully Legible Scrollable Row */}
+      <div className="p-2 bg-[#FAF3EC] border-b border-[#EEDCD0] flex items-center gap-1.5 overflow-x-auto shrink-0 scrollbar-thin">
         {CATEGORY_TABS.map((tab) => {
           const isActive = activeCategory === tab.id;
           return (
             <button
               key={tab.id}
               onClick={() => setActiveCategory(tab.id)}
-              className={`flex flex-col items-center justify-center p-2 rounded-xl transition-all ${
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl transition-all font-heading shrink-0 ${
                 isActive
-                  ? 'bg-white shadow-md scale-105 ring-2 ring-purple-600'
-                  : 'hover:bg-[#EEDCD0]/50 opacity-90 hover:opacity-100'
+                  ? 'bg-purple-700 text-white shadow-sm ring-2 ring-purple-400 font-black'
+                  : 'bg-white text-slate-800 hover:bg-purple-100 border border-[#EEDCD0] font-bold'
               }`}
               title={tab.label}
               aria-label={tab.label}
             >
-              <div
-                className="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold shadow-sm"
-                style={{ backgroundColor: tab.color }}
-              >
+              <div className={`p-1 rounded-md ${isActive ? 'bg-white/20 text-white' : 'bg-purple-100 text-purple-800'}`}>
                 {tab.icon}
               </div>
-              <span className="text-[11px] font-black text-slate-900 mt-1 whitespace-nowrap">
+              <span className="text-xs whitespace-nowrap">
                 {tab.label}
               </span>
             </button>

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { BlockInstance, Sprite } from '@/lib/junior-blocks/types';
 import { BLOCK_DEFINITIONS } from '@/lib/junior-blocks/blocks-def';
 import { BlockView } from './BlockView';
@@ -10,12 +10,23 @@ interface WorkspaceProps {
   activeSprite: Sprite;
   onUpdateSpriteScripts: (spriteId: string, scripts: BlockInstance[]) => void;
   onInputChange: (blockId: string, inputName: string, value: number | string | BlockInstance) => void;
+  onRegisterActions?: (actions: {
+    zoomIn: () => void;
+    zoomOut: () => void;
+    resetZoom: () => void;
+    undo: () => void;
+    redo: () => void;
+    cleanUp: () => void;
+    canUndo: boolean;
+    canRedo: boolean;
+  }) => void;
 }
 
 export const Workspace: React.FC<WorkspaceProps> = ({
   activeSprite,
   onUpdateSpriteScripts,
   onInputChange,
+  onRegisterActions,
 }) => {
   const [zoom, setZoom] = useState<number>(1.0);
   const [history, setHistory] = useState<BlockInstance[][]>([activeSprite.scripts]);
@@ -46,6 +57,33 @@ export const Workspace: React.FC<WorkspaceProps> = ({
       onUpdateSpriteScripts(activeSprite.id, next);
     }
   };
+
+  const handleCleanUp = () => {
+    let currentY = 30;
+    const updated = activeSprite.scripts.map((s) => {
+      const reordered = { ...s, x: 40, y: currentY };
+      currentY += 160;
+      return reordered;
+    });
+    saveHistory(updated);
+    setContextMenu(null);
+  };
+
+  // Expose action handlers to parent TopBar
+  useEffect(() => {
+    if (onRegisterActions) {
+      onRegisterActions({
+        zoomIn: () => setZoom((z) => Math.min(2.0, z + 0.1)),
+        zoomOut: () => setZoom((z) => Math.max(0.5, z - 0.1)),
+        resetZoom: () => setZoom(1.0),
+        undo: handleUndo,
+        redo: handleRedo,
+        cleanUp: handleCleanUp,
+        canUndo: historyIndex > 0,
+        canRedo: historyIndex < history.length - 1,
+      });
+    }
+  }, [historyIndex, history.length, activeSprite]);
 
   const handleDropInsideCBlock = (e: React.DragEvent, parentBlockId: string, isElseSlot: boolean = false) => {
     const blockType = e.dataTransfer.getData('kms/block_type');
@@ -139,6 +177,8 @@ export const Workspace: React.FC<WorkspaceProps> = ({
         while (tail.next) {
           tail = tail.next;
         }
+        delete newBlock.x;
+        delete newBlock.y;
         tail.next = newBlock;
       } else {
         scripts.push(newBlock);
@@ -224,17 +264,6 @@ export const Workspace: React.FC<WorkspaceProps> = ({
     setContextMenu(null);
   };
 
-  const handleCleanUp = () => {
-    let currentY = 30;
-    const updated = activeSprite.scripts.map((s) => {
-      const reordered = { ...s, x: 40, y: currentY };
-      currentY += 160;
-      return reordered;
-    });
-    saveHistory(updated);
-    setContextMenu(null);
-  };
-
   const handleDragStartExisting = (e: React.DragEvent, block: BlockInstance) => {
     e.dataTransfer.setData('kms/existing_block_id', block.id);
   };
@@ -251,69 +280,6 @@ export const Workspace: React.FC<WorkspaceProps> = ({
         backgroundSize: `${24 * zoom}px ${24 * zoom}px`,
       }}
     >
-      
-      {/* Top Right Workspace Toolbar Controls */}
-      <div className="absolute top-3 right-3 z-30 flex items-center gap-1.5 bg-[#FFFDF9] p-1.5 rounded-2xl shadow-lg border border-[#EEDCD0] backdrop-blur-md">
-        <button
-          onClick={() => setZoom((z) => Math.min(2.0, z + 0.1))}
-          className="p-1.5 hover:bg-purple-100 rounded-xl text-purple-900 transition-colors"
-          title="Zoom In"
-          aria-label="Zoom In"
-        >
-          <ZoomIn className="w-4 h-4 text-purple-800" />
-        </button>
-
-        <button
-          onClick={() => setZoom((z) => Math.max(0.5, z - 0.1))}
-          className="p-1.5 hover:bg-purple-100 rounded-xl text-purple-900 transition-colors"
-          title="Zoom Out"
-          aria-label="Zoom Out"
-        >
-          <ZoomOut className="w-4 h-4 text-purple-800" />
-        </button>
-
-        <button
-          onClick={() => setZoom(1.0)}
-          className="px-2 py-1 hover:bg-purple-100 rounded-xl text-[11px] font-black text-purple-900 transition-colors font-heading"
-          title="Reset Zoom"
-          aria-label="Reset Zoom"
-        >
-          <Maximize2 className="w-3.5 h-3.5" />
-        </button>
-
-        <div className="w-[1px] h-4 bg-slate-300 mx-0.5" />
-
-        <button
-          onClick={handleUndo}
-          disabled={historyIndex <= 0}
-          className="p-1.5 hover:bg-purple-100 disabled:opacity-40 rounded-xl text-purple-900 transition-colors"
-          title="Undo"
-          aria-label="Undo"
-        >
-          <RotateCcw className="w-4 h-4 text-purple-800" />
-        </button>
-
-        <button
-          onClick={handleRedo}
-          disabled={historyIndex >= history.length - 1}
-          className="p-1.5 hover:bg-purple-100 disabled:opacity-40 rounded-xl text-purple-900 transition-colors"
-          title="Redo"
-          aria-label="Redo"
-        >
-          <RotateCw className="w-4 h-4 text-purple-800" />
-        </button>
-
-        <button
-          onClick={handleCleanUp}
-          className="px-2.5 py-1 bg-purple-100 hover:bg-purple-200 text-purple-950 rounded-xl text-xs font-black transition-colors flex items-center gap-1 font-heading border border-purple-300"
-          title="Auto Arrange Scripts"
-          aria-label="Auto Arrange Scripts"
-        >
-          <Sparkles className="w-3.5 h-3.5 text-purple-700" />
-          <span>Clean Up</span>
-        </button>
-      </div>
-
       {/* Workspace Scripts Container */}
       <div
         className="min-w-[1200px] min-h-[900px] p-8 relative transform-origin-top-left transition-transform duration-75"

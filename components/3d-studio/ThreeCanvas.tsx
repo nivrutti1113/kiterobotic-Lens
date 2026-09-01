@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useRef, useEffect, useState } from 'react';
-import { Box, RotateCcw, Download, Eye, Sun, Layers } from 'lucide-react';
+import * as THREE from 'three';
+import { Box, RotateCcw, Download, Layers, Sun, Eye } from 'lucide-react';
 
 interface ThreeCanvasProps {
   initialShape?: 'cube' | 'sphere' | 'cylinder' | 'torus' | 'pyramid';
@@ -21,9 +22,11 @@ export const ThreeCanvas: React.FC<ThreeCanvasProps> = ({
   const [rotX, setRotX] = useState<number>(25);
   const [rotY, setRotY] = useState<number>(45);
 
+  const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const isDraggingRef = useRef<boolean>(false);
   const lastMouseRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
+  const meshRef = useRef<THREE.Mesh | null>(null);
 
   const handleMouseDown = (e: React.MouseEvent) => {
     isDraggingRef.current = true;
@@ -43,140 +46,155 @@ export const ThreeCanvas: React.FC<ThreeCanvasProps> = ({
     isDraggingRef.current = false;
   };
 
-  // Render 3D Geometry on HTML5 3D Perspective Canvas
+  // Real Three.js WebGL Renderer Engine with Dynamic Lighting & Geometry
   useEffect(() => {
     const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
+    const container = containerRef.current;
+    if (!canvas || !container) return;
 
-    const width = canvas.width;
-    const height = canvas.height;
-    const centerX = width / 2;
-    const centerY = height / 2;
+    const width = container.clientWidth || 700;
+    const height = container.clientHeight || 460;
 
-    ctx.clearRect(0, 0, width, height);
+    // Scene & Camera setup
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x0f172a);
 
-    // Grid lines background
-    ctx.strokeStyle = '#1E293B';
-    ctx.lineWidth = 1;
-    for (let x = 0; x < width; x += 40) {
-      ctx.beginPath();
-      ctx.moveTo(x, 0);
-      ctx.lineTo(x, height);
-      ctx.stroke();
+    const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
+    camera.position.set(0, 0, 7);
+
+    // Renderer setup
+    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+    renderer.setSize(width, height);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+    // Dynamic Shading Lighting Setup
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+    scene.add(ambientLight);
+
+    const dirLight1 = new THREE.DirectionalLight(0xffffff, 0.9);
+    dirLight1.position.set(5, 8, 5);
+    scene.add(dirLight1);
+
+    const dirLight2 = new THREE.DirectionalLight(0xa78bfa, 0.4);
+    dirLight2.position.set(-5, -4, -5);
+    scene.add(dirLight2);
+
+    // Grid Floor
+    const gridHelper = new THREE.GridHelper(10, 20, 0x475569, 0x1e293b);
+    gridHelper.position.y = -2;
+    scene.add(gridHelper);
+
+    // Create 3D Primitive Geometry based on user selection
+    let geometry: THREE.BufferGeometry;
+    switch (shape) {
+      case 'cube':
+        geometry = new THREE.BoxGeometry(2.2, 2.2, 2.2);
+        break;
+      case 'sphere':
+        geometry = new THREE.SphereGeometry(1.5, 32, 32);
+        break;
+      case 'cylinder':
+        geometry = new THREE.CylinderGeometry(1.2, 1.2, 2.5, 32);
+        break;
+      case 'torus':
+        geometry = new THREE.TorusGeometry(1.3, 0.5, 24, 48);
+        break;
+      case 'pyramid':
+        geometry = new THREE.ConeGeometry(1.6, 2.6, 4);
+        break;
+      default:
+        geometry = new THREE.BoxGeometry(2, 2, 2);
     }
-    for (let y = 0; y < height; y += 40) {
-      ctx.beginPath();
-      ctx.moveTo(0, y);
-      ctx.lineTo(width, y);
-      ctx.stroke();
-    }
 
-    // 3D Perspective Projection Mathematics
-    const radX = (rotX * Math.PI) / 180;
-    const radY = (rotY * Math.PI) / 180;
+    // Material Creation
+    const material = wireframe
+      ? new THREE.MeshBasicMaterial({ color, wireframe: true })
+      : new THREE.MeshStandardMaterial({
+          color,
+          roughness: 0.35,
+          metalness: 0.25,
+          side: THREE.DoubleSide,
+        });
 
-    const project3D = (x: number, y: number, z: number) => {
-      // Rotate Y
-      const x1 = x * Math.cos(radY) + z * Math.sin(radY);
-      const z1 = -x * Math.sin(radY) + z * Math.cos(radY);
+    const mesh = new THREE.Mesh(geometry, material);
+    mesh.scale.set(scale / 100, scale / 100, scale / 100);
+    mesh.rotation.x = (rotX * Math.PI) / 180;
+    mesh.rotation.y = (rotY * Math.PI) / 180;
 
-      // Rotate X
-      const y2 = y * Math.cos(radX) - z1 * Math.sin(radX);
-      const z2 = y * Math.sin(radX) + z1 * Math.cos(radX);
+    scene.add(mesh);
+    meshRef.current = mesh;
 
-      // Perspective divide
-      const fov = 350;
-      const distance = 400;
-      const factor = fov / (distance + z2);
-
-      return {
-        px: centerX + x1 * factor * (scale / 100),
-        py: centerY + y2 * factor * (scale / 100),
-      };
+    // Render loop
+    let animationFrameId: number;
+    const animate = () => {
+      renderer.render(scene, camera);
+      animationFrameId = requestAnimationFrame(animate);
     };
+    animate();
 
-    const size = 90;
+    const handleResize = () => {
+      if (!container || !canvas) return;
+      const newW = container.clientWidth;
+      const newH = container.clientHeight;
+      camera.aspect = newW / newH;
+      camera.updateProjectionMatrix();
+      renderer.setSize(newW, newH);
+    };
+    window.addEventListener('resize', handleResize);
 
-    if (shape === 'cube') {
-      const vertices = [
-        { x: -size, y: -size, z: -size },
-        { x: size, y: -size, z: -size },
-        { x: size, y: size, z: -size },
-        { x: -size, y: size, z: -size },
-        { x: -size, y: -size, z: size },
-        { x: size, y: -size, z: size },
-        { x: size, y: size, z: size },
-        { x: -size, y: size, z: size },
-      ];
-
-      const projected = vertices.map((v) => project3D(v.x, v.y, v.z));
-
-      const faces = [
-        [0, 1, 2, 3], // Back
-        [4, 5, 6, 7], // Front
-        [0, 1, 5, 4], // Top
-        [2, 3, 7, 6], // Bottom
-        [0, 3, 7, 4], // Left
-        [1, 2, 6, 5], // Right
-      ];
-
-      faces.forEach((face, idx) => {
-        ctx.beginPath();
-        ctx.moveTo(projected[face[0]].px, projected[face[0]].py);
-        for (let i = 1; i < face.length; i++) {
-          ctx.lineTo(projected[face[i]].px, projected[face[i]].py);
-        }
-        ctx.closePath();
-
-        if (wireframe) {
-          ctx.strokeStyle = color;
-          ctx.lineWidth = 2;
-          ctx.stroke();
-        } else {
-          ctx.fillStyle = color;
-          ctx.globalAlpha = 0.85 - idx * 0.08;
-          ctx.fill();
-          ctx.strokeStyle = '#FFFFFF';
-          ctx.lineWidth = 2;
-          ctx.stroke();
-          ctx.globalAlpha = 1.0;
-        }
-      });
-    } else {
-      // Sphere / Pyramid 3D render approximation
-      const pointsCount = 18;
-      const pts = [];
-      for (let i = 0; i < pointsCount; i++) {
-        const theta = (i / pointsCount) * Math.PI * 2;
-        pts.push(project3D(size * Math.cos(theta), size * Math.sin(theta), 0));
-        pts.push(project3D(size * Math.cos(theta), 0, size * Math.sin(theta)));
-      }
-
-      ctx.beginPath();
-      pts.forEach((p, idx) => {
-        if (idx === 0) ctx.moveTo(p.px, p.py);
-        else ctx.lineTo(p.px, p.py);
-      });
-      ctx.strokeStyle = color;
-      ctx.lineWidth = wireframe ? 2 : 4;
-      ctx.stroke();
-      if (!wireframe) {
-        ctx.fillStyle = color;
-        ctx.globalAlpha = 0.7;
-        ctx.fill();
-        ctx.globalAlpha = 1.0;
-      }
-    }
+    return () => {
+      cancelAnimationFrame(animationFrameId);
+      window.removeEventListener('resize', handleResize);
+      geometry.dispose();
+      if (Array.isArray(material)) material.forEach((m) => m.dispose());
+      else material.dispose();
+      renderer.dispose();
+    };
   }, [shape, color, wireframe, scale, rotX, rotY]);
 
+  // Valid Triangulated STL Exporter
   const handleDownloadSTL = () => {
-    const stlContent = `solid kms_3d_${shape}\n  facet normal 0.0 0.0 1.0\n    outer loop\n      vertex -50.0 -50.0 0.0\n      vertex 50.0 -50.0 0.0\n      vertex 0.0 50.0 100.0\n    endloop\n  endfacet\nendsolid kms_3d_${shape}`;
-    const blob = new Blob([stlContent], { type: 'text/plain' });
+    if (!meshRef.current) return;
+    const mesh = meshRef.current;
+    mesh.updateMatrixWorld(true);
+
+    const geometry = mesh.geometry.clone().toNonIndexed();
+    const positionAttr = geometry.getAttribute('position');
+    const normalAttr = geometry.getAttribute('normal');
+
+    let stl = `solid kms_3d_${shape}\n`;
+
+    for (let i = 0; i < positionAttr.count; i += 3) {
+      const v1 = new THREE.Vector3().fromBufferAttribute(positionAttr, i);
+      const v2 = new THREE.Vector3().fromBufferAttribute(positionAttr, i + 1);
+      const v3 = new THREE.Vector3().fromBufferAttribute(positionAttr, i + 2);
+
+      let nx = 0, ny = 0, nz = 1;
+      if (normalAttr) {
+        nx = normalAttr.getX(i);
+        ny = normalAttr.getY(i);
+        nz = normalAttr.getZ(i);
+      }
+
+      v1.applyMatrix4(mesh.matrixWorld);
+      v2.applyMatrix4(mesh.matrixWorld);
+      v3.applyMatrix4(mesh.matrixWorld);
+
+      stl += `  facet normal ${nx.toFixed(6)} ${ny.toFixed(6)} ${nz.toFixed(6)}\n`;
+      stl += `    outer loop\n`;
+      stl += `      vertex ${v1.x.toFixed(6)} ${v1.y.toFixed(6)} ${v1.z.toFixed(6)}\n`;
+      stl += `      vertex ${v2.x.toFixed(6)} ${v2.y.toFixed(6)} ${v2.z.toFixed(6)}\n`;
+      stl += `      vertex ${v3.x.toFixed(6)} ${v3.y.toFixed(6)} ${v3.z.toFixed(6)}\n`;
+      stl += `    endloop\n`;
+      stl += `  endfacet\n`;
+    }
+
+    stl += `endsolid kms_3d_${shape}\n`;
+
+    const blob = new Blob([stl], { type: 'model/stl' });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
-    a.download = `kms_3d_mesh_${shape}.stl`;
+    a.download = `kms_3d_${shape}.stl`;
     a.click();
   };
 
@@ -249,18 +267,21 @@ export const ThreeCanvas: React.FC<ThreeCanvasProps> = ({
         </div>
       </div>
 
-      {/* Center WebGL 3D Canvas */}
-      <div className="flex-1 bg-[#0F172A] rounded-2xl border-2 border-slate-800 shadow-xl overflow-hidden flex flex-col items-center justify-center p-3 relative min-h-[420px]">
-        <div className="absolute top-3 left-4 text-xs font-mono text-slate-400 flex items-center gap-2">
+      {/* Center WebGL 3D Canvas Container */}
+      <div
+        ref={containerRef}
+        className="flex-1 bg-[#0F172A] rounded-2xl border-2 border-slate-800 shadow-xl overflow-hidden flex flex-col items-center justify-center p-3 relative min-h-[420px]"
+      >
+        <div className="absolute top-3 left-4 text-xs font-mono text-slate-400 flex items-center gap-2 z-10">
           <span>Rotate: Drag Mouse</span>
           <span>·</span>
-          <span>3D Mesh: {shape.toUpperCase()}</span>
+          <span>Mesh: {shape.toUpperCase()}</span>
+          <span>·</span>
+          <span className="text-emerald-400">Three.js WebGL Engine</span>
         </div>
 
         <canvas
           ref={canvasRef}
-          width={700}
-          height={460}
           onMouseDown={handleMouseDown}
           onMouseMove={handleMouseMove}
           onMouseUp={handleMouseUp}

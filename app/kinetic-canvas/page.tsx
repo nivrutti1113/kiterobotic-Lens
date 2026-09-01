@@ -2,7 +2,23 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { Rocket, ArrowRight, Cpu, Sparkles, Smile, Layers, Clock, Palette, Gamepad2, Zap, Wifi, Globe, Calculator, Eye } from 'lucide-react';
+import {
+  Rocket,
+  ArrowRight,
+  Cpu,
+  Sparkles,
+  Smile,
+  Layers,
+  Palette,
+  Gamepad2,
+  Zap,
+  Wifi,
+  Globe,
+  Calculator,
+  Eye,
+  Terminal,
+  Box,
+} from 'lucide-react';
 
 export default function KineticCanvasDashboard() {
   return (
@@ -12,7 +28,7 @@ export default function KineticCanvasDashboard() {
       <div className="bg-gradient-to-r from-[#FDEEE9] via-[#FAF3EC] to-[#FFFDF9] border-b border-[#EEDCD0] py-10 px-4 sm:px-8 text-center shadow-sm">
         <div className="max-w-4xl mx-auto space-y-3">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-purple-700 text-white text-xs font-black tracking-wide shadow-sm font-heading">
-            <Rocket className="w-4 h-4 animate-bounce text-amber-300" />
+            <Rocket className="w-4 h-4 text-amber-300 animate-bounce" />
             <span>KMS-AI (Kite Maker Studio)</span>
           </div>
           <h1 className="text-3xl sm:text-4xl font-black text-slate-950 tracking-tight font-heading">
@@ -45,8 +61,8 @@ export default function KineticCanvasDashboard() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
             
-            {/* Card 1: Junior Blocks (FULLY FUNCTIONAL) */}
-            <div className="bg-[#FFFDF9] rounded-2xl border-2 border-purple-300 hover:border-purple-600 p-5 shadow-sm hover:shadow-xl transition-all hover:-translate-y-1 flex flex-col justify-between group">
+            {/* Card 1: Junior Blocks */}
+            <div className="bg-[#FFFDF9] rounded-2xl border-2 border-purple-200 hover:border-purple-600 p-5 shadow-sm hover:shadow-xl transition-all hover:-translate-y-1 flex flex-col justify-between group">
               <div>
                 <div className="flex items-center justify-between mb-3">
                   <div className="w-10 h-10 rounded-2xl bg-purple-700 text-white flex items-center justify-center font-bold shadow-sm">
@@ -73,19 +89,19 @@ export default function KineticCanvasDashboard() {
               </Link>
             </div>
 
-            {/* Card 2: Blocks (AGAIN FULLY FUNCTIONAL ENGINE) */}
-            <div className="bg-[#FFFDF9] rounded-2xl border-2 border-blue-300 hover:border-blue-600 p-5 shadow-sm hover:shadow-xl transition-all hover:-translate-y-1 flex flex-col justify-between group">
+            {/* Card 2: Blocks */}
+            <div className="bg-[#FFFDF9] rounded-2xl border-2 border-purple-200 hover:border-purple-600 p-5 shadow-sm hover:shadow-xl transition-all hover:-translate-y-1 flex flex-col justify-between group">
               <div>
                 <div className="flex items-center justify-between mb-3">
-                  <div className="w-10 h-10 rounded-2xl bg-blue-600 text-white flex items-center justify-center font-bold shadow-sm">
+                  <div className="w-10 h-10 rounded-2xl bg-purple-700 text-white flex items-center justify-center font-bold shadow-sm">
                     <Layers className="w-6 h-6" />
                   </div>
-                  <span className="text-[11px] font-black px-2.5 py-1 rounded-full bg-blue-100 text-blue-950 border border-blue-300 font-heading">
+                  <span className="text-[11px] font-black px-2.5 py-1 rounded-full bg-purple-100 text-purple-950 border border-purple-300 font-heading">
                     Ages 7+
                   </span>
                 </div>
-                <h3 className="text-lg font-black text-slate-950 group-hover:text-blue-700 transition-colors font-heading">
-                  Blocks
+                <h3 className="text-lg font-black text-slate-950 group-hover:text-purple-700 transition-colors font-heading">
+                  Blocks Studio
                 </h3>
                 <p className="text-xs text-slate-800 mt-1.5 leading-relaxed font-bold">
                   Learn logic with puzzle-shaped blocks, sensing, variables, and math operators.
@@ -94,30 +110,27 @@ export default function KineticCanvasDashboard() {
 
               <Link
                 href="/kinetic-canvas/blocks"
-                className="mt-5 w-full flex items-center justify-between px-4 py-2.5 rounded-xl bg-blue-700 hover:bg-blue-800 text-white font-black text-xs shadow-md transition-colors font-heading"
+                className="mt-5 w-full flex items-center justify-between px-4 py-2.5 rounded-xl bg-purple-700 hover:bg-purple-800 text-white font-black text-xs shadow-md transition-colors font-heading"
               >
                 <span>Open Blocks Studio</span>
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </Link>
             </div>
 
-            {/* Card 3: Arduino Coding (ACTIVE INTERACTIVE STUDIO) */}
-            <div className="bg-[#FFFDF9] rounded-2xl border-2 border-amber-300 hover:border-amber-600 p-5 shadow-sm hover:shadow-xl transition-all hover:-translate-y-1 flex flex-col justify-between group">
+            {/* Card 3: Arduino Coding */}
+            <div className="bg-[#FFFDF9] rounded-2xl border-2 border-purple-200 hover:border-purple-600 p-5 shadow-sm hover:shadow-xl transition-all hover:-translate-y-1 flex flex-col justify-between group">
               <div>
                 <div className="flex items-center justify-between mb-3">
-                  <div className="w-10 h-10 rounded-2xl bg-amber-600 text-white flex items-center justify-center font-bold shadow-sm">
+                  <div className="w-10 h-10 rounded-2xl bg-purple-700 text-white flex items-center justify-center font-bold shadow-sm">
                     <Cpu className="w-6 h-6" />
                   </div>
-                  <span className="text-[11px] font-black px-2.5 py-1 rounded-full bg-amber-100 text-amber-950 border border-amber-300 font-heading">
+                  <span className="text-[11px] font-black px-2.5 py-1 rounded-full bg-purple-100 text-purple-950 border border-purple-300 font-heading">
                     Ages 10+
                   </span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <h3 className="text-base font-black text-slate-950 font-heading group-hover:text-amber-700 transition-colors">Arduino C++ Studio</h3>
-                  <span className="text-[10px] font-black px-2 py-0.5 rounded bg-emerald-100 text-emerald-950 border border-emerald-300 font-heading">
-                    Active
-                  </span>
-                </div>
+                <h3 className="text-lg font-black text-slate-950 group-hover:text-purple-700 transition-colors font-heading">
+                  Arduino C++ Studio
+                </h3>
                 <p className="text-xs text-slate-800 mt-1.5 leading-relaxed font-bold">
                   Code with Arduino C++, connect WebSerial USB, and flash microcontroller boards live!
                 </p>
@@ -125,30 +138,27 @@ export default function KineticCanvasDashboard() {
 
               <Link
                 href="/kinetic-canvas/arduino"
-                className="mt-5 w-full flex items-center justify-between px-4 py-2.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-black text-xs shadow-md transition-colors font-heading"
+                className="mt-5 w-full flex items-center justify-between px-4 py-2.5 rounded-xl bg-purple-700 hover:bg-purple-800 text-white font-black text-xs shadow-md transition-colors font-heading"
               >
                 <span>Open Arduino Studio</span>
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </Link>
             </div>
 
-            {/* Card 4: Science Experiment (ACTIVE INTERACTIVE PHYSICS) */}
-            <div className="bg-[#FFFDF9] rounded-2xl border-2 border-emerald-300 hover:border-emerald-600 p-5 shadow-sm hover:shadow-xl transition-all hover:-translate-y-1 flex flex-col justify-between group">
+            {/* Card 4: Science Experiment */}
+            <div className="bg-[#FFFDF9] rounded-2xl border-2 border-purple-200 hover:border-purple-600 p-5 shadow-sm hover:shadow-xl transition-all hover:-translate-y-1 flex flex-col justify-between group">
               <div>
                 <div className="flex items-center justify-between mb-3">
-                  <div className="w-10 h-10 rounded-2xl bg-emerald-600 text-white flex items-center justify-center font-bold shadow-sm">
-                    <Sparkles className="w-6 h-6" />
+                  <div className="w-10 h-10 rounded-2xl bg-purple-700 text-white flex items-center justify-center font-bold shadow-sm">
+                    <Sparkles className="w-6 h-6 text-amber-300" />
                   </div>
-                  <span className="text-[11px] font-black px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-950 border border-emerald-300 font-heading">
+                  <span className="text-[11px] font-black px-2.5 py-1 rounded-full bg-purple-100 text-purple-950 border border-purple-300 font-heading">
                     Ages 10+
                   </span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <h3 className="text-base font-black text-slate-950 font-heading group-hover:text-emerald-700 transition-colors">Science Experiment</h3>
-                  <span className="text-[10px] font-black px-2 py-0.5 rounded bg-emerald-100 text-emerald-950 border border-emerald-300 font-heading">
-                    Active
-                  </span>
-                </div>
+                <h3 className="text-lg font-black text-slate-950 group-hover:text-purple-700 transition-colors font-heading">
+                  Science Multi-Lab
+                </h3>
                 <p className="text-xs text-slate-800 mt-1.5 leading-relaxed font-bold">
                   Perform 2D physics simulations, pendulum harmonic motion, and force vector analysis!
                 </p>
@@ -156,7 +166,7 @@ export default function KineticCanvasDashboard() {
 
               <Link
                 href="/kinetic-canvas/science"
-                className="mt-5 w-full flex items-center justify-between px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs shadow-md transition-colors font-heading"
+                className="mt-5 w-full flex items-center justify-between px-4 py-2.5 rounded-xl bg-purple-700 hover:bg-purple-800 text-white font-black text-xs shadow-md transition-colors font-heading"
               >
                 <span>Open Physics Lab</span>
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
@@ -180,33 +190,36 @@ export default function KineticCanvasDashboard() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-5">
             {[
-              { id: 'python', title: 'Python Coding', age: 'Ages 12+', desc: 'Real text-based Python scripts for Class 8-12.' },
-              { id: 'ml', title: 'Machine Learning', age: 'Ages 12+', desc: 'Train AI models for image & voice recognition.' },
-              { id: 'xr', title: '3D & XR Studio', age: 'Ages 12+', desc: 'Interactive 3D environments & physics simulation.' },
-              { id: 'arvr', title: 'AR/VR Lab', age: 'Ages 12+', desc: 'Augmented & Virtual Reality immersive experiences.' },
-              { id: 'design3d', title: '3D Designing', age: 'Ages 12+', desc: '3D modeling & CAD for robotics printing.' },
+              { id: 'python', title: 'Python Coding', age: 'Ages 12+', desc: 'Real text-based Python scripts for Class 8-12.', icon: <Terminal className="w-5 h-5" /> },
+              { id: 'ml', title: 'Machine Learning', age: 'Ages 12+', desc: 'Train AI models for image & voice recognition.', icon: <Cpu className="w-5 h-5" /> },
+              { id: 'xr', title: '3D & XR Studio', age: 'Ages 12+', desc: 'Interactive 3D environments & physics simulation.', icon: <Box className="w-5 h-5" /> },
+              { id: 'arvr', title: 'AR/VR Lab', age: 'Ages 12+', desc: 'Augmented & Virtual Reality immersive experiences.', icon: <Eye className="w-5 h-5" /> },
+              { id: 'design3d', title: '3D Designing', age: 'Ages 12+', desc: '3D modeling & CAD for robotics printing.', icon: <Layers className="w-5 h-5" /> },
             ].map((tool) => (
               <div
                 key={tool.id}
-                className="bg-[#FFFDF9] rounded-2xl border border-purple-200 hover:border-purple-500 p-4 shadow-sm hover:shadow-md transition-all flex flex-col justify-between group"
+                className="bg-[#FFFDF9] rounded-2xl border-2 border-purple-200 hover:border-purple-600 p-5 shadow-sm hover:shadow-xl transition-all hover:-translate-y-1 flex flex-col justify-between group"
               >
                 <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-[11px] font-black text-slate-700 font-heading">{tool.age}</span>
-                    <span className="text-[9px] font-black px-2 py-0.5 rounded bg-emerald-100 text-emerald-900 border border-emerald-300 font-heading">
-                      Active
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="w-10 h-10 rounded-2xl bg-purple-700 text-white flex items-center justify-center font-bold shadow-sm">
+                      {tool.icon}
+                    </div>
+                    <span className="text-[11px] font-black px-2.5 py-1 rounded-full bg-purple-100 text-purple-950 border border-purple-300 font-heading">
+                      {tool.age}
                     </span>
                   </div>
                   <h4 className="font-black text-base text-slate-950 group-hover:text-purple-700 transition-colors font-heading">{tool.title}</h4>
-                  <p className="text-xs text-slate-800 mt-1.5 leading-snug font-bold">{tool.desc}</p>
+                  <p className="text-xs text-slate-800 mt-1.5 leading-relaxed font-bold">{tool.desc}</p>
                 </div>
                 <Link
                   href={`/kinetic-canvas/${tool.id}`}
-                  className="mt-4 text-center py-2 rounded-xl bg-purple-700 hover:bg-purple-800 text-white text-xs font-black block shadow-sm transition-colors font-heading"
+                  className="mt-5 w-full flex items-center justify-between px-4 py-2.5 rounded-xl bg-purple-700 hover:bg-purple-800 text-white text-xs font-black shadow-md transition-colors font-heading"
                 >
-                  Open {tool.title}
+                  <span>Open {tool.title}</span>
+                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                 </Link>
               </div>
             ))}
@@ -218,7 +231,7 @@ export default function KineticCanvasDashboard() {
           <div className="flex items-center justify-between border-b border-[#EEDCD0] pb-3">
             <div>
               <div className="flex items-center gap-2.5">
-                <span className="text-xs font-black px-3 py-1 rounded-full bg-amber-200 text-amber-950 border border-amber-300 font-heading">
+                <span className="text-xs font-black px-3 py-1 rounded-full bg-purple-200 text-purple-950 border border-purple-300 font-heading">
                   Explore, Create & Innovate
                 </span>
                 <h2 className="text-xl font-black text-slate-950 font-heading">Tier 3 — MORE TOOLS</h2>
@@ -227,26 +240,23 @@ export default function KineticCanvasDashboard() {
             </div>
           </div>
 
-          <div className="flex flex-wrap gap-2.5">
+          <div className="flex flex-wrap gap-3">
             {[
               { id: 'paint', title: 'Paint Studio', icon: <Palette className="w-4 h-4 text-purple-700" /> },
-              { id: 'gamelab', title: 'Game Lab', icon: <Gamepad2 className="w-4 h-4 text-blue-700" /> },
-              { id: 'electronics', title: 'Electronics', icon: <Zap className="w-4 h-4 text-amber-700" /> },
-              { id: 'iot', title: 'IoT Simulator', icon: <Wifi className="w-4 h-4 text-cyan-700" /> },
-              { id: 'web', title: 'Web Builder', icon: <Globe className="w-4 h-4 text-emerald-700" /> },
-              { id: 'math', title: 'Math Lab', icon: <Calculator className="w-4 h-4 text-pink-700" /> },
-              { id: 'invisible', title: 'Invisible Mode', icon: <Eye className="w-4 h-4 text-indigo-700" /> },
+              { id: 'gamelab', title: 'Game Lab', icon: <Gamepad2 className="w-4 h-4 text-purple-700" /> },
+              { id: 'electronics', title: 'Electronics', icon: <Zap className="w-4 h-4 text-purple-700" /> },
+              { id: 'iot', title: 'IoT Simulator', icon: <Wifi className="w-4 h-4 text-purple-700" /> },
+              { id: 'web', title: 'Web Builder', icon: <Globe className="w-4 h-4 text-purple-700" /> },
+              { id: 'math', title: 'Math Lab', icon: <Calculator className="w-4 h-4 text-purple-700" /> },
+              { id: 'invisible', title: 'Invisible Mode', icon: <Eye className="w-4 h-4 text-purple-700" /> },
             ].map((chip) => (
               <Link
                 key={chip.id}
                 href={`/kinetic-canvas/tool/${chip.id}`}
-                className="flex items-center gap-2 px-4 py-2 bg-[#FFFDF9] hover:bg-purple-100 border border-[#EEDCD0] rounded-xl shadow-sm text-xs font-black text-slate-950 transition-all hover:scale-105 font-heading"
+                className="flex items-center gap-2.5 px-4 py-2.5 bg-[#FFFDF9] hover:bg-purple-100 border border-[#EEDCD0] hover:border-purple-400 rounded-xl shadow-sm text-xs font-black text-slate-950 transition-all hover:scale-105 font-heading"
               >
                 {chip.icon}
                 <span>{chip.title}</span>
-                <span className="text-[10px] font-black text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded-full border border-emerald-300">
-                  Ready
-                </span>
               </Link>
             ))}
           </div>

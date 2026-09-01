@@ -26,6 +26,16 @@ export function JuniorBlocksStudio() {
   const [helpOpen, setHelpOpen] = useState<boolean>(false);
   const [showPythonDrawer, setShowPythonDrawer] = useState<boolean>(false);
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
+  const [workspaceActions, setWorkspaceActions] = useState<{
+    zoomIn?: () => void;
+    zoomOut?: () => void;
+    resetZoom?: () => void;
+    undo?: () => void;
+    redo?: () => void;
+    cleanUp?: () => void;
+    canUndo?: boolean;
+    canRedo?: boolean;
+  }>({});
 
   // Load project on mount
   useEffect(() => {
@@ -191,7 +201,7 @@ export function JuniorBlocksStudio() {
       }
     >
       
-      {/* Top Header Bar with File Menu, Example Projects & Fullscreen Minimize Toggle */}
+      {/* Top Header Bar with File Menu, Example Projects & Fixed Workspace Toolbar */}
       <TopBar
         project={project}
         showPythonDrawer={showPythonDrawer}
@@ -211,6 +221,14 @@ export function JuniorBlocksStudio() {
         onOpenHelp={() => setHelpOpen(true)}
         isFullscreen={isFullscreen}
         onToggleFullscreen={handleToggleFullscreen}
+        onZoomIn={workspaceActions.zoomIn}
+        onZoomOut={workspaceActions.zoomOut}
+        onResetZoom={workspaceActions.resetZoom}
+        onUndo={workspaceActions.undo}
+        onRedo={workspaceActions.redo}
+        onCleanUp={workspaceActions.cleanUp}
+        canUndo={workspaceActions.canUndo}
+        canRedo={workspaceActions.canRedo}
       />
 
       {/* Studio Core Body */}
@@ -233,6 +251,7 @@ export function JuniorBlocksStudio() {
                 activeSprite={activeSprite}
                 onUpdateSpriteScripts={handleUpdateSpriteScripts}
                 onInputChange={handleBlockInputChange}
+                onRegisterActions={setWorkspaceActions}
               />
             ) : (
               <div className="flex items-center justify-center h-full text-slate-500 font-bold">

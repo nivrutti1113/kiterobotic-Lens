@@ -68,12 +68,6 @@ export default function GenericModuleStudioPage({ params }: { params: { module: 
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
-          <span className="text-xs font-black px-3 py-1 rounded-full bg-emerald-100 text-emerald-950 border border-emerald-300 font-heading flex items-center gap-1">
-            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-            <span>Production Ready</span>
-          </span>
-        </div>
       </header>
 
       {/* Main Content View by Module Type */}
