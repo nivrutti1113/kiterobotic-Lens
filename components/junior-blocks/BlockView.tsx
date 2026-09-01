@@ -64,7 +64,7 @@ export const BlockView: React.FC<BlockViewProps> = ({
               key={idx}
               value={String(val)}
               onChange={(e) => onInputChange && onInputChange(block.id, inputName, e.target.value)}
-              className="bg-white text-slate-950 font-black px-2 py-0.5 rounded-md text-xs focus:outline-none cursor-pointer border border-slate-300 mx-1 shadow-sm"
+              className="bg-white/90 text-slate-950 font-black px-2 py-0.5 rounded-md text-xs focus:outline-none cursor-pointer border border-slate-300 mx-1 shadow-sm"
             >
               {inputDef.options?.map((opt) => (
                 <option key={opt.value} value={opt.value} className="bg-slate-900 text-white font-bold">
@@ -81,7 +81,7 @@ export const BlockView: React.FC<BlockViewProps> = ({
             type="text"
             value={String(val)}
             onChange={(e) => handleTextOrNumChange(inputName, e.target.value)}
-            className="w-14 bg-white text-slate-950 font-black px-1.5 py-0.5 rounded-md text-xs border border-slate-300 focus:outline-none focus:ring-2 focus:ring-purple-600 text-center mx-1 shadow-sm"
+            className="w-14 bg-white/90 text-slate-950 font-black px-1.5 py-0.5 rounded-md text-xs border border-slate-300 focus:outline-none focus:ring-2 focus:ring-purple-600 text-center mx-1 shadow-sm"
           />
         );
       }
@@ -99,35 +99,51 @@ export const BlockView: React.FC<BlockViewProps> = ({
     if (onDragStart) onDragStart(e, block);
   };
 
-  // Render block element by shape
+  // Render authentic Scratch puzzle piece shape SVG overlay
   const renderSingleBlock = () => {
+    // 1. Hat Block (Dome Top + Bottom Socket)
     if (def.shape === 'hat') {
       return (
         <div
           draggable={!isTemplate}
           onDragStart={handleDragStartBlock}
-          className={`relative cursor-grab active:cursor-grabbing select-none ${textContrastClass} text-xs px-4 py-2.5 rounded-t-2xl rounded-b-md shadow-md flex items-center gap-1.5 border-t-2 border-l-2 border-r-2 border-white/40`}
-          style={{ backgroundColor: categoryColor.hex }}
+          className={`relative cursor-grab active:cursor-grabbing select-none ${textContrastClass} text-xs px-4 pt-4 pb-3 flex items-center gap-1.5 filter drop-shadow-md group`}
+          style={{ minWidth: '150px' }}
         >
-          <span className="relative z-10 flex items-center gap-1">{renderLabel()}</span>
+          {/* Hat SVG Path Background */}
+          <svg className="absolute inset-0 w-full h-full pointer-events-none overflow-visible">
+            <path
+              d="M 0,16 C 20,-6 65,-6 85,16 L calc(100% - 6px),16 a 6,6 0 0 1 6,6 L 100%,calc(100% - 6px) a 6,6 0 0 1 -6,6 L 28,100% c -2,0 -3,4 -5,4 l -8,0 c -2,0 -3,-4 -5,-4 L 6,100% a 6,6 0 0 1 -6,-6 Z"
+              fill={categoryColor.hex}
+              stroke="rgba(0,0,0,0.25)"
+              strokeWidth="1.5"
+            />
+          </svg>
+          <span className="relative z-10 flex items-center gap-1 mt-1">{renderLabel()}</span>
         </div>
       );
     }
 
+    // 2. C-Block / Loop Block (Puzzle Notch Top, Loop Slot, Socket Bottom)
     if (def.shape === 'c_block' || def.shape === 'c_block_else') {
       return (
         <div
           draggable={!isTemplate}
           onDragStart={handleDragStartBlock}
-          className={`relative cursor-grab active:cursor-grabbing select-none ${textContrastClass} text-xs shadow-md rounded-lg overflow-hidden border border-white/30`}
-          style={{ backgroundColor: categoryColor.hex }}
+          className={`relative cursor-grab active:cursor-grabbing select-none ${textContrastClass} text-xs filter drop-shadow-md flex flex-col`}
+          style={{ minWidth: '160px' }}
         >
-          {/* C-Block Header */}
-          <div className="px-3 py-2 flex items-center gap-1 border-b border-black/10">
-            {renderLabel()}
+          {/* C-Block Top Header Bar */}
+          <div
+            className="px-3 pt-2 pb-2.5 flex items-center gap-1 relative rounded-t-lg"
+            style={{ backgroundColor: categoryColor.hex }}
+          >
+            {/* Top Notch SVG Tab */}
+            <div className="absolute top-0 left-3 w-4 h-1 bg-white/40 rounded-b-sm" />
+            <span className="relative z-10">{renderLabel()}</span>
           </div>
 
-          {/* C-Block Main Body Slot with Drop Target */}
+          {/* C-Block Main Loop Body Slot */}
           <div
             onDragOver={(e) => {
               e.preventDefault();
@@ -145,8 +161,8 @@ export const BlockView: React.FC<BlockViewProps> = ({
               setIsDragOverMain(false);
               if (onDropInsideCBlock) onDropInsideCBlock(e, block.id, false);
             }}
-            className={`pl-6 py-2.5 min-h-[48px] space-y-1.5 border-l-8 transition-colors ${
-              isDragOverMain ? 'bg-purple-500/30 border-purple-400' : 'bg-black/10'
+            className={`pl-5 py-2 min-h-[44px] space-y-1 border-l-[16px] transition-colors ${
+              isDragOverMain ? 'bg-amber-400/40 border-amber-500' : 'bg-black/10'
             }`}
             style={{ borderLeftColor: categoryColor.hex }}
           >
@@ -161,7 +177,7 @@ export const BlockView: React.FC<BlockViewProps> = ({
                 />
               ))
             ) : (
-              <div className="text-[11px] text-white/90 font-bold italic py-1.5 px-2 rounded bg-black/20 border border-dashed border-white/40">
+              <div className="text-[10px] text-white/90 font-bold italic py-1 px-2 rounded bg-black/20 border border-dashed border-white/40 w-fit">
                 📥 Drop blocks inside loop
               </div>
             )}
@@ -170,8 +186,11 @@ export const BlockView: React.FC<BlockViewProps> = ({
           {/* C-Block Else Body if applicable */}
           {def.shape === 'c_block_else' && (
             <>
-              <div className="px-3 py-1.5 font-black bg-black/20 text-white border-t border-b border-black/10">
-                Else
+              <div
+                className="px-3 py-1.5 font-black text-white relative flex items-center"
+                style={{ backgroundColor: categoryColor.hex }}
+              >
+                <span>Else</span>
               </div>
               <div
                 onDragOver={(e) => {
@@ -190,8 +209,8 @@ export const BlockView: React.FC<BlockViewProps> = ({
                   setIsDragOverElse(false);
                   if (onDropInsideCBlock) onDropInsideCBlock(e, block.id, true);
                 }}
-                className={`pl-6 py-2.5 min-h-[48px] space-y-1.5 border-l-8 transition-colors ${
-                  isDragOverElse ? 'bg-purple-500/30 border-purple-400' : 'bg-black/10'
+                className={`pl-5 py-2 min-h-[44px] space-y-1 border-l-[16px] transition-colors ${
+                  isDragOverElse ? 'bg-amber-400/40 border-amber-500' : 'bg-black/10'
                 }`}
                 style={{ borderLeftColor: categoryColor.hex }}
               >
@@ -206,7 +225,7 @@ export const BlockView: React.FC<BlockViewProps> = ({
                     />
                   ))
                 ) : (
-                  <div className="text-[11px] text-white/90 font-bold italic py-1.5 px-2 rounded bg-black/20 border border-dashed border-white/40">
+                  <div className="text-[10px] text-white/90 font-bold italic py-1 px-2 rounded bg-black/20 border border-dashed border-white/40 w-fit">
                     📥 Drop else blocks
                   </div>
                 )}
@@ -214,19 +233,26 @@ export const BlockView: React.FC<BlockViewProps> = ({
             </>
           )}
 
-          {/* C-Block Footer */}
-          <div className="h-2.5 w-full" style={{ backgroundColor: categoryColor.hex }} />
+          {/* C-Block Footer Bar with Bottom Socket */}
+          <div
+            className="h-4 w-full relative rounded-b-lg border-t border-black/10"
+            style={{ backgroundColor: categoryColor.hex }}
+          >
+            {/* Bottom Socket Indent */}
+            <div className="absolute bottom-0 left-3 w-4 h-1 bg-black/30 rounded-t-sm" />
+          </div>
         </div>
       );
     }
 
+    // 3. Reporter (Oval Capsule) & Boolean (Hexagon Pointed)
     if (def.shape === 'reporter' || def.shape === 'boolean') {
       return (
         <div
           draggable={!isTemplate}
           onDragStart={handleDragStartBlock}
-          className={`inline-flex items-center gap-1 cursor-grab active:cursor-grabbing select-none ${textContrastClass} text-[11px] px-3 py-1 shadow-sm ${
-            def.shape === 'boolean' ? 'rounded-full border-2 border-emerald-300' : 'rounded-xl border border-white/40'
+          className={`inline-flex items-center gap-1 cursor-grab active:cursor-grabbing select-none ${textContrastClass} text-[11px] px-3.5 py-1.5 shadow-sm border border-black/20 ${
+            def.shape === 'boolean' ? 'rounded-full border-2 border-emerald-300' : 'rounded-full'
           }`}
           style={{ backgroundColor: categoryColor.hex }}
         >
@@ -235,26 +261,36 @@ export const BlockView: React.FC<BlockViewProps> = ({
       );
     }
 
-    // Standard Stack Block
+    // 4. Standard Puzzle Stack Block (Top Notch Tab + Bottom Socket Indent + Rounded Corners)
     return (
       <div
         draggable={!isTemplate}
         onDragStart={handleDragStartBlock}
-        className={`relative cursor-grab active:cursor-grabbing select-none ${textContrastClass} text-xs px-3.5 py-2 rounded-lg shadow-md flex items-center gap-1.5 border border-white/30`}
-        style={{ backgroundColor: categoryColor.hex }}
+        className={`relative cursor-grab active:cursor-grabbing select-none ${textContrastClass} text-xs px-4 pt-2.5 pb-3 flex items-center gap-1.5 filter drop-shadow-md group`}
+        style={{ minWidth: '140px' }}
       >
-        {renderLabel()}
+        {/* Puzzle Block Top Notch + Bottom Socket SVG Layer */}
+        <svg className="absolute inset-0 w-full h-full pointer-events-none overflow-visible">
+          <path
+            d="M 0,6 a 6,6 0 0 1 6,-6 l 6,0 c 2,0 3,4 5,4 l 8,0 c 2,0 3,-4 5,-4 L calc(100% - 6px),0 a 6,6 0 0 1 6,6 L 100%,calc(100% - 6px) a 6,6 0 0 1 -6,6 L 28,100% c -2,0 -3,4 -5,4 l -8,0 c -2,0 -3,-4 -5,-4 L 6,100% a 6,6 0 0 1 -6,-6 Z"
+            fill={categoryColor.hex}
+            stroke="rgba(0,0,0,0.25)"
+            strokeWidth="1.5"
+          />
+        </svg>
+
+        <span className="relative z-10 flex items-center gap-1">{renderLabel()}</span>
       </div>
     );
   };
 
   return (
-    <div className="flex flex-col items-start w-fit">
+    <div className="flex flex-col items-start w-fit group/stack">
       {renderSingleBlock()}
 
-      {/* RECURSIVE STACK CHAIN RENDERING FOR BLOCK.NEXT */}
+      {/* RECURSIVE STACK CHAIN RENDERING FOR BLOCK.NEXT WITH INTERLOCKING FIT */}
       {block.next && (
-        <div className="mt-0.5">
+        <div className="-mt-1.5">
           <BlockView
             block={block.next}
             onInputChange={onInputChange}
@@ -267,4 +303,3 @@ export const BlockView: React.FC<BlockViewProps> = ({
     </div>
   );
 };
-

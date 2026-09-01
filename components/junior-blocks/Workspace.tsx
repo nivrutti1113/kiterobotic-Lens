@@ -268,11 +268,47 @@ export const Workspace: React.FC<WorkspaceProps> = ({
     e.dataTransfer.setData('kms/existing_block_id', block.id);
   };
 
+  const [snapTarget, setSnapTarget] = useState<{ x: number; y: number } | null>(null);
+
+  const handleDragOverWorkspace = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'copy';
+
+    const rect = workspaceRef.current?.getBoundingClientRect();
+    if (!rect) return;
+
+    const dragX = (e.clientX - rect.left) / zoom;
+    const dragY = (e.clientY - rect.top) / zoom;
+
+    // Check snap distance to any existing script
+    const targetScript = activeSprite.scripts.find((s) => {
+      const rootX = s.x || 40;
+      const rootY = s.y || 40;
+      return Math.abs(dragX - rootX) < 80 && Math.abs(dragY - (rootY + 50)) < 70;
+    });
+
+    if (targetScript) {
+      const rootX = targetScript.x || 40;
+      let tail = targetScript;
+      let stackDepth = 1;
+      while (tail.next) {
+        tail = tail.next;
+        stackDepth++;
+      }
+      const rootY = (targetScript.y || 40) + stackDepth * 40;
+      setSnapTarget({ x: rootX, y: rootY });
+    } else {
+      setSnapTarget(null);
+    }
+  };
   return (
     <div
       ref={workspaceRef}
-      onDragOver={(e) => e.preventDefault()}
-      onDrop={handleDropOnWorkspace}
+      onDragOver={handleDragOverWorkspace}
+      onDrop={(e) => {
+        setSnapTarget(null);
+        handleDropOnWorkspace(e);
+      }}
       onClick={() => setContextMenu(null)}
       className="relative flex-1 bg-white h-full overflow-auto shadow-inner rounded-r-2xl border-l border-[#EEDCD0] font-sans"
       style={{
@@ -285,6 +321,18 @@ export const Workspace: React.FC<WorkspaceProps> = ({
         className="min-w-[1200px] min-h-[900px] p-8 relative transform-origin-top-left transition-transform duration-75"
         style={{ transform: `scale(${zoom})` }}
       >
+        {/* Highlighted Snap Preview Line when dragging near a stack */}
+        {snapTarget && (
+          <div
+            className="absolute h-1.5 bg-amber-400 border border-purple-600 rounded-full shadow-lg animate-pulse z-40 pointer-events-none"
+            style={{
+              left: `${snapTarget.x}px`,
+              top: `${snapTarget.y}px`,
+              width: '140px',
+            }}
+          />
+        )}
+
         {activeSprite.scripts.map((script) => (
           <div
             key={script.id}
