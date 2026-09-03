@@ -59,11 +59,14 @@ export const Workspace: React.FC<WorkspaceProps> = ({
   };
 
   const handleCleanUp = () => {
-    let currentY = 30;
-    const updated = activeSprite.scripts.map((s) => {
-      const reordered = { ...s, x: 40, y: currentY };
-      currentY += 160;
-      return reordered;
+    const updated = activeSprite.scripts.map((s, idx) => {
+      const col = idx % 2;
+      const row = Math.floor(idx / 2);
+      return {
+        ...s,
+        x: 30 + col * 240,
+        y: 30 + row * 120,
+      };
     });
     saveHistory(updated);
     setContextMenu(null);
