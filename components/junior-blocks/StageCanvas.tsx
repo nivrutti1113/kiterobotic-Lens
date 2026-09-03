@@ -1,15 +1,17 @@
 'use client';
 
 import React, { useRef, useEffect } from 'react';
-import { Project, Sprite } from '@/lib/junior-blocks/types';
+import { Project } from '@/lib/junior-blocks/types';
 import { BACKDROP_CATALOG } from '@/lib/junior-blocks/catalog';
-import { MessageSquare, Send } from 'lucide-react';
+import { Play, Square, MessageSquare, Send } from 'lucide-react';
 
 interface StageCanvasProps {
   project: Project;
   activeSpriteId: string;
   gridVisible: boolean;
+  isRunning: boolean;
   askPrompt: string | null;
+  onToggleRun: () => void;
   onSubmitAnswer: (answer: string) => void;
   onSelectSprite: (spriteId: string) => void;
   onSpriteClickTrigger?: (spriteId: string) => void;
@@ -19,7 +21,9 @@ export const StageCanvas: React.FC<StageCanvasProps> = ({
   project,
   activeSpriteId,
   gridVisible,
+  isRunning,
   askPrompt,
+  onToggleRun,
   onSubmitAnswer,
   onSelectSprite,
   onSpriteClickTrigger,
@@ -29,6 +33,7 @@ export const StageCanvas: React.FC<StageCanvasProps> = ({
 
   const imageCacheRef = useRef<Map<string, HTMLImageElement>>(new Map());
   const activeBackdrop = BACKDROP_CATALOG.find((b) => b.id === project.backdropUrl) || BACKDROP_CATALOG[0];
+  const activeSprite = project.sprites.find((s) => s.id === activeSpriteId) || project.sprites[0];
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -49,7 +54,7 @@ export const StageCanvas: React.FC<StageCanvasProps> = ({
       ctx.fillStyle = activeBackdrop.color || '#FFFFFF';
       ctx.fillRect(0, 0, width, height);
 
-      // 2. Draw 0-20 Coordinate Grid Ruler if enabled
+      // 2. Draw Coordinate Grid Ruler if enabled
       if (gridVisible) {
         ctx.strokeStyle = '#E2E8F0';
         ctx.lineWidth = 1;
@@ -77,12 +82,6 @@ export const StageCanvas: React.FC<StageCanvasProps> = ({
         ctx.moveTo(0, centerY);
         ctx.lineTo(width, centerY);
         ctx.stroke();
-
-        ctx.fillStyle = '#64748B';
-        ctx.font = 'bold 9px sans-serif';
-        for (let i = 0; i <= 20; i++) {
-          ctx.fillText(String(i), i * cellSize + 2, 11);
-        }
       }
 
       // 3. Draw Sprites
@@ -111,8 +110,8 @@ export const StageCanvas: React.FC<StageCanvasProps> = ({
         if (cachedImg && cachedImg.complete && cachedImg.naturalWidth !== 0) {
           ctx.drawImage(cachedImg, -35, -35, 70, 70);
         } else {
-          // Fallback shape only while image is initially loading
-          ctx.fillStyle = '#5B21B6';
+          // Fallback shape while image is initially loading
+          ctx.fillStyle = '#6D28D9';
           ctx.beginPath();
           ctx.arc(0, 0, 25, 0, Math.PI * 2);
           ctx.fill();
@@ -120,7 +119,7 @@ export const StageCanvas: React.FC<StageCanvasProps> = ({
 
         // Draw selection ring for currently active sprite
         if (sprite.id === activeSpriteId) {
-          ctx.strokeStyle = '#8B5CF6';
+          ctx.strokeStyle = '#7C3AED';
           ctx.lineWidth = 3;
           ctx.setLineDash([4, 4]);
           ctx.strokeRect(-40, -40, 80, 80);
@@ -140,7 +139,7 @@ export const StageCanvas: React.FC<StageCanvasProps> = ({
           const bubbleY = stageY - 65;
 
           ctx.fillStyle = '#FFFFFF';
-          ctx.strokeStyle = '#4C1D95';
+          ctx.strokeStyle = '#5B21B6';
           ctx.lineWidth = 2;
           ctx.beginPath();
           ctx.roundRect(bubbleX, bubbleY, bubbleW, bubbleH, 10);
@@ -181,7 +180,6 @@ export const StageCanvas: React.FC<StageCanvasProps> = ({
     const clickX = e.clientX - rect.left - canvas.width / 2;
     const clickY = e.clientY - rect.top - canvas.height / 2;
 
-    // Check hit test against sprites
     for (const sprite of project.sprites) {
       const dist = Math.hypot(clickX - sprite.x, clickY - sprite.y);
       if (dist <= 35) {
@@ -193,8 +191,40 @@ export const StageCanvas: React.FC<StageCanvasProps> = ({
   };
 
   return (
-    <div className="relative bg-white rounded-2xl border-2 border-slate-200 shadow-lg overflow-hidden">
+    <div className="relative bg-white rounded-2xl border-2 border-slate-200 shadow-md overflow-hidden flex flex-col font-sans">
       
+      {/* Authentic Scratch Stage Top Header Bar (Green Flag & Stop Controls) */}
+      <div className="px-3 py-1.5 bg-slate-100 border-b border-slate-200 flex items-center justify-between shrink-0 select-none">
+        <div className="flex items-center gap-2">
+          {/* Green Flag Button */}
+          <button
+            onClick={onToggleRun}
+            className={`p-1.5 rounded-lg transition-all ${
+              isRunning ? 'bg-emerald-100 text-emerald-800 ring-2 ring-emerald-400' : 'hover:bg-emerald-100 text-emerald-600'
+            }`}
+            title="Go / Run Flag Scripts"
+          >
+            <Play className="w-4 h-4 fill-emerald-600 text-emerald-600" />
+          </button>
+
+          {/* Red Octagon Stop Button */}
+          <button
+            onClick={onToggleRun}
+            className={`p-1.5 rounded-lg transition-all ${
+              !isRunning ? 'hover:bg-rose-100 text-rose-600' : 'bg-rose-600 text-white ring-2 ring-rose-400'
+            }`}
+            title="Stop Execution"
+          >
+            <Square className="w-4 h-4 fill-rose-600 text-rose-600" />
+          </button>
+        </div>
+
+        {/* Active Sprite Info Label */}
+        <span className="text-[11px] font-black text-slate-700 tracking-tight">
+          {activeSprite?.name || 'Stage'}
+        </span>
+      </div>
+
       {/* Stage Backdrop & Ruler Canvas */}
       <canvas
         ref={canvasRef}
@@ -206,10 +236,10 @@ export const StageCanvas: React.FC<StageCanvasProps> = ({
 
       {/* Ask & Wait Input Overlay Box */}
       {askPrompt && (
-        <div className="absolute bottom-3 left-3 right-3 bg-white/95 border-2 border-cyan-500 p-3 rounded-2xl shadow-2xl flex items-center gap-2 backdrop-blur-md animate-bounce">
-          <MessageSquare className="w-5 h-5 text-cyan-600 shrink-0" />
+        <div className="absolute bottom-3 left-3 right-3 bg-white/95 border-2 border-purple-500 p-3 rounded-2xl shadow-2xl flex items-center gap-2 backdrop-blur-md animate-bounce">
+          <MessageSquare className="w-5 h-5 text-purple-600 shrink-0" />
           <div className="flex-1">
-            <p className="text-xs font-extrabold text-slate-800">{askPrompt}</p>
+            <p className="text-xs font-extrabold text-slate-900">{askPrompt}</p>
             <form
               onSubmit={(e) => {
                 e.preventDefault();
@@ -224,11 +254,11 @@ export const StageCanvas: React.FC<StageCanvasProps> = ({
                 onChange={(e) => setAnswerInput(e.target.value)}
                 placeholder="Type your answer..."
                 autoFocus
-                className="flex-1 bg-slate-100 text-slate-900 font-bold px-3 py-1.5 rounded-xl text-xs border border-slate-300 focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                className="flex-1 bg-slate-100 text-slate-900 font-bold px-3 py-1.5 rounded-xl text-xs border border-slate-300 focus:outline-none focus:ring-2 focus:ring-purple-600"
               />
               <button
                 type="submit"
-                className="px-3 py-1.5 bg-cyan-500 hover:bg-cyan-600 text-white font-black text-xs rounded-xl shadow transition-colors flex items-center gap-1"
+                className="px-3 py-1.5 bg-purple-700 hover:bg-purple-800 text-white font-black text-xs rounded-xl shadow transition-colors flex items-center gap-1"
               >
                 <span>Submit</span>
                 <Send className="w-3.5 h-3.5" />

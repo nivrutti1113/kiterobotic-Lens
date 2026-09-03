@@ -196,8 +196,8 @@ export function JuniorBlocksStudio() {
     <div
       className={
         isFullscreen
-          ? 'fixed inset-0 z-50 bg-[#FAF3EC] w-screen h-screen flex flex-col overflow-hidden select-none p-3 gap-3'
-          : 'flex flex-col h-[calc(100vh-6rem)] min-h-[700px] w-full bg-[#FAF3EC] text-slate-900 font-sans select-none rounded-3xl border-2 border-[#EEDCD0] shadow-xl overflow-hidden'
+          ? 'fixed inset-0 z-50 bg-[#FAF7F5] w-screen h-screen flex flex-col overflow-hidden select-none p-2 gap-2'
+          : 'flex flex-col h-[calc(100vh-6rem)] min-h-[700px] w-full bg-[#FAF7F5] text-slate-900 font-sans select-none rounded-3xl border-2 border-slate-200 shadow-xl overflow-hidden'
       }
     >
       
@@ -232,17 +232,17 @@ export function JuniorBlocksStudio() {
       />
 
       {/* 2. CORE STUDIO BODY: Standard PictoBlox / Scratch 3-Column Layout */}
-      <div className="flex-1 flex flex-col md:flex-row gap-3 min-h-0 overflow-hidden p-1">
+      <div className="flex-1 flex flex-col md:flex-row gap-2.5 min-h-0 overflow-hidden p-0.5">
         
         {/* COLUMN 1: Vertical Block Palette Sidebar (Fixed Width ~280px) */}
-        <div className="w-full md:w-72 h-64 md:h-full shrink-0 bg-[#FFFDF9] rounded-2xl border-2 border-[#EEDCD0] shadow-sm overflow-hidden flex flex-col">
+        <div className="w-full md:w-72 h-64 md:h-full shrink-0 bg-white rounded-2xl border-2 border-slate-200 shadow-sm overflow-hidden flex flex-col">
           <BlockPalette
             onDragStartBlockTemplate={handleDragStartBlockTemplate}
           />
         </div>
 
         {/* COLUMN 2: Large Block Workspace Canvas (Expands to fill 100% Center Height & Width) */}
-        <div className="flex-1 bg-[#FFFDF9] rounded-2xl border-2 border-[#EEDCD0] shadow-sm overflow-hidden min-h-0 relative flex flex-col">
+        <div className="flex-1 bg-white rounded-2xl border-2 border-slate-200 shadow-sm overflow-hidden min-h-0 relative flex flex-col">
           {activeSprite ? (
             <Workspace
               activeSprite={activeSprite}
@@ -258,12 +258,14 @@ export function JuniorBlocksStudio() {
         </div>
 
         {/* COLUMN 3: Stage Preview Canvas & Sprites Panel (Fixed Width ~340px) */}
-        <div className="w-full md:w-[320px] lg:w-[340px] flex flex-col gap-3 shrink-0 overflow-y-auto max-h-full">
+        <div className="w-full md:w-[320px] lg:w-[340px] flex flex-col gap-2 shrink-0 overflow-y-auto max-h-full">
           <StageCanvas
             project={project}
             activeSpriteId={activeSpriteId}
             gridVisible={project.gridVisible}
+            isRunning={isRunning}
             askPrompt={askPrompt}
+            onToggleRun={handleToggleRun}
             onSubmitAnswer={(ans) => interpreterEngine.submitAnswer(ans)}
             onSelectSprite={setActiveSpriteId}
             onSpriteClickTrigger={(sId) => {
