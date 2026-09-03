@@ -196,12 +196,12 @@ export function JuniorBlocksStudio() {
     <div
       className={
         isFullscreen
-          ? 'fixed inset-0 z-50 bg-[#FAF3EC] w-screen h-screen flex flex-col overflow-hidden select-none p-2 gap-2'
-          : 'flex flex-col h-[calc(100vh-6rem)] min-h-[680px] w-full bg-[#FAF3EC] text-slate-900 font-sans select-none rounded-3xl border-2 border-[#EEDCD0] shadow-xl overflow-hidden'
+          ? 'fixed inset-0 z-50 bg-[#FAF3EC] w-screen h-screen flex flex-col overflow-hidden select-none p-3 gap-3'
+          : 'flex flex-col h-[calc(100vh-6rem)] min-h-[700px] w-full bg-[#FAF3EC] text-slate-900 font-sans select-none rounded-3xl border-2 border-[#EEDCD0] shadow-xl overflow-hidden'
       }
     >
       
-      {/* 1. TOP HEADER BAR: Back, File, Example Projects, Zoom Controls, Fullscreen */}
+      {/* 1. TOP HEADER BAR: Navigation, Files, Examples, Fixed Workspace Actions, Fullscreen */}
       <TopBar
         project={project}
         showPythonDrawer={showPythonDrawer}
@@ -231,11 +231,18 @@ export function JuniorBlocksStudio() {
         canRedo={workspaceActions.canRedo}
       />
 
-      {/* 2. MIDDLE ROW: Workspace Canvas (Left/Center) + Stage/Sprites (Right) */}
-      <div className="flex-1 flex flex-col md:flex-row gap-2 min-h-0 overflow-hidden">
+      {/* 2. CORE STUDIO BODY: Standard PictoBlox / Scratch 3-Column Layout */}
+      <div className="flex-1 flex flex-col md:flex-row gap-3 min-h-0 overflow-hidden p-1">
         
-        {/* Workspace Column (Expands to fill entire left & center width) */}
-        <div className="flex-1 bg-[#FFFDF9] rounded-2xl border-2 border-[#EEDCD0] shadow-sm overflow-hidden min-h-0 relative">
+        {/* COLUMN 1: Vertical Block Palette Sidebar (Fixed Width ~280px) */}
+        <div className="w-full md:w-72 h-64 md:h-full shrink-0 bg-[#FFFDF9] rounded-2xl border-2 border-[#EEDCD0] shadow-sm overflow-hidden flex flex-col">
+          <BlockPalette
+            onDragStartBlockTemplate={handleDragStartBlockTemplate}
+          />
+        </div>
+
+        {/* COLUMN 2: Large Block Workspace Canvas (Expands to fill 100% Center Height & Width) */}
+        <div className="flex-1 bg-[#FFFDF9] rounded-2xl border-2 border-[#EEDCD0] shadow-sm overflow-hidden min-h-0 relative flex flex-col">
           {activeSprite ? (
             <Workspace
               activeSprite={activeSprite}
@@ -250,8 +257,8 @@ export function JuniorBlocksStudio() {
           )}
         </div>
 
-        {/* Right Column: Stage & Sprite Panel */}
-        <div className="w-full md:w-[320px] lg:w-[340px] flex flex-col gap-2 shrink-0 overflow-y-auto max-h-full">
+        {/* COLUMN 3: Stage Preview Canvas & Sprites Panel (Fixed Width ~340px) */}
+        <div className="w-full md:w-[320px] lg:w-[340px] flex flex-col gap-3 shrink-0 overflow-y-auto max-h-full">
           <StageCanvas
             project={project}
             activeSpriteId={activeSpriteId}
@@ -298,13 +305,6 @@ export function JuniorBlocksStudio() {
           />
         )}
 
-      </div>
-
-      {/* 3. BOTTOM DOCK TRAY: Full-Width Block Palette with Category Tabs & Horizontal Blocks */}
-      <div className="w-full h-[180px] shrink-0 bg-[#FFFDF9] rounded-2xl border-2 border-[#EEDCD0] shadow-md overflow-hidden flex flex-col">
-        <BlockPalette
-          onDragStartBlockTemplate={handleDragStartBlockTemplate}
-        />
       </div>
 
       {/* Searchable Help Modal */}
