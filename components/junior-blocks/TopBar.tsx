@@ -5,7 +5,6 @@ import Link from 'next/link';
 import { Project } from '@/lib/junior-blocks/types';
 import { EXAMPLE_PROJECTS } from '@/lib/junior-blocks/example-projects';
 import {
-  Bot,
   Folder,
   Sparkles,
   HelpCircle,
@@ -21,12 +20,7 @@ import {
   ZoomOut,
   RotateCcw,
   RotateCw,
-  Globe,
   ChevronDown,
-  Zap,
-  Layers,
-  Cpu,
-  Trophy,
 } from 'lucide-react';
 
 interface TopBarProps {
@@ -39,7 +33,6 @@ interface TopBarProps {
   onExportProject: () => void;
   onLoadExampleProject: (proj: Project) => void;
   onOpenHelp: () => void;
-  onOpenMissions?: () => void;
   isFullscreen?: boolean;
   onToggleFullscreen?: () => void;
   onZoomIn?: () => void;
@@ -62,7 +55,6 @@ export const TopBar: React.FC<TopBarProps> = ({
   onExportProject,
   onLoadExampleProject,
   onOpenHelp,
-  onOpenMissions,
   isFullscreen = false,
   onToggleFullscreen,
   onZoomIn,
@@ -78,112 +70,28 @@ export const TopBar: React.FC<TopBarProps> = ({
   const [exampleMenuOpen, setExampleMenuOpen] = useState(false);
 
   return (
-    <div className="flex flex-col w-full shrink-0 z-30 font-sans border-b border-slate-200 bg-white">
+    <div className="flex flex-col w-full shrink-0 z-30 font-sans border-b border-slate-200 bg-[#FAF9FC] select-none">
       
-      {/* ROW 1: MAIN APP HEADER BAR (Full width, fixed height ~52px) */}
-      <header className="px-4 py-2 border-b border-slate-200/80 flex items-center justify-between gap-4 bg-white select-none">
+      {/* EDITOR TOOLBAR ROW (Single height ~48-52px) */}
+      <div className="px-4 py-2 flex items-center justify-between gap-3 overflow-x-auto scrollbar-none">
         
-        {/* Left Branding */}
-        <div className="flex items-center gap-3 shrink-0">
-          <div className="w-8 h-8 rounded-xl bg-[#6C2EB5] text-white flex items-center justify-center font-black shadow-md shadow-purple-900/10">
-            <Bot className="w-5 h-5 text-white" />
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="font-black text-sm text-slate-900 tracking-tight font-heading">
-              KITE ROBOTICS
-            </span>
-            <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-[#6C2EB5]/10 text-[#6C2EB5] border border-[#6C2EB5]/20 uppercase tracking-wider font-heading">
-              KMS Studio
-            </span>
-            <span className="text-[11px] font-bold text-slate-500 hidden xl:inline border-l border-slate-200 pl-2">
-              STEM Lens & Coding Canvas
-            </span>
-          </div>
-        </div>
-
-        {/* Center Nav Tabs */}
-        <nav className="hidden md:flex items-center gap-1 bg-slate-100/90 p-1 rounded-full border border-slate-200/80">
-          <Link
-            href="/stem-lens"
-            className="flex items-center gap-1.5 px-3.5 py-1 rounded-full text-xs font-bold text-slate-600 hover:text-slate-900 transition-colors"
-          >
-            <Layers className="w-3.5 h-3.5 text-slate-500" />
-            <span>Camera Lens</span>
-          </Link>
-
-          <Link
-            href="/kinetic-canvas/junior-blocks"
-            className="flex items-center gap-1.5 px-4 py-1 rounded-full text-xs font-black bg-[#6C2EB5] text-white shadow-sm"
-          >
-            <Code className="w-3.5 h-3.5 text-white" />
-            <span>Coding Studio</span>
-          </Link>
-
-          <Link
-            href="/hardware-lab"
-            className="flex items-center gap-1.5 px-3.5 py-1 rounded-full text-xs font-bold text-slate-600 hover:text-slate-900 transition-colors"
-          >
-            <Cpu className="w-3.5 h-3.5 text-slate-500" />
-            <span>Wiring Lab</span>
-          </Link>
-
-          <Link
-            href="/challenges"
-            className="flex items-center gap-1.5 px-3.5 py-1 rounded-full text-xs font-bold text-slate-600 hover:text-slate-900 transition-colors"
-          >
-            <Trophy className="w-3.5 h-3.5 text-amber-500" />
-            <span>Fun Quests</span>
-          </Link>
-        </nav>
-
-        {/* Right CTA & Language Selector */}
+        {/* Left: Back Link & Project Title & Dropdowns */}
         <div className="flex items-center gap-2.5 shrink-0">
-          {/* Language Selector */}
-          <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-slate-200 bg-white text-xs font-bold text-slate-700 hover:bg-slate-50 cursor-pointer transition-colors shadow-2xs">
-            <Globe className="w-3.5 h-3.5 text-slate-500" />
-            <span>English</span>
-            <ChevronDown className="w-3 h-3 text-slate-400" />
-          </div>
-
-          {/* Plug Robot Board CTA */}
-          <button
-            onClick={() => alert("Connecting to physical Kite Robot Board via WebSerial USB...")}
-            className="flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-[#6C2EB5] hover:bg-[#5b259b] text-white font-black text-xs shadow-md shadow-purple-900/15 transition-all hover:scale-105 active:scale-95 cursor-pointer font-heading"
-          >
-            <Zap className="w-3.5 h-3.5 fill-amber-300 text-amber-300" />
-            <span>⚡ Plug Robot Board</span>
-          </button>
-        </div>
-
-      </header>
-
-      {/* ROW 2: EDITOR SUB-HEADER ROW (Project Bar, Pill Buttons ~36px height) */}
-      <div className="px-4 py-1.5 bg-[#FAF9FC] flex items-center justify-between gap-3 overflow-x-auto select-none border-b border-slate-200/60 scrollbar-none">
-        
-        {/* Left: Back Link & Project Title */}
-        <div className="flex items-center gap-3 shrink-0">
           <Link
             href="/kinetic-canvas"
             className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-white hover:bg-slate-100 text-slate-700 font-bold text-xs border border-slate-200 shadow-2xs transition-colors shrink-0"
           >
             <ArrowLeft className="w-3.5 h-3.5 text-slate-600" />
-            <span className="hidden sm:inline">Back to Dashboard</span>
+            <span className="hidden sm:inline">Back</span>
           </Link>
 
-          <div className="flex items-center gap-2 border-l border-slate-200/80 pl-3">
-            <span className="font-black text-xs text-slate-900 font-heading tracking-tight">KMS-AI</span>
+          <div className="flex items-center gap-1.5 border-l border-slate-200/80 pl-2.5 pr-1">
+            <span className="font-black text-xs text-slate-900 font-heading tracking-tight">{project.name || 'KMS Project'}</span>
             <span className="text-[10px] font-black px-2 py-0.2 rounded-full bg-purple-100 text-purple-900 border border-purple-200">
-              Junior Studio
-            </span>
-            <span className="text-[10px] font-bold text-slate-600 hidden lg:inline">
-              Kite Maker Studio IDE
+              Junior Blocks
             </span>
           </div>
-        </div>
 
-        {/* Center: File & Examples Dropdowns */}
-        <div className="flex items-center gap-2 shrink-0">
-          
           {/* File Dropdown */}
           <div className="relative">
             <button
@@ -191,10 +99,10 @@ export const TopBar: React.FC<TopBarProps> = ({
                 setFileMenuOpen(!fileMenuOpen);
                 setExampleMenuOpen(false);
               }}
-              className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white hover:bg-slate-100 text-slate-800 font-extrabold text-xs transition-colors border border-slate-200 shadow-2xs"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white hover:bg-slate-100 text-slate-800 font-extrabold text-xs transition-colors border border-slate-200 shadow-2xs cursor-pointer"
             >
               <Folder className="w-3.5 h-3.5 text-[#6C2EB5]" />
-              <span>📁 File</span>
+              <span>File</span>
               <ChevronDown className="w-3 h-3 text-slate-400" />
             </button>
 
@@ -219,7 +127,7 @@ export const TopBar: React.FC<TopBarProps> = ({
                   className="w-full px-3.5 py-2 text-left hover:bg-purple-50 hover:text-[#6C2EB5] flex items-center gap-2"
                 >
                   <Save className="w-4 h-4 text-[#6C2EB5]" />
-                  <span>Save Project (Local)</span>
+                  <span>Save Project</span>
                 </button>
 
                 <button
@@ -254,10 +162,10 @@ export const TopBar: React.FC<TopBarProps> = ({
                 setExampleMenuOpen(!exampleMenuOpen);
                 setFileMenuOpen(false);
               }}
-              className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-purple-50 hover:bg-purple-100 text-[#6C2EB5] font-extrabold text-xs transition-colors border border-purple-200 shadow-2xs"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-purple-50 hover:bg-purple-100 text-[#6C2EB5] font-extrabold text-xs transition-colors border border-purple-200 shadow-2xs cursor-pointer"
             >
               <Sparkles className="w-3.5 h-3.5 text-[#6C2EB5]" />
-              <span>✨ Example Projects</span>
+              <span className="hidden sm:inline">Examples</span>
               <ChevronDown className="w-3 h-3 text-purple-400" />
             </button>
 
@@ -282,45 +190,44 @@ export const TopBar: React.FC<TopBarProps> = ({
               </div>
             )}
           </div>
-
         </div>
 
-        {/* Right Tools (Python Toggle, Zoom, Clean Up, Fullscreen) */}
+        {/* Right Tools (Python Toggle, Zoom, Clean Up, Help, Fullscreen) */}
         <div className="flex items-center gap-2 shrink-0">
           
           {/* View Python Code Pill Toggle */}
           <button
             onClick={onTogglePythonDrawer}
-            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-black transition-all border shadow-2xs ${
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-black transition-all border shadow-2xs cursor-pointer ${
               showPythonDrawer
                 ? 'bg-emerald-600 text-white border-emerald-700 shadow-sm'
                 : 'bg-white text-slate-800 border-slate-200 hover:bg-slate-50'
             }`}
           >
             <Code className={`w-3.5 h-3.5 ${showPythonDrawer ? 'text-white' : 'text-emerald-600'}`} />
-            <span>&lt;/&gt; View Python Code</span>
+            <span className="hidden sm:inline">&lt;/&gt; Python</span>
           </button>
 
           {/* Zoom Controls Bar */}
           {onZoomIn && (
-            <div className="flex items-center gap-1 bg-white px-2 py-1 rounded-full border border-slate-200 shadow-2xs">
+            <div className="flex items-center gap-0.5 bg-white px-1.5 py-1 rounded-full border border-slate-200 shadow-2xs">
               <button
                 onClick={onZoomIn}
-                className="p-1 hover:bg-slate-100 rounded-full text-slate-700 transition-colors"
+                className="p-1 hover:bg-slate-100 rounded-full text-slate-700 transition-colors cursor-pointer"
                 title="Zoom In"
               >
                 <ZoomIn className="w-3.5 h-3.5" />
               </button>
               <button
                 onClick={onZoomOut}
-                className="p-1 hover:bg-slate-100 rounded-full text-slate-700 transition-colors"
+                className="p-1 hover:bg-slate-100 rounded-full text-slate-700 transition-colors cursor-pointer"
                 title="Zoom Out"
               >
                 <ZoomOut className="w-3.5 h-3.5" />
               </button>
               <button
                 onClick={onResetZoom}
-                className="px-1.5 py-0.5 hover:bg-slate-100 rounded-full text-[10px] font-black text-slate-800 transition-colors"
+                className="px-1.5 py-0.5 hover:bg-slate-100 rounded-full text-[10px] font-black text-slate-800 transition-colors cursor-pointer"
                 title="Reset Zoom"
               >
                 100%
@@ -334,7 +241,7 @@ export const TopBar: React.FC<TopBarProps> = ({
               <button
                 onClick={onUndo}
                 disabled={!canUndo}
-                className="p-1 hover:bg-slate-100 disabled:opacity-30 rounded-full text-slate-700 transition-colors"
+                className="p-1 hover:bg-slate-100 disabled:opacity-30 rounded-full text-slate-700 transition-colors cursor-pointer"
                 title="Undo"
               >
                 <RotateCcw className="w-3.5 h-3.5" />
@@ -342,7 +249,7 @@ export const TopBar: React.FC<TopBarProps> = ({
               <button
                 onClick={onRedo}
                 disabled={!canRedo}
-                className="p-1 hover:bg-slate-100 disabled:opacity-30 rounded-full text-slate-700 transition-colors"
+                className="p-1 hover:bg-slate-100 disabled:opacity-30 rounded-full text-slate-700 transition-colors cursor-pointer"
                 title="Redo"
               >
                 <RotateCw className="w-3.5 h-3.5" />
@@ -354,7 +261,7 @@ export const TopBar: React.FC<TopBarProps> = ({
           {onCleanUp && (
             <button
               onClick={onCleanUp}
-              className="flex items-center gap-1 px-3 py-1.5 bg-white hover:bg-purple-50 text-[#6C2EB5] rounded-full text-xs font-extrabold border border-purple-200 shadow-2xs transition-colors"
+              className="flex items-center gap-1 px-3 py-1.5 bg-white hover:bg-purple-50 text-[#6C2EB5] rounded-full text-xs font-extrabold border border-purple-200 shadow-2xs transition-colors cursor-pointer"
               title="Auto Arrange Workspace Scripts"
             >
               <span>🧹 Clean Up</span>
@@ -364,7 +271,7 @@ export const TopBar: React.FC<TopBarProps> = ({
           {/* Help "?" Button */}
           <button
             onClick={onOpenHelp}
-            className="p-1.5 bg-white hover:bg-slate-100 text-slate-700 rounded-full border border-slate-200 shadow-2xs transition-colors"
+            className="p-1.5 bg-white hover:bg-slate-100 text-slate-700 rounded-full border border-slate-200 shadow-2xs transition-colors cursor-pointer"
             title="Open Help & Guide"
           >
             <HelpCircle className="w-4 h-4 text-purple-700" />
@@ -374,7 +281,7 @@ export const TopBar: React.FC<TopBarProps> = ({
           {onToggleFullscreen && (
             <button
               onClick={onToggleFullscreen}
-              className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-black transition-all border shadow-2xs ${
+              className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-black transition-all border shadow-2xs cursor-pointer ${
                 isFullscreen
                   ? 'bg-amber-500 text-slate-950 border-amber-600'
                   : 'bg-white text-slate-800 border-slate-200 hover:bg-slate-50'
@@ -382,7 +289,7 @@ export const TopBar: React.FC<TopBarProps> = ({
               title={isFullscreen ? 'Exit Fullscreen' : 'Fullscreen'}
             >
               {isFullscreen ? <Minimize2 className="w-3.5 h-3.5" /> : <Maximize2 className="w-3.5 h-3.5 text-[#6C2EB5]" />}
-              <span>{isFullscreen ? 'Exit' : '⛶ Fullscreen'}</span>
+              <span className="hidden sm:inline">{isFullscreen ? 'Exit' : '⛶ Fullscreen'}</span>
             </button>
           )}
 

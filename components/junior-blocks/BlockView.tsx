@@ -33,12 +33,17 @@ export const BlockView: React.FC<BlockViewProps> = ({
   };
 
   const categoryColor = CATEGORY_COLORS[def.category as Category] || {
-    bg: 'bg-purple-600',
-    border: 'border-purple-700',
+    bg: 'bg-[#4C97FF]',
+    border: 'border-[#3373CC]',
     text: 'text-white',
-    hex: def.color || '#6C2EB5',
+    hex: def.color || '#4C97FF',
   };
-  const isDarkText = def.category === 'events';
+
+  const fillColor = def.color || categoryColor.hex;
+
+  // Determine text contrast color: dark navy for yellow/gold (events/control), white for all others
+  const isDarkText = def.category === 'events' || def.category === 'control';
+  const textColorClass = isDarkText ? 'text-[#1E293B] font-black' : 'text-white font-black drop-shadow-xs';
 
   const handleTextOrNumChange = (inputName: string, valStr: string) => {
     if (!onInputChange) return;
@@ -47,11 +52,11 @@ export const BlockView: React.FC<BlockViewProps> = ({
     onInputChange(block.id, inputName, val);
   };
 
-  // Render label parts with inputs inserted as unified inline white pill elements
+  // Render label parts with inputs inserted as unified inline white pill elements fused inside block
   const renderLabel = () => {
     const parts = def.label.split(/(\{[\w]+\})/g);
     return (
-      <div className="relative z-10 flex items-center justify-start flex-row gap-1.5 whitespace-nowrap leading-none">
+      <div className="relative z-10 flex items-center justify-start flex-row gap-1.5 whitespace-nowrap leading-none py-0.5">
         {parts.map((part, idx) => {
           if (!part) return null;
           if (part.startsWith('{') && part.endsWith('}')) {
@@ -70,18 +75,24 @@ export const BlockView: React.FC<BlockViewProps> = ({
 
             if (inputDef?.type === 'select') {
               return (
-                <select
-                  key={idx}
-                  value={String(val)}
-                  onChange={(e) => onInputChange && onInputChange(block.id, inputName, e.target.value)}
-                  className="bg-white/95 text-slate-950 font-black px-2 py-0.5 rounded-md text-xs focus:outline-none cursor-pointer border border-black/20 shadow-inner shrink-0 my-0"
-                >
-                  {inputDef.options?.map((opt) => (
-                    <option key={opt.value} value={opt.value} className="bg-slate-900 text-white font-bold">
-                      {opt.label}
-                    </option>
-                  ))}
-                </select>
+                <div key={idx} className="relative inline-flex items-center shrink-0 my-0">
+                  <select
+                    value={String(val)}
+                    onChange={(e) => onInputChange && onInputChange(block.id, inputName, e.target.value)}
+                    className="bg-white text-[#1E293B] font-extrabold text-xs pl-2.5 pr-5 py-0.5 rounded-[10px] border border-black/15 shadow-inner focus:outline-none cursor-pointer appearance-none shrink-0 my-0 leading-tight"
+                  >
+                    {inputDef.options?.map((opt) => (
+                      <option key={opt.value} value={opt.value} className="bg-slate-900 text-white font-bold">
+                        {opt.label}
+                      </option>
+                    ))}
+                  </select>
+                  <div className="absolute right-1.5 pointer-events-none text-[#1E293B]">
+                    <svg className="w-3 h-3 fill-current" viewBox="0 0 20 20">
+                      <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
+                    </svg>
+                  </div>
+                </div>
               );
             }
 
@@ -91,13 +102,13 @@ export const BlockView: React.FC<BlockViewProps> = ({
                 type="text"
                 value={String(val)}
                 onChange={(e) => handleTextOrNumChange(inputName, e.target.value)}
-                className="w-14 bg-white/95 text-slate-950 font-black px-2 py-0.5 rounded-md text-xs border border-black/20 focus:outline-none focus:ring-2 focus:ring-purple-600 text-center shadow-inner shrink-0 my-0"
+                className="w-12 min-w-[36px] bg-white text-[#1E293B] font-extrabold text-xs px-2 py-0.5 rounded-[10px] border border-black/15 focus:outline-none focus:ring-2 focus:ring-purple-600 text-center shadow-inner shrink-0 my-0 leading-tight"
               />
             );
           }
 
           return (
-            <span key={idx} className="whitespace-nowrap font-black inline-block text-xs leading-none">
+            <span key={idx} className={`whitespace-nowrap ${textColorClass} text-xs tracking-tight leading-none`}>
               {part}
             </span>
           );
@@ -105,8 +116,6 @@ export const BlockView: React.FC<BlockViewProps> = ({
       </div>
     );
   };
-
-  const textContrastClass = isDarkText ? 'text-slate-950 font-black' : 'text-white font-black drop-shadow-xs';
 
   const handleDragStartBlock = (e: React.DragEvent) => {
     e.stopPropagation();
@@ -124,19 +133,23 @@ export const BlockView: React.FC<BlockViewProps> = ({
         <div
           draggable={!isTemplate}
           onDragStart={handleDragStartBlock}
-          className={`relative cursor-grab active:cursor-grabbing select-none ${textContrastClass} text-xs px-4 pt-4 pb-3 flex items-center justify-start flex-row gap-2 filter drop-shadow-md group`}
+          className={`relative cursor-grab active:cursor-grabbing select-none text-xs px-4 pt-5 pb-3 flex items-center justify-start flex-row gap-2 filter drop-shadow-md group`}
           style={{ minWidth: '150px' }}
         >
-          {/* Hat SVG Path Background */}
-          <svg className="absolute inset-0 w-full h-full pointer-events-none overflow-visible">
+          {/* Hat SVG Path Background (Solid fill, no opacity reduction) */}
+          <svg
+            viewBox="0 0 200 52"
+            preserveAspectRatio="none"
+            className="absolute inset-0 w-full h-full pointer-events-none overflow-visible"
+          >
             <path
-              d="M 0,16 C 20,-6 65,-6 85,16 L calc(100% - 6px),16 a 6,6 0 0 1 6,6 L 100%,calc(100% - 6px) a 6,6 0 0 1 -6,6 L 28,100% c -2,0 -3,4 -5,4 l -8,0 c -2,0 -3,-4 -5,-4 L 6,100% a 6,6 0 0 1 -6,-6 Z"
-              fill={def.color || categoryColor.hex}
-              stroke="rgba(0,0,0,0.25)"
+              d="M 0,16 C 15,-4 65,-4 85,16 L 196,16 A 4,4 0 0 1 200,20 L 200,48 A 4,4 0 0 1 196,52 L 36,52 C 34,52 33,48 31,48 L 19,48 C 17,48 16,52 14,52 L 4,52 A 4,4 0 0 1 0,48 Z"
+              fill={fillColor}
+              stroke="rgba(0,0,0,0.2)"
               strokeWidth="1.5"
             />
           </svg>
-          <div className="mt-1">{renderLabel()}</div>
+          {renderLabel()}
         </div>
       );
     }
@@ -147,16 +160,16 @@ export const BlockView: React.FC<BlockViewProps> = ({
         <div
           draggable={!isTemplate}
           onDragStart={handleDragStartBlock}
-          className={`relative cursor-grab active:cursor-grabbing select-none ${textContrastClass} text-xs filter drop-shadow-md flex flex-col`}
+          className={`relative cursor-grab active:cursor-grabbing select-none text-xs filter drop-shadow-md flex flex-col`}
           style={{ minWidth: '160px' }}
         >
           {/* C-Block Top Header Bar */}
           <div
-            className="px-3 pt-2 pb-2.5 flex items-center justify-start flex-row gap-2 relative rounded-t-lg"
-            style={{ backgroundColor: def.color || categoryColor.hex }}
+            className="px-3.5 pt-2.5 pb-2 flex items-center justify-start flex-row gap-2 relative rounded-t-lg shadow-xs"
+            style={{ backgroundColor: fillColor }}
           >
             {/* Top Notch SVG Tab */}
-            <div className="absolute top-0 left-3 w-4 h-1 bg-white/40 rounded-b-sm" />
+            <div className="absolute -top-1 left-4 w-4 h-1.5 bg-[#FFFFFF]/40 rounded-t-xs" />
             {renderLabel()}
           </div>
 
@@ -178,10 +191,10 @@ export const BlockView: React.FC<BlockViewProps> = ({
               setIsDragOverMain(false);
               if (onDropInsideCBlock) onDropInsideCBlock(e, block.id, false);
             }}
-            className={`pl-5 py-2 min-h-[44px] space-y-1 border-l-[16px] transition-colors ${
+            className={`pl-4 py-2 min-h-[44px] space-y-1 border-l-[16px] transition-colors ${
               isDragOverMain ? 'bg-amber-400/40 border-amber-500' : 'bg-black/10'
             }`}
-            style={{ borderLeftColor: def.color || categoryColor.hex }}
+            style={{ borderLeftColor: fillColor }}
           >
             {block.children && block.children.length > 0 ? (
               block.children.map((child) => (
@@ -194,7 +207,7 @@ export const BlockView: React.FC<BlockViewProps> = ({
                 />
               ))
             ) : (
-              <div className="text-[10px] text-white/90 font-bold italic py-1 px-2 rounded bg-black/20 border border-dashed border-white/40 w-fit">
+              <div className="text-[10px] text-white/90 font-bold italic py-1 px-2.5 rounded bg-black/25 border border-dashed border-white/40 w-fit shadow-inner">
                 📥 Drop blocks inside loop
               </div>
             )}
@@ -204,8 +217,8 @@ export const BlockView: React.FC<BlockViewProps> = ({
           {def.shape === 'c_block_else' && (
             <>
               <div
-                className="px-3 py-1.5 font-black text-white relative flex items-center justify-start flex-row gap-2"
-                style={{ backgroundColor: def.color || categoryColor.hex }}
+                className="px-3.5 py-1.5 font-black text-white relative flex items-center justify-start flex-row gap-2 shadow-xs"
+                style={{ backgroundColor: fillColor }}
               >
                 <span>Else</span>
               </div>
@@ -226,10 +239,10 @@ export const BlockView: React.FC<BlockViewProps> = ({
                   setIsDragOverElse(false);
                   if (onDropInsideCBlock) onDropInsideCBlock(e, block.id, true);
                 }}
-                className={`pl-5 py-2 min-h-[44px] space-y-1 border-l-[16px] transition-colors ${
+                className={`pl-4 py-2 min-h-[44px] space-y-1 border-l-[16px] transition-colors ${
                   isDragOverElse ? 'bg-amber-400/40 border-amber-500' : 'bg-black/10'
                 }`}
-                style={{ borderLeftColor: def.color || categoryColor.hex }}
+                style={{ borderLeftColor: fillColor }}
               >
                 {block.elseChildren && block.elseChildren.length > 0 ? (
                   block.elseChildren.map((child) => (
@@ -242,7 +255,7 @@ export const BlockView: React.FC<BlockViewProps> = ({
                     />
                   ))
                 ) : (
-                  <div className="text-[10px] text-white/90 font-bold italic py-1 px-2 rounded bg-black/20 border border-dashed border-white/40 w-fit">
+                  <div className="text-[10px] text-white/90 font-bold italic py-1 px-2.5 rounded bg-black/25 border border-dashed border-white/40 w-fit shadow-inner">
                     📥 Drop else blocks
                   </div>
                 )}
@@ -252,11 +265,11 @@ export const BlockView: React.FC<BlockViewProps> = ({
 
           {/* C-Block Footer Bar with Bottom Socket */}
           <div
-            className="h-4 w-full relative rounded-b-lg border-t border-black/10"
-            style={{ backgroundColor: def.color || categoryColor.hex }}
+            className="h-4 w-full relative rounded-b-lg border-t border-black/10 shadow-xs"
+            style={{ backgroundColor: fillColor }}
           >
             {/* Bottom Socket Indent */}
-            <div className="absolute bottom-0 left-3 w-4 h-1 bg-black/30 rounded-t-sm" />
+            <div className="absolute bottom-0 left-4 w-4 h-1 bg-black/30 rounded-t-xs" />
           </div>
         </div>
       );
@@ -268,10 +281,15 @@ export const BlockView: React.FC<BlockViewProps> = ({
         <div
           draggable={!isTemplate}
           onDragStart={handleDragStartBlock}
-          className={`inline-flex items-center justify-start flex-row gap-2 cursor-grab active:cursor-grabbing select-none ${textContrastClass} text-[11px] px-3.5 py-1.5 shadow-sm border border-black/20 ${
-            def.shape === 'boolean' ? 'rounded-full border-2 border-emerald-300' : 'rounded-full'
+          className={`relative inline-flex items-center justify-start gap-2 cursor-grab active:cursor-grabbing select-none px-4 py-1.5 shadow-sm border border-black/20 ${
+            def.shape === 'boolean' ? 'rounded-xs border-y border-black/20' : 'rounded-full'
           }`}
-          style={{ backgroundColor: def.color || categoryColor.hex }}
+          style={{
+            backgroundColor: fillColor,
+            clipPath: def.shape === 'boolean'
+              ? 'polygon(10px 0%, calc(100% - 10px) 0%, 100% 50%, calc(100% - 10px) 100%, 10px 100%, 0% 50%)'
+              : undefined,
+          }}
         >
           {renderLabel()}
         </div>
@@ -283,15 +301,19 @@ export const BlockView: React.FC<BlockViewProps> = ({
       <div
         draggable={!isTemplate}
         onDragStart={handleDragStartBlock}
-        className={`relative cursor-grab active:cursor-grabbing select-none ${textContrastClass} text-xs px-4 pt-2.5 pb-3 flex items-center justify-start flex-row gap-2 filter drop-shadow-md group`}
+        className={`relative cursor-grab active:cursor-grabbing select-none text-xs px-4 pt-2.5 pb-3 flex items-center justify-start flex-row gap-2 filter drop-shadow-md group`}
         style={{ minWidth: '140px' }}
       >
-        {/* Puzzle Block Top Notch + Bottom Socket SVG Layer */}
-        <svg className="absolute inset-0 w-full h-full pointer-events-none overflow-visible">
+        {/* Puzzle Block SVG Layer with Top Notch Tab + Bottom Socket Indent (Solid Fill) */}
+        <svg
+          viewBox="0 0 200 40"
+          preserveAspectRatio="none"
+          className="absolute inset-0 w-full h-full pointer-events-none overflow-visible"
+        >
           <path
-            d="M 0,6 a 6,6 0 0 1 6,-6 l 6,0 c 2,0 3,4 5,4 l 8,0 c 2,0 3,-4 5,-4 L calc(100% - 6px),0 a 6,6 0 0 1 6,6 L 100%,calc(100% - 6px) a 6,6 0 0 1 -6,6 L 28,100% c -2,0 -3,4 -5,4 l -8,0 c -2,0 -3,-4 -5,-4 L 6,100% a 6,6 0 0 1 -6,-6 Z"
-            fill={def.color || categoryColor.hex}
-            stroke="rgba(0,0,0,0.25)"
+            d="M 0,4 A 4,4 0 0 1 4,0 L 14,0 C 16,0 17,-4 19,-4 L 31,-4 C 33,-4 34,0 36,0 L 196,0 A 4,4 0 0 1 200,4 L 200,36 A 4,4 0 0 1 196,40 L 36,40 C 34,40 33,36 31,36 L 19,36 C 17,36 16,40 14,40 L 4,40 A 4,4 0 0 1 0,36 Z"
+            fill={fillColor}
+            stroke="rgba(0,0,0,0.2)"
             strokeWidth="1.5"
           />
         </svg>
@@ -305,9 +327,9 @@ export const BlockView: React.FC<BlockViewProps> = ({
     <div className="flex flex-col items-start w-fit group/stack">
       {renderSingleBlock()}
 
-      {/* RECURSIVE STACK CHAIN RENDERING FOR BLOCK.NEXT WITH INTERLOCKING FIT */}
+      {/* RECURSIVE STACK CHAIN RENDERING FOR BLOCK.NEXT WITH ZERO GAP FLUSH INTERLOCKING FIT */}
       {block.next && (
-        <div className="-mt-1.5">
+        <div className="-mt-[4px]">
           <BlockView
             block={block.next}
             onInputChange={onInputChange}
