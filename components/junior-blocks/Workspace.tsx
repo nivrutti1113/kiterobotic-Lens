@@ -33,7 +33,7 @@ export const Workspace: React.FC<WorkspaceProps> = ({
   const [history, setHistory] = useState<BlockInstance[][]>([activeSprite.scripts]);
   const [historyIndex, setHistoryIndex] = useState<number>(0);
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number; scriptId: string } | null>(null);
-  const [snapTarget, setSnapTarget] = useState<{ x: number; y: number } | null>(null);
+  const [snapTarget, setSnapTarget] = useState<{ x: number; y: number; parentScriptId: string } | null>(null);
   const workspaceRef = useRef<HTMLDivElement>(null);
 
   const saveHistory = (newScripts: BlockInstance[]) => {
@@ -66,8 +66,8 @@ export const Workspace: React.FC<WorkspaceProps> = ({
       const row = Math.floor(idx / 2);
       return {
         ...s,
-        x: 30 + col * 240,
-        y: 30 + row * 120,
+        x: 30 + col * 260,
+        y: 30 + row * 140,
       };
     });
     saveHistory(updated);
@@ -146,8 +146,78 @@ export const Workspace: React.FC<WorkspaceProps> = ({
     const dropX = Math.max(20, Math.round((e.clientX - rect.left) / zoom));
     const dropY = Math.max(20, Math.round((e.clientY - rect.top) / zoom));
 
+    // 1. Check if dropping near an existing block stack to snap & attach to .next!
+    let targetParentScript: BlockInstance | null = null;
+    for (const script of activeSprite.scripts) {
+      if (existingBlockId && script.id === existingBlockId) continue;
+
+      const scriptX = script.x || 40;
+      const scriptY = script.y || 40;
+
+      let lastBlock = script;
+      let stackDepth = 1;
+      while (lastBlock.next) {
+        lastBlock = lastBlock.next;
+        stackDepth++;
+      }
+      const stackBottomY = scriptY + stackDepth * 40;
+
+      // Check proximity hit test (within 100px horizontally and 50px vertically)
+      if (Math.abs(dropX - scriptX) < 100 && Math.abs(dropY - stackBottomY) < 55) {
+        targetParentScript = script;
+        break;
+      }
+    }
+
+    if (targetParentScript) {
+      // Create or move block to attach to bottom of targetParentScript
+      let blockToAttach: BlockInstance;
+
+      if (existingBlockId) {
+        const found = activeSprite.scripts.find((s) => s.id === existingBlockId);
+        if (!found) return;
+        blockToAttach = { ...found, x: undefined, y: undefined };
+      } else if (blockType) {
+        const def = BLOCK_DEFINITIONS[blockType];
+        if (!def) return;
+        const sampleInputs: Record<string, number | string | BlockInstance> = {};
+        if (def.inputs) {
+          Object.entries(def.inputs).forEach(([k, v]) => {
+            sampleInputs[k] = v.defaultValue;
+          });
+        }
+        blockToAttach = {
+          id: `b_${Date.now()}_${Math.floor(Math.random() * 1000)}`,
+          type: blockType,
+          category: def.category,
+          inputs: sampleInputs,
+        };
+      } else {
+        return;
+      }
+
+      // Attach blockToAttach to bottom of targetParentScript chain
+      const attachToBottom = (root: BlockInstance): BlockInstance => {
+        let current = root;
+        while (current.next) {
+          current = current.next;
+        }
+        current.next = blockToAttach;
+        return root;
+      };
+
+      const updatedScripts = activeSprite.scripts
+        .filter((s) => s.id !== existingBlockId) // Remove from root list if it was an existing script
+        .map((s) => (s.id === targetParentScript!.id ? attachToBottom({ ...s }) : s));
+
+      saveHistory(updatedScripts);
+      delete (window as any).__kms_dragged_existing_id;
+      delete (window as any).__kms_dragged_block_type;
+      return;
+    }
+
+    // 2. If not snapping to a stack, place as new independent root script at dropX, dropY
     if (existingBlockId) {
-      // Move existing root script
       const updated = activeSprite.scripts.map((s) =>
         s.id === existingBlockId ? { ...s, x: dropX, y: dropY } : s
       );
@@ -221,20 +291,22 @@ export const Workspace: React.FC<WorkspaceProps> = ({
     const mouseX = (e.clientX - rect.left) / zoom;
     const mouseY = (e.clientY - rect.top) / zoom;
 
-    let foundSnap: { x: number; y: number } | null = null;
+    let foundSnap: { x: number; y: number; parentScriptId: string } | null = null;
 
     for (const script of activeSprite.scripts) {
       const scriptX = script.x || 40;
       const scriptY = script.y || 40;
 
-      if (Math.abs(mouseX - scriptX) < 80 && Math.abs(mouseY - scriptY) < 120) {
-        let lastBlock = script;
-        let stackDepth = 1;
-        while (lastBlock.next) {
-          lastBlock = lastBlock.next;
-          stackDepth++;
-        }
-        foundSnap = { x: scriptX, y: scriptY + stackDepth * 40 };
+      let lastBlock = script;
+      let stackDepth = 1;
+      while (lastBlock.next) {
+        lastBlock = lastBlock.next;
+        stackDepth++;
+      }
+      const bottomY = scriptY + stackDepth * 40;
+
+      if (Math.abs(mouseX - scriptX) < 100 && Math.abs(mouseY - bottomY) < 55) {
+        foundSnap = { x: scriptX, y: bottomY - 6, parentScriptId: script.id };
         break;
       }
     }
@@ -265,7 +337,7 @@ export const Workspace: React.FC<WorkspaceProps> = ({
         {/* Snap Line Highlight Preview */}
         {snapTarget && (
           <div
-            className="absolute h-1.5 bg-amber-400 border border-purple-600 rounded-full shadow-lg animate-pulse z-40 pointer-events-none"
+            className="absolute h-2 bg-amber-400 border-2 border-purple-600 rounded-full shadow-lg animate-pulse z-40 pointer-events-none"
             style={{
               left: `${snapTarget.x}px`,
               top: `${snapTarget.y}px`,
@@ -283,7 +355,7 @@ export const Workspace: React.FC<WorkspaceProps> = ({
             onContextMenu={(e) => handleContextMenu(e, script.id)}
             onClick={(e) => {
               e.stopPropagation();
-              // Executing single script directly on stage when clicked
+              // Executing script stack directly on stage when clicked
               interpreterEngine.runProject(
                 {
                   id: 'run_temp',

@@ -100,11 +100,13 @@ export default function ToolChipStudioPage({ params }: { params: { slug: string 
   };
 
   // -------------------------------------------------------------
-  // Tool 2: Game Lab State & Engine
+  // Tool 2: Game Lab Engine (All 6 Arcade Games)
   // -------------------------------------------------------------
   const gameCanvasRef = useRef<HTMLCanvasElement>(null);
   const [gameScore, setGameScore] = useState(0);
   const [gameRunning, setGameRunning] = useState(true);
+  const [gameMessage, setGameMessage] = useState<string | null>(null);
+
   const [memoryCards, setMemoryCards] = useState<Array<{ id: number; icon: string; flipped: boolean; matched: boolean }>>([
     { id: 1, icon: '🤖', flipped: false, matched: false },
     { id: 2, icon: '🤖', flipped: false, matched: false },
@@ -116,30 +118,71 @@ export default function ToolChipStudioPage({ params }: { params: { slug: string 
     { id: 8, icon: '🎮', flipped: false, matched: false },
   ]);
 
+  // Master game state ref
   const gameStateRef = useRef({
-    playerX: 60,
-    playerY: 200,
-    playerVy: 0,
-    isGrounded: false,
-    stars: [
-      { x: 300, y: 160, collected: false },
-      { x: 500, y: 120, collected: false },
-      { x: 700, y: 180, collected: false },
-    ],
-    platforms: [
-      { x: 0, y: 270, width: 800, height: 30 },
-      { x: 250, y: 200, width: 120, height: 16 },
-      { x: 450, y: 160, width: 120, height: 16 },
-    ],
+    // Platformer
+    pX: 60, pY: 200, pVy: 0, isGrounded: false,
+    stars: [{ x: 300, y: 160, collected: false }, { x: 500, y: 120, collected: false }, { x: 700, y: 180, collected: false }],
+    platforms: [{ x: 0, y: 270, width: 800, height: 30 }, { x: 250, y: 200, width: 120, height: 16 }, { x: 450, y: 160, width: 120, height: 16 }],
+
+    // Maze
+    mX: 40, mY: 40, keysLeft: 3, keys: [{ x: 200, y: 80, got: false }, { x: 400, y: 200, got: false }, { x: 650, y: 100, got: false }],
+
+    // Flappy
+    fY: 150, fVy: 0, pipes: [{ x: 400, gapY: 120 }, { x: 650, gapY: 160 }],
+
+    // Shooter
+    sX: 400, bullets: [] as Array<{ x: number; y: number }>, aliens: [{ x: 100, y: 40, dir: 1 }, { x: 300, y: 40, dir: -1 }, { x: 500, y: 40, dir: 1 }, { x: 700, y: 40, dir: -1 }],
+
+    // Sandbox balls
+    balls: [] as Array<{ x: number; y: number; vy: number; radius: number; color: string }>,
   });
 
-  const handlePlayerJump = () => {
+  const handleGameAction = () => {
     const state = gameStateRef.current;
-    if (state.isGrounded) {
-      state.playerVy = -11;
-      state.isGrounded = false;
+    if (activeProject?.id === 'platformer') {
+      if (state.isGrounded) {
+        state.pVy = -11;
+        state.isGrounded = false;
+      }
+    } else if (activeProject?.id === 'flappy_runner') {
+      state.fVy = -7;
+    } else if (activeProject?.id === 'space_shooter') {
+      state.bullets.push({ x: state.sX + 16, y: 250 });
+    } else if (activeProject?.id === 'blank' || activeProject?.id === 'sandbox') {
+      state.balls.push({
+        x: Math.random() * 700 + 50,
+        y: 40,
+        vy: 0,
+        radius: 12 + Math.random() * 12,
+        color: ['#EC4899', '#3B82F6', '#10B981', '#F59E0B', '#8B5CF6'][Math.floor(Math.random() * 5)],
+      });
     }
   };
+
+  // Keyboard navigation for Maze and Shooter
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (toolSlug !== 'gamelab' || !activeProject) return;
+      const state = gameStateRef.current;
+
+      if (activeProject.id === 'topdown_maze') {
+        if (e.key === 'ArrowRight' || e.key === 'd') state.mX = Math.min(740, state.mX + 15);
+        if (e.key === 'ArrowLeft' || e.key === 'a') state.mX = Math.max(20, state.mX - 15);
+        if (e.key === 'ArrowDown' || e.key === 's') state.mY = Math.min(250, state.mY + 15);
+        if (e.key === 'ArrowUp' || e.key === 'w') state.mY = Math.max(20, state.mY - 15);
+      } else if (activeProject.id === 'space_shooter') {
+        if (e.key === 'ArrowRight' || e.key === 'd') state.sX = Math.min(750, state.sX + 20);
+        if (e.key === 'ArrowLeft' || e.key === 'a') state.sX = Math.max(20, state.sX - 20);
+        if (e.key === ' ' || e.key === 'ArrowUp') handleGameAction();
+      } else if (activeProject.id === 'platformer' || activeProject.id === 'flappy_runner') {
+        if (e.key === ' ' || e.key === 'ArrowUp') handleGameAction();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [toolSlug, activeProject]);
 
   useEffect(() => {
     if (toolSlug !== 'gamelab' || !activeProject) return;
@@ -150,32 +193,33 @@ export default function ToolChipStudioPage({ params }: { params: { slug: string 
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    const gravity = 0.55;
-
     const loop = () => {
-      if (gameRunning && activeProject.id === 'platformer') {
-        const state = gameStateRef.current;
-        state.playerVy += gravity;
-        state.playerY += state.playerVy;
+      const state = gameStateRef.current;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // 1. Platformer Quest Engine
+      if (activeProject.id === 'platformer') {
+        state.pVy += 0.55;
+        state.pY += state.pVy;
         state.isGrounded = false;
 
         state.platforms.forEach((plat) => {
           if (
-            state.playerX + 32 > plat.x &&
-            state.playerX < plat.x + plat.width &&
-            state.playerY + 32 >= plat.y &&
-            state.playerY + 32 <= plat.y + 16 &&
-            state.playerVy >= 0
+            state.pX + 32 > plat.x &&
+            state.pX < plat.x + plat.width &&
+            state.pY + 32 >= plat.y &&
+            state.pY + 32 <= plat.y + 16 &&
+            state.pVy >= 0
           ) {
-            state.playerY = plat.y - 32;
-            state.playerVy = 0;
+            state.pY = plat.y - 32;
+            state.pVy = 0;
             state.isGrounded = true;
           }
         });
 
         state.stars.forEach((star) => {
           if (!star.collected) {
-            const dist = Math.hypot(state.playerX + 16 - star.x, state.playerY + 16 - star.y);
+            const dist = Math.hypot(state.pX + 16 - star.x, state.pY + 16 - star.y);
             if (dist < 26) {
               star.collected = true;
               setGameScore((s) => s + 10);
@@ -189,10 +233,8 @@ export default function ToolChipStudioPage({ params }: { params: { slug: string 
 
         ctx.fillStyle = '#0F172A';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
-
         ctx.fillStyle = '#6D28D9';
         state.platforms.forEach((p) => ctx.fillRect(p.x, p.y, p.width, p.height));
-
         state.stars.forEach((star) => {
           if (!star.collected) {
             ctx.fillStyle = '#F59E0B';
@@ -201,9 +243,123 @@ export default function ToolChipStudioPage({ params }: { params: { slug: string 
             ctx.fill();
           }
         });
-
         ctx.fillStyle = '#10B981';
-        ctx.fillRect(state.playerX, state.playerY, 32, 32);
+        ctx.fillRect(state.pX, state.pY, 32, 32);
+      }
+
+      // 2. Top-Down Maze Collector Engine
+      else if (activeProject.id === 'topdown_maze') {
+        ctx.fillStyle = '#1E1B4B';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // Draw Keys
+        state.keys.forEach((k) => {
+          if (!k.got) {
+            ctx.fillStyle = '#F59E0B';
+            ctx.beginPath();
+            ctx.arc(k.x, k.y, 10, 0, Math.PI * 2);
+            ctx.fill();
+            const dist = Math.hypot(state.mX - k.x, state.mY - k.y);
+            if (dist < 20) {
+              k.got = true;
+              setGameScore((s) => s + 25);
+            }
+          }
+        });
+
+        // Exit Door
+        ctx.fillStyle = state.keys.every((k) => k.got) ? '#10B981' : '#EF4444';
+        ctx.fillRect(720, 120, 30, 60);
+
+        // Player Dot
+        ctx.fillStyle = '#3B82F6';
+        ctx.beginPath();
+        ctx.arc(state.mX, state.mY, 14, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // 3. Flappy Sky Runner Engine
+      else if (activeProject.id === 'flappy_runner') {
+        ctx.fillStyle = '#0284C7';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        state.fVy += 0.4;
+        state.fY += state.fVy;
+        if (state.fY > 270) {
+          state.fY = 270;
+          state.fVy = 0;
+        }
+
+        // Draw & Move Pipes
+        ctx.fillStyle = '#15803D';
+        state.pipes.forEach((pipe) => {
+          pipe.x -= 2.5;
+          if (pipe.x < -60) {
+            pipe.x = 800;
+            pipe.gapY = Math.floor(Math.random() * 120) + 80;
+            setGameScore((s) => s + 5);
+          }
+          ctx.fillRect(pipe.x, 0, 50, pipe.gapY);
+          ctx.fillRect(pipe.x, pipe.gapY + 90, 50, 300);
+        });
+
+        // Player Bird
+        ctx.fillStyle = '#F59E0B';
+        ctx.beginPath();
+        ctx.arc(100, state.fY, 14, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // 4. Space Invader Shooter Engine
+      else if (activeProject.id === 'space_shooter') {
+        ctx.fillStyle = '#090D16';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // Move Aliens
+        state.aliens.forEach((alien) => {
+          alien.x += alien.dir * 2;
+          if (alien.x > 740 || alien.x < 20) alien.dir *= -1;
+
+          ctx.fillStyle = '#EF4444';
+          ctx.fillRect(alien.x, alien.y, 30, 20);
+        });
+
+        // Move & Draw Bullets
+        ctx.fillStyle = '#38BDF8';
+        state.bullets.forEach((b, idx) => {
+          b.y -= 7;
+          ctx.fillRect(b.x, b.y, 4, 12);
+
+          state.aliens.forEach((alien) => {
+            if (b.x >= alien.x && b.x <= alien.x + 30 && b.y <= alien.y + 20 && b.y >= alien.y) {
+              alien.x = Math.random() * 700 + 30;
+              setGameScore((s) => s + 15);
+            }
+          });
+        });
+
+        // Player Ship
+        ctx.fillStyle = '#10B981';
+        ctx.fillRect(state.sX, 260, 32, 20);
+      }
+
+      // 5. Custom Physics Sandbox Engine
+      else if (activeProject.id === 'blank' || activeProject.id === 'sandbox') {
+        ctx.fillStyle = '#0F172A';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        state.balls.forEach((ball) => {
+          ball.vy += 0.4;
+          ball.y += ball.vy;
+          if (ball.y + ball.radius > 280) {
+            ball.y = 280 - ball.radius;
+            ball.vy *= -0.75;
+          }
+          ctx.fillStyle = ball.color;
+          ctx.beginPath();
+          ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
+          ctx.fill();
+        });
       }
 
       animId = requestAnimationFrame(loop);
@@ -211,7 +367,7 @@ export default function ToolChipStudioPage({ params }: { params: { slug: string 
 
     animId = requestAnimationFrame(loop);
     return () => cancelAnimationFrame(animId);
-  }, [toolSlug, activeProject, gameRunning]);
+  }, [toolSlug, activeProject]);
 
   // -------------------------------------------------------------
   // Tool 3: Electronics Simulator State
@@ -223,7 +379,7 @@ export default function ToolChipStudioPage({ params }: { params: { slug: string 
   const [rgbGreen, setRgbGreen] = useState(128);
   const [rgbBlue, setRgbBlue] = useState(0);
   const [trafficLightStep, setTrafficLightStep] = useState<'red' | 'yellow' | 'green'>('red');
-  const [potentiometerVal, setPotentiometerVal] = useState(5000); // 0-10k ohms
+  const [potentiometerVal, setPotentiometerVal] = useState(5000);
 
   const resistanceVal = hasResistor ? 220 : 0.1;
   const currentAmp = elecSwitchOn ? elecVoltage / (resistanceVal + potentiometerVal / 50) : 0;
@@ -233,7 +389,6 @@ export default function ToolChipStudioPage({ params }: { params: { slug: string 
   const isShortCircuit = elecSwitchOn && !hasResistor && activeProject?.id === 'led_resistor_button';
   const isCircuitActive = elecSwitchOn && (hasResistor || activeProject?.id !== 'led_resistor_button');
 
-  // Traffic Light Sequencer loop
   useEffect(() => {
     if (toolSlug !== 'electronics' || activeProject?.id !== 'traffic_light' || !elecSwitchOn) return;
     const interval = setInterval(() => {
@@ -290,7 +445,7 @@ export default function ToolChipStudioPage({ params }: { params: { slug: string 
   // -------------------------------------------------------------
   // Tool 7: Invisible Focus Mode State
   // -------------------------------------------------------------
-  const [focusTimerSeconds, setFocusTimerSeconds] = useState(600); // 10 minutes
+  const [focusTimerSeconds, setFocusTimerSeconds] = useState(600);
   const [focusTimerActive, setFocusTimerActive] = useState(false);
 
   useEffect(() => {
@@ -301,7 +456,6 @@ export default function ToolChipStudioPage({ params }: { params: { slug: string 
     return () => clearInterval(timer);
   }, [toolSlug, focusTimerActive]);
 
-  // Select project handler
   const openProject = (projId: string) => {
     router.push(`/kinetic-canvas/tool/${toolSlug}?project=${projId}`);
   };
@@ -521,15 +675,13 @@ export default function ToolChipStudioPage({ params }: { params: { slug: string 
                   <p className="text-3xl font-black text-purple-700 font-heading">{gameScore} XP</p>
                 </div>
 
-                {activeProject.id === 'platformer' && (
-                  <button
-                    onClick={handlePlayerJump}
-                    className="w-full py-3 bg-purple-700 hover:bg-purple-800 text-white font-black text-xs rounded-xl shadow-lg transition-transform hover:scale-105 active:scale-95 flex items-center justify-center gap-2 font-heading"
-                  >
-                    <Sparkles className="w-4 h-4 text-amber-300" />
-                    <span>🎮 Jump (Space / Click)</span>
-                  </button>
-                )}
+                <button
+                  onClick={handleGameAction}
+                  className="w-full py-3 bg-purple-700 hover:bg-purple-800 text-white font-black text-xs rounded-xl shadow-lg transition-transform hover:scale-105 active:scale-95 flex items-center justify-center gap-2 font-heading"
+                >
+                  <Sparkles className="w-4 h-4 text-amber-300" />
+                  <span>🎮 Action / Tap to Play!</span>
+                </button>
 
                 <p className="text-xs text-slate-600 font-bold leading-relaxed">
                   {activeProject.description}
@@ -560,7 +712,7 @@ export default function ToolChipStudioPage({ params }: { params: { slug: string 
                     ref={gameCanvasRef}
                     width={800}
                     height={300}
-                    onClick={handlePlayerJump}
+                    onClick={handleGameAction}
                     className="w-full h-full object-contain cursor-pointer rounded-xl"
                   />
                 )}
