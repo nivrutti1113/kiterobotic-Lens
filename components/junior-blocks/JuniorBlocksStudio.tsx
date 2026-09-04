@@ -16,15 +16,24 @@ import { StageCanvas } from './StageCanvas';
 import { SpriteScenePanel } from './SpriteScenePanel';
 import { HelpModal } from './HelpModal';
 import { PythonCodeDrawer } from './PythonCodeDrawer';
+import { ExtensionMarketplaceModal } from './ExtensionMarketplaceModal';
 
 export function JuniorBlocksStudio() {
-  const [project, setProject] = useState<Project>(createDefaultProject);
+  const [project, setProject] = useState<Project>(() => {
+    const defaultProj = createDefaultProject();
+    return {
+      ...defaultProj,
+      extensions: defaultProj.extensions || ['qr-code-scanner', 'face-detection'],
+    };
+  });
+
   const [activeSpriteId, setActiveSpriteId] = useState<string>('');
   const [isRunning, setIsRunning] = useState<boolean>(false);
   const [askPrompt, setAskPrompt] = useState<string | null>(null);
   const [helpOpen, setHelpOpen] = useState<boolean>(false);
   const [showPythonDrawer, setShowPythonDrawer] = useState<boolean>(false);
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
+  const [marketplaceOpen, setMarketplaceOpen] = useState<boolean>(false);
   const [workspaceActions, setWorkspaceActions] = useState<{
     zoomIn?: () => void;
     zoomOut?: () => void;
@@ -39,9 +48,14 @@ export function JuniorBlocksStudio() {
   // Load project on mount
   useEffect(() => {
     const loaded = loadProjectFromStorage();
-    setProject(loaded);
-    if (loaded.sprites.length > 0) {
+    if (loaded && loaded.sprites && loaded.sprites.length > 0) {
+      setProject({
+        ...loaded,
+        extensions: loaded.extensions || ['qr-code-scanner', 'face-detection'],
+      });
       setActiveSpriteId(loaded.sprites[0].id);
+    } else if (project.sprites.length > 0) {
+      setActiveSpriteId(project.sprites[0].id);
     }
 
     const handleFullscreenChange = () => {
@@ -191,6 +205,17 @@ export function JuniorBlocksStudio() {
     }
   };
 
+  const handleToggleExtension = (extensionId: string) => {
+    setProject((prev) => {
+      const current = prev.extensions || [];
+      const exists = current.includes(extensionId);
+      const updated = exists
+        ? current.filter((id) => id !== extensionId)
+        : [...current, extensionId];
+      return { ...prev, extensions: updated };
+    });
+  };
+
   return (
     <div
       className={
@@ -200,21 +225,21 @@ export function JuniorBlocksStudio() {
       }
     >
       
-      {/* 1. TOP HEADER BAR: PictoBlox 2-Row Header (Main Header + Editor Sub-Header Row) */}
+      {/* 1. TOP HEADER BAR: PictoBlox 2-Row Header */}
       <TopBar
         project={project}
         showPythonDrawer={showPythonDrawer}
         onTogglePythonDrawer={() => setShowPythonDrawer(!showPythonDrawer)}
         onNewProject={() => {
           const fresh = createDefaultProject();
-          setProject(fresh);
+          setProject({ ...fresh, extensions: ['qr-code-scanner', 'face-detection'] });
           setActiveSpriteId(fresh.sprites[0].id);
         }}
         onSaveProject={() => saveProjectToStorage(project)}
         onLoadProject={() => setProject(loadProjectFromStorage())}
         onExportProject={() => exportProjectAsJSON(project)}
         onLoadExampleProject={(exProj) => {
-          setProject(exProj);
+          setProject({ ...exProj, extensions: exProj.extensions || ['qr-code-scanner'] });
           if (exProj.sprites.length > 0) setActiveSpriteId(exProj.sprites[0].id);
         }}
         onOpenHelp={() => setHelpOpen(true)}
@@ -230,17 +255,19 @@ export function JuniorBlocksStudio() {
         canRedo={workspaceActions.canRedo}
       />
 
-      {/* 2. CORE STUDIO BODY: Authentic PictoBlox 3-Column IDE Layout */}
+      {/* 2. CORE STUDIO BODY: PictoBlox 3-Column Layout */}
       <div className="flex-1 flex flex-col md:flex-row gap-0 min-h-0 overflow-hidden bg-[#FAF9FC]">
         
         {/* COLUMN 1: Left Block Palette Sidebar (Fixed Width ~280px) */}
         <div className="w-full md:w-[280px] h-64 md:h-full shrink-0 overflow-hidden flex flex-col z-10">
           <BlockPalette
+            activeExtensionIds={project.extensions || []}
+            onOpenMarketplace={() => setMarketplaceOpen(true)}
             onDragStartBlockTemplate={handleDragStartBlockTemplate}
           />
         </div>
 
-        {/* COLUMN 2: Large Block Workspace Canvas (Fluid Center Width & Height) */}
+        {/* COLUMN 2: Large Block Workspace Canvas */}
         <div className="flex-1 overflow-hidden min-h-0 relative flex flex-col min-w-0">
           {activeSprite ? (
             <Workspace
@@ -256,7 +283,7 @@ export function JuniorBlocksStudio() {
           )}
         </div>
 
-        {/* COLUMN 3: Stage Preview Canvas & Sprites Panel (Fixed Width ~340px) */}
+        {/* COLUMN 3: Stage Preview Canvas & Sprites Panel */}
         <div className="w-full md:w-[340px] flex flex-col gap-2.5 shrink-0 overflow-y-auto max-h-full p-2.5 bg-slate-100/60 border-l border-slate-200/80 min-w-0">
           <StageCanvas
             project={project}
@@ -300,6 +327,14 @@ export function JuniorBlocksStudio() {
         )}
 
       </div>
+
+      {/* Extension Marketplace Modal ("Choose an Extension" screen) */}
+      <ExtensionMarketplaceModal
+        isOpen={marketplaceOpen}
+        onClose={() => setMarketplaceOpen(false)}
+        activeExtensionIds={project.extensions || []}
+        onToggleExtension={handleToggleExtension}
+      />
 
       {/* Searchable Help Modal */}
       <HelpModal isOpen={helpOpen} onClose={() => setHelpOpen(false)} />

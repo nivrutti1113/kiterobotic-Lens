@@ -6,6 +6,7 @@ import { BLOCK_DEFINITIONS, CATEGORY_COLORS } from '@/lib/junior-blocks/blocks-d
 
 interface BlockViewProps {
   block: BlockInstance;
+  overrideDefinition?: BlockDefinition;
   onInputChange?: (blockId: string, inputName: string, value: number | string | BlockInstance) => void;
   onDragStart?: (e: React.DragEvent, block: BlockInstance) => void;
   onDropInsideCBlock?: (e: React.DragEvent, parentBlockId: string, isElseSlot?: boolean) => void;
@@ -14,6 +15,7 @@ interface BlockViewProps {
 
 export const BlockView: React.FC<BlockViewProps> = ({
   block,
+  overrideDefinition,
   onInputChange,
   onDragStart,
   onDropInsideCBlock,
@@ -22,7 +24,7 @@ export const BlockView: React.FC<BlockViewProps> = ({
   const [isDragOverMain, setIsDragOverMain] = useState(false);
   const [isDragOverElse, setIsDragOverElse] = useState(false);
 
-  const def: BlockDefinition = BLOCK_DEFINITIONS[block.type] || {
+  const def: BlockDefinition = overrideDefinition || BLOCK_DEFINITIONS[block.type] || {
     type: block.type,
     category: block.category || 'movement',
     shape: 'stack',
@@ -30,7 +32,12 @@ export const BlockView: React.FC<BlockViewProps> = ({
     color: '#4C97FF',
   };
 
-  const categoryColor = CATEGORY_COLORS[def.category as Category] || CATEGORY_COLORS.movement;
+  const categoryColor = CATEGORY_COLORS[def.category as Category] || {
+    bg: 'bg-purple-600',
+    border: 'border-purple-700',
+    text: 'text-white',
+    hex: def.color || '#6C2EB5',
+  };
   const isDarkText = def.category === 'events';
 
   const handleTextOrNumChange = (inputName: string, valStr: string) => {
@@ -124,7 +131,7 @@ export const BlockView: React.FC<BlockViewProps> = ({
           <svg className="absolute inset-0 w-full h-full pointer-events-none overflow-visible">
             <path
               d="M 0,16 C 20,-6 65,-6 85,16 L calc(100% - 6px),16 a 6,6 0 0 1 6,6 L 100%,calc(100% - 6px) a 6,6 0 0 1 -6,6 L 28,100% c -2,0 -3,4 -5,4 l -8,0 c -2,0 -3,-4 -5,-4 L 6,100% a 6,6 0 0 1 -6,-6 Z"
-              fill={categoryColor.hex}
+              fill={def.color || categoryColor.hex}
               stroke="rgba(0,0,0,0.25)"
               strokeWidth="1.5"
             />
@@ -146,7 +153,7 @@ export const BlockView: React.FC<BlockViewProps> = ({
           {/* C-Block Top Header Bar */}
           <div
             className="px-3 pt-2 pb-2.5 flex items-center justify-start flex-row gap-2 relative rounded-t-lg"
-            style={{ backgroundColor: categoryColor.hex }}
+            style={{ backgroundColor: def.color || categoryColor.hex }}
           >
             {/* Top Notch SVG Tab */}
             <div className="absolute top-0 left-3 w-4 h-1 bg-white/40 rounded-b-sm" />
@@ -174,7 +181,7 @@ export const BlockView: React.FC<BlockViewProps> = ({
             className={`pl-5 py-2 min-h-[44px] space-y-1 border-l-[16px] transition-colors ${
               isDragOverMain ? 'bg-amber-400/40 border-amber-500' : 'bg-black/10'
             }`}
-            style={{ borderLeftColor: categoryColor.hex }}
+            style={{ borderLeftColor: def.color || categoryColor.hex }}
           >
             {block.children && block.children.length > 0 ? (
               block.children.map((child) => (
@@ -198,7 +205,7 @@ export const BlockView: React.FC<BlockViewProps> = ({
             <>
               <div
                 className="px-3 py-1.5 font-black text-white relative flex items-center justify-start flex-row gap-2"
-                style={{ backgroundColor: categoryColor.hex }}
+                style={{ backgroundColor: def.color || categoryColor.hex }}
               >
                 <span>Else</span>
               </div>
@@ -222,7 +229,7 @@ export const BlockView: React.FC<BlockViewProps> = ({
                 className={`pl-5 py-2 min-h-[44px] space-y-1 border-l-[16px] transition-colors ${
                   isDragOverElse ? 'bg-amber-400/40 border-amber-500' : 'bg-black/10'
                 }`}
-                style={{ borderLeftColor: categoryColor.hex }}
+                style={{ borderLeftColor: def.color || categoryColor.hex }}
               >
                 {block.elseChildren && block.elseChildren.length > 0 ? (
                   block.elseChildren.map((child) => (
@@ -246,7 +253,7 @@ export const BlockView: React.FC<BlockViewProps> = ({
           {/* C-Block Footer Bar with Bottom Socket */}
           <div
             className="h-4 w-full relative rounded-b-lg border-t border-black/10"
-            style={{ backgroundColor: categoryColor.hex }}
+            style={{ backgroundColor: def.color || categoryColor.hex }}
           >
             {/* Bottom Socket Indent */}
             <div className="absolute bottom-0 left-3 w-4 h-1 bg-black/30 rounded-t-sm" />
@@ -264,7 +271,7 @@ export const BlockView: React.FC<BlockViewProps> = ({
           className={`inline-flex items-center justify-start flex-row gap-2 cursor-grab active:cursor-grabbing select-none ${textContrastClass} text-[11px] px-3.5 py-1.5 shadow-sm border border-black/20 ${
             def.shape === 'boolean' ? 'rounded-full border-2 border-emerald-300' : 'rounded-full'
           }`}
-          style={{ backgroundColor: categoryColor.hex }}
+          style={{ backgroundColor: def.color || categoryColor.hex }}
         >
           {renderLabel()}
         </div>
@@ -283,7 +290,7 @@ export const BlockView: React.FC<BlockViewProps> = ({
         <svg className="absolute inset-0 w-full h-full pointer-events-none overflow-visible">
           <path
             d="M 0,6 a 6,6 0 0 1 6,-6 l 6,0 c 2,0 3,4 5,4 l 8,0 c 2,0 3,-4 5,-4 L calc(100% - 6px),0 a 6,6 0 0 1 6,6 L 100%,calc(100% - 6px) a 6,6 0 0 1 -6,6 L 28,100% c -2,0 -3,4 -5,4 l -8,0 c -2,0 -3,-4 -5,-4 L 6,100% a 6,6 0 0 1 -6,-6 Z"
-            fill={categoryColor.hex}
+            fill={def.color || categoryColor.hex}
             stroke="rgba(0,0,0,0.25)"
             strokeWidth="1.5"
           />

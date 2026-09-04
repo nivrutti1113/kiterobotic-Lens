@@ -6,7 +6,8 @@ export type Category =
   | "sound" 
   | "sensing" 
   | "operators"
-  | "variables";
+  | "variables"
+  | string;
 
 export type BlockShape = 
   | "hat" 
@@ -33,6 +34,8 @@ export type BlockDefinition = {
   label: string; // E.g. "Move Right {steps} steps"
   inputs?: Record<string, InputDefinition>;
   color: string;
+  sectionLabel?: string;
+  hasCheckbox?: boolean;
 };
 
 // Data Model
@@ -83,6 +86,7 @@ export type Project = {
   sprites: Sprite[];
   backdropUrl: string;
   gridVisible: boolean;
+  extensions?: string[]; // IDs of active extensions
 };
 
 export type ExecutionState = {
