@@ -2,22 +2,23 @@
 
 import React, { useState } from 'react';
 import { Category, BlockInstance } from '@/lib/junior-blocks/types';
-import { BLOCK_DEFINITIONS } from '@/lib/junior-blocks/blocks-def';
+import { BLOCK_DEFINITIONS, CATEGORY_COLORS } from '@/lib/junior-blocks/blocks-def';
 import { BlockView } from './BlockView';
-import { Navigation, Eye, Zap, Sliders, Volume2, Radio, Calculator } from 'lucide-react';
+import { Navigation, Eye, Zap, Sliders, Volume2, Radio, Calculator, Database } from 'lucide-react';
 
 interface BlockPaletteProps {
   onDragStartBlockTemplate: (e: React.DragEvent, blockType: string) => void;
 }
 
 const CATEGORY_TABS: { id: Category; label: string; icon: React.ReactNode }[] = [
-  { id: 'movement', label: 'Movement', icon: <Navigation className="w-3.5 h-3.5" /> },
-  { id: 'looks', label: 'Looks', icon: <Eye className="w-3.5 h-3.5" /> },
-  { id: 'events', label: 'Events', icon: <Zap className="w-3.5 h-3.5" /> },
-  { id: 'control', label: 'Control', icon: <Sliders className="w-3.5 h-3.5" /> },
-  { id: 'sound', label: 'Sound', icon: <Volume2 className="w-3.5 h-3.5" /> },
-  { id: 'sensing', label: 'Sensing', icon: <Radio className="w-3.5 h-3.5" /> },
-  { id: 'operators', label: 'Operators', icon: <Calculator className="w-3.5 h-3.5" /> },
+  { id: 'movement', label: 'Movement', icon: <Navigation className="w-4 h-4" /> },
+  { id: 'looks', label: 'Looks', icon: <Eye className="w-4 h-4" /> },
+  { id: 'sound', label: 'Sound', icon: <Volume2 className="w-4 h-4" /> },
+  { id: 'events', label: 'Events', icon: <Zap className="w-4 h-4" /> },
+  { id: 'control', label: 'Control', icon: <Sliders className="w-4 h-4" /> },
+  { id: 'sensing', label: 'Sensing', icon: <Radio className="w-4 h-4" /> },
+  { id: 'operators', label: 'Operators', icon: <Calculator className="w-4 h-4" /> },
+  { id: 'variables', label: 'Variables', icon: <Database className="w-4 h-4" /> },
 ];
 
 export const BlockPalette: React.FC<BlockPaletteProps> = ({
@@ -29,29 +30,53 @@ export const BlockPalette: React.FC<BlockPaletteProps> = ({
     (b) => b.category === activeCategory
   );
 
+  const currentCategoryColor = CATEGORY_COLORS[activeCategory] || CATEGORY_COLORS.movement;
+
   return (
-    <div className="flex flex-col h-full w-full bg-[#FFFDF9] font-sans border-r border-[#EEDCD0] overflow-hidden select-none">
+    <div className="flex h-full w-full bg-white font-sans overflow-hidden select-none border-r border-slate-200">
       
-      {/* Category Tabs Bar - Horizontal Scrollable Row at Top of Sidebar */}
-      <div className="p-2 bg-[#FAF3EC] border-b border-[#EEDCD0] flex items-center gap-1.5 overflow-x-auto shrink-0 scrollbar-none">
+      {/* SUB-COLUMN A: VERTICAL CATEGORY ICON STRIP (Width ~68px) */}
+      <div className="w-[68px] shrink-0 bg-slate-50 border-r border-slate-200/80 flex flex-col items-center py-2 space-y-1.5 overflow-y-auto scrollbar-none">
         {CATEGORY_TABS.map((tab) => {
           const isActive = activeCategory === tab.id;
+          const catColor = CATEGORY_COLORS[tab.id];
+
           return (
             <button
               key={tab.id}
               onClick={() => setActiveCategory(tab.id)}
-              className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl transition-all font-heading shrink-0 ${
-                isActive
-                  ? 'bg-purple-700 text-white shadow-sm ring-2 ring-purple-400 font-black'
-                  : 'bg-white text-slate-800 hover:bg-purple-100 border border-[#EEDCD0] font-bold'
+              className={`w-full py-2 px-1 flex flex-col items-center justify-center transition-all relative group cursor-pointer ${
+                isActive ? 'bg-white shadow-2xs font-black' : 'hover:bg-slate-100/80'
               }`}
               title={tab.label}
-              aria-label={tab.label}
             >
-              <div className={`p-0.5 rounded ${isActive ? 'text-white' : 'text-purple-800'}`}>
+              {/* Active Left Accent Border Line */}
+              {isActive && (
+                <div
+                  className="absolute left-0 top-1 bottom-1 w-1 rounded-r-full"
+                  style={{ backgroundColor: catColor.hex }}
+                />
+              )}
+
+              {/* Category Circle Icon Badge */}
+              <div
+                className={`w-8 h-8 rounded-full flex items-center justify-center transition-transform group-hover:scale-110 shadow-2xs ${
+                  isActive ? 'ring-2 ring-offset-1' : ''
+                }`}
+                style={{
+                  backgroundColor: catColor.hex,
+                  color: tab.id === 'events' ? '#0F172A' : '#FFFFFF',
+                }}
+              >
                 {tab.icon}
               </div>
-              <span className="text-xs whitespace-nowrap">
+
+              {/* Category Label */}
+              <span
+                className={`text-[9px] font-black tracking-tight mt-1 text-center truncate max-w-full font-heading ${
+                  isActive ? 'text-slate-900 font-extrabold' : 'text-slate-500'
+                }`}
+              >
                 {tab.label}
               </span>
             </button>
@@ -59,47 +84,55 @@ export const BlockPalette: React.FC<BlockPaletteProps> = ({
         })}
       </div>
 
-      {/* Category Title Header */}
-      <div className="px-3 py-2 bg-[#FFFDF9] border-b border-slate-100 flex items-center justify-between shrink-0">
-        <span className="text-[11px] font-black text-purple-950 uppercase tracking-wider font-heading">
-          {activeCategory} Blocks
-        </span>
-        <span className="text-[10px] text-slate-600 font-bold">Drag to Workspace ➔</span>
-      </div>
+      {/* SUB-COLUMN B: BLOCK LIST (Scrollable Remaining Width ~212px) */}
+      <div className="flex-1 flex flex-col h-full bg-[#FFFDF9] min-w-0 overflow-hidden">
+        
+        {/* Category Header */}
+        <div className="px-3 py-2 bg-white border-b border-slate-200/80 flex items-center justify-between shrink-0">
+          <span
+            className="text-[10px] font-black uppercase tracking-wider font-heading"
+            style={{ color: currentCategoryColor.hex }}
+          >
+            {activeCategory} Blocks
+          </span>
+          <span className="text-[9px] font-bold text-slate-400">Drag ➔</span>
+        </div>
 
-      {/* Vertical Scrollable Block List */}
-      <div className="flex-1 p-3 overflow-y-auto space-y-3 bg-[#FFFDF9] scrollbar-thin">
-        {categoryBlocks.map((def) => {
-          const sampleInputs: Record<string, number | string | BlockInstance> = {};
-          if (def.inputs) {
-            Object.entries(def.inputs).forEach(([k, v]) => {
-              sampleInputs[k] = v.defaultValue;
-            });
-          }
+        {/* Scrollable Draggable Blocks List */}
+        <div className="flex-1 p-3 overflow-y-auto space-y-3 scrollbar-thin bg-slate-50/50">
+          {categoryBlocks.map((def) => {
+            const sampleInputs: Record<string, number | string | BlockInstance> = {};
+            if (def.inputs) {
+              Object.entries(def.inputs).forEach(([k, v]) => {
+                sampleInputs[k] = v.defaultValue;
+              });
+            }
 
-          const templateBlock: BlockInstance = {
-            id: `template_${def.type}`,
-            type: def.type,
-            category: def.category,
-            inputs: sampleInputs,
-          };
+            const templateBlock: BlockInstance = {
+              id: `template_${def.type}`,
+              type: def.type,
+              category: def.category,
+              inputs: sampleInputs,
+            };
 
-          return (
-            <div
-              key={def.type}
-              draggable={true}
-              onDragStart={(e) => {
-                e.dataTransfer.setData('kms/block_type', def.type);
-                e.dataTransfer.setData('text/plain', def.type);
-                e.dataTransfer.effectAllowed = 'copy';
-                onDragStartBlockTemplate(e, def.type);
-              }}
-              className="hover:scale-[1.02] transition-transform cursor-grab active:cursor-grabbing select-none w-fit"
-            >
-              <BlockView block={templateBlock} isTemplate={true} />
-            </div>
-          );
-        })}
+            return (
+              <div
+                key={def.type}
+                draggable={true}
+                onDragStart={(e) => {
+                  e.dataTransfer.setData('kms/block_type', def.type);
+                  e.dataTransfer.setData('text/plain', def.type);
+                  e.dataTransfer.effectAllowed = 'copy';
+                  onDragStartBlockTemplate(e, def.type);
+                }}
+                className="hover:scale-[1.02] transition-transform cursor-grab active:cursor-grabbing select-none w-fit"
+              >
+                <BlockView block={templateBlock} isTemplate={true} />
+              </div>
+            );
+          })}
+        </div>
+
       </div>
 
     </div>

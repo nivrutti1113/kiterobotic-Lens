@@ -1,13 +1,14 @@
 import { BlockDefinition, Category } from "./types";
 
 export const CATEGORY_COLORS: Record<Category, { bg: string; border: string; text: string; hex: string }> = {
-  movement: { bg: "bg-blue-500", border: "border-blue-600", text: "text-white", hex: "#3B82F6" },
-  looks: { bg: "bg-purple-500", border: "border-purple-600", text: "text-white", hex: "#8B5CF6" },
-  events: { bg: "bg-amber-400", border: "border-amber-500", text: "text-slate-950", hex: "#F5C518" },
-  control: { bg: "bg-orange-500", border: "border-orange-600", text: "text-white", hex: "#F97316" },
-  sound: { bg: "bg-pink-500", border: "border-pink-600", text: "text-white", hex: "#EC4899" },
-  sensing: { bg: "bg-cyan-500", border: "border-cyan-600", text: "text-white", hex: "#06B6D4" },
-  operators: { bg: "bg-emerald-500", border: "border-emerald-600", text: "text-white", hex: "#22C55E" },
+  movement: { bg: "bg-[#4C97FF]", border: "border-[#3373CC]", text: "text-white", hex: "#4C97FF" },
+  looks: { bg: "bg-[#9966FF]", border: "border-[#7740E6]", text: "text-white", hex: "#9966FF" },
+  sound: { bg: "bg-[#D65CD6]", border: "border-[#BD42BD]", text: "text-white", hex: "#D65CD6" },
+  events: { bg: "bg-[#FFBF00]", border: "border-[#CC9900]", text: "text-slate-950", hex: "#FFBF00" },
+  control: { bg: "bg-[#FFAB19]", border: "border-[#CF8B11]", text: "text-white", hex: "#FFAB19" },
+  sensing: { bg: "bg-[#4CBFE6]", border: "border-[#2E9CBD]", text: "text-white", hex: "#4CBFE6" },
+  operators: { bg: "bg-[#59C059]", border: "border-[#389E38]", text: "text-white", hex: "#59C059" },
+  variables: { bg: "bg-[#FF8C1A]", border: "border-[#DB6E00]", text: "text-white", hex: "#FF8C1A" },
 };
 
 export const BLOCK_DEFINITIONS: Record<string, BlockDefinition> = {
@@ -17,7 +18,7 @@ export const BLOCK_DEFINITIONS: Record<string, BlockDefinition> = {
     category: "movement",
     shape: "stack",
     label: "Move Right {steps} steps",
-    color: "#3B82F6",
+    color: "#4C97FF",
     inputs: {
       steps: { name: "steps", type: "number", defaultValue: 10 },
     },
@@ -27,7 +28,7 @@ export const BLOCK_DEFINITIONS: Record<string, BlockDefinition> = {
     category: "movement",
     shape: "stack",
     label: "Move Left {steps} steps",
-    color: "#3B82F6",
+    color: "#4C97FF",
     inputs: {
       steps: { name: "steps", type: "number", defaultValue: 10 },
     },
@@ -37,7 +38,7 @@ export const BLOCK_DEFINITIONS: Record<string, BlockDefinition> = {
     category: "movement",
     shape: "stack",
     label: "Move Up {steps} steps",
-    color: "#3B82F6",
+    color: "#4C97FF",
     inputs: {
       steps: { name: "steps", type: "number", defaultValue: 10 },
     },
@@ -47,7 +48,7 @@ export const BLOCK_DEFINITIONS: Record<string, BlockDefinition> = {
     category: "movement",
     shape: "stack",
     label: "Move Down {steps} steps",
-    color: "#3B82F6",
+    color: "#4C97FF",
     inputs: {
       steps: { name: "steps", type: "number", defaultValue: 10 },
     },
@@ -57,7 +58,7 @@ export const BLOCK_DEFINITIONS: Record<string, BlockDefinition> = {
     category: "movement",
     shape: "stack",
     label: "Turn ↻ {degrees} degrees",
-    color: "#3B82F6",
+    color: "#4C97FF",
     inputs: {
       degrees: { name: "degrees", type: "number", defaultValue: 15 },
     },
@@ -67,7 +68,7 @@ export const BLOCK_DEFINITIONS: Record<string, BlockDefinition> = {
     category: "movement",
     shape: "stack",
     label: "Turn ↺ {degrees} degrees",
-    color: "#3B82F6",
+    color: "#4C97FF",
     inputs: {
       degrees: { name: "degrees", type: "number", defaultValue: 15 },
     },
@@ -77,7 +78,7 @@ export const BLOCK_DEFINITIONS: Record<string, BlockDefinition> = {
     category: "movement",
     shape: "stack",
     label: "Point in direction {degrees}°",
-    color: "#3B82F6",
+    color: "#4C97FF",
     inputs: {
       degrees: { name: "degrees", type: "number", defaultValue: 90 },
     },
@@ -87,14 +88,14 @@ export const BLOCK_DEFINITIONS: Record<string, BlockDefinition> = {
     category: "movement",
     shape: "stack",
     label: "Go to random position",
-    color: "#3B82F6",
+    color: "#4C97FF",
   },
   go_to_xy: {
     type: "go_to_xy",
     category: "movement",
     shape: "stack",
     label: "Go to x: {x} y: {y}",
-    color: "#3B82F6",
+    color: "#4C97FF",
     inputs: {
       x: { name: "x", type: "number", defaultValue: 0 },
       y: { name: "y", type: "number", defaultValue: 0 },
@@ -105,7 +106,7 @@ export const BLOCK_DEFINITIONS: Record<string, BlockDefinition> = {
     category: "movement",
     shape: "stack",
     label: "Glide {duration} secs to x: {x} y: {y}",
-    color: "#3B82F6",
+    color: "#4C97FF",
     inputs: {
       duration: { name: "duration", type: "number", defaultValue: 1 },
       x: { name: "x", type: "number", defaultValue: 100 },
@@ -118,10 +119,11 @@ export const BLOCK_DEFINITIONS: Record<string, BlockDefinition> = {
     type: "say_text",
     category: "looks",
     shape: "stack",
-    label: "Say {text}",
-    color: "#8B5CF6",
+    label: "Say {text} for {duration} secs",
+    color: "#9966FF",
     inputs: {
       text: { name: "text", type: "text", defaultValue: "Hello!" },
+      duration: { name: "duration", type: "number", defaultValue: 2 },
     },
   },
   show: {
@@ -129,21 +131,21 @@ export const BLOCK_DEFINITIONS: Record<string, BlockDefinition> = {
     category: "looks",
     shape: "stack",
     label: "Show",
-    color: "#8B5CF6",
+    color: "#9966FF",
   },
   hide: {
     type: "hide",
     category: "looks",
     shape: "stack",
     label: "Hide",
-    color: "#8B5CF6",
+    color: "#9966FF",
   },
   switch_costume: {
     type: "switch_costume",
     category: "looks",
     shape: "stack",
     label: "Switch costume to {costume}",
-    color: "#8B5CF6",
+    color: "#9966FF",
     inputs: {
       costume: {
         name: "costume",
@@ -162,131 +164,10 @@ export const BLOCK_DEFINITIONS: Record<string, BlockDefinition> = {
     category: "looks",
     shape: "stack",
     label: "Change size by {percent}%",
-    color: "#8B5CF6",
+    color: "#9966FF",
     inputs: {
       percent: { name: "percent", type: "number", defaultValue: 10 },
     },
-  },
-
-  // --- EVENTS ---
-  when_flag_clicked: {
-    type: "when_flag_clicked",
-    category: "events",
-    shape: "hat",
-    label: "When 🟢 flag clicked",
-    color: "#F5C518",
-  },
-  when_sprite_clicked: {
-    type: "when_sprite_clicked",
-    category: "events",
-    shape: "hat",
-    label: "When this sprite clicked",
-    color: "#F5C518",
-  },
-  when_key_pressed: {
-    type: "when_key_pressed",
-    category: "events",
-    shape: "hat",
-    label: "When key {key} pressed",
-    color: "#F5C518",
-    inputs: {
-      key: {
-        name: "key",
-        type: "select",
-        defaultValue: "space",
-        options: [
-          { label: "Space", value: "space" },
-          { label: "Up Arrow", value: "ArrowUp" },
-          { label: "Down Arrow", value: "ArrowDown" },
-          { label: "Left Arrow", value: "ArrowLeft" },
-          { label: "Right Arrow", value: "ArrowRight" },
-          { label: "Letter A", value: "a" },
-        ],
-      },
-    },
-  },
-  broadcast: {
-    type: "broadcast",
-    category: "events",
-    shape: "stack",
-    label: "Broadcast {message}",
-    color: "#F5C518",
-    inputs: {
-      message: { name: "message", type: "text", defaultValue: "message1" },
-    },
-  },
-  when_receive_message: {
-    type: "when_receive_message",
-    category: "events",
-    shape: "hat",
-    label: "When I receive {message}",
-    color: "#F5C518",
-    inputs: {
-      message: { name: "message", type: "text", defaultValue: "message1" },
-    },
-  },
-
-  // --- CONTROL ---
-  wait: {
-    type: "wait",
-    category: "control",
-    shape: "stack",
-    label: "Wait {seconds} seconds",
-    color: "#F97316",
-    inputs: {
-      seconds: { name: "seconds", type: "number", defaultValue: 1 },
-    },
-  },
-  repeat: {
-    type: "repeat",
-    category: "control",
-    shape: "c_block",
-    label: "Repeat {times} times",
-    color: "#F97316",
-    inputs: {
-      times: { name: "times", type: "number", defaultValue: 10 },
-    },
-  },
-  forever: {
-    type: "forever",
-    category: "control",
-    shape: "c_block",
-    label: "Forever",
-    color: "#F97316",
-  },
-  if_then: {
-    type: "if_then",
-    category: "control",
-    shape: "c_block",
-    label: "If {condition} then",
-    color: "#F97316",
-    inputs: {
-      condition: { name: "condition", type: "reporter", defaultValue: "" },
-    },
-  },
-  if_else: {
-    type: "if_else",
-    category: "control",
-    shape: "c_block_else",
-    label: "If {condition} then ... Else",
-    color: "#F97316",
-    inputs: {
-      condition: { name: "condition", type: "reporter", defaultValue: "" },
-    },
-  },
-  stop_script: {
-    type: "stop_script",
-    category: "control",
-    shape: "stack",
-    label: "Stop this script",
-    color: "#F97316",
-  },
-  stop_all: {
-    type: "stop_all",
-    category: "control",
-    shape: "stack",
-    label: "Stop all",
-    color: "#F97316",
   },
 
   // --- SOUND ---
@@ -295,7 +176,7 @@ export const BLOCK_DEFINITIONS: Record<string, BlockDefinition> = {
     category: "sound",
     shape: "stack",
     label: "Play sound {sound}",
-    color: "#EC4899",
+    color: "#D65CD6",
     inputs: {
       sound: {
         name: "sound",
@@ -317,7 +198,7 @@ export const BLOCK_DEFINITIONS: Record<string, BlockDefinition> = {
     category: "sound",
     shape: "stack",
     label: "Play sound {sound} until done",
-    color: "#EC4899",
+    color: "#D65CD6",
     inputs: {
       sound: {
         name: "sound",
@@ -338,10 +219,131 @@ export const BLOCK_DEFINITIONS: Record<string, BlockDefinition> = {
     category: "sound",
     shape: "stack",
     label: "Set volume to {volume}%",
-    color: "#EC4899",
+    color: "#D65CD6",
     inputs: {
       volume: { name: "volume", type: "number", defaultValue: 100 },
     },
+  },
+
+  // --- EVENTS ---
+  when_flag_clicked: {
+    type: "when_flag_clicked",
+    category: "events",
+    shape: "hat",
+    label: "When 🟢 flag clicked",
+    color: "#FFBF00",
+  },
+  when_sprite_clicked: {
+    type: "when_sprite_clicked",
+    category: "events",
+    shape: "hat",
+    label: "When this sprite clicked",
+    color: "#FFBF00",
+  },
+  when_key_pressed: {
+    type: "when_key_pressed",
+    category: "events",
+    shape: "hat",
+    label: "When key {key} pressed",
+    color: "#FFBF00",
+    inputs: {
+      key: {
+        name: "key",
+        type: "select",
+        defaultValue: "space",
+        options: [
+          { label: "Space", value: "space" },
+          { label: "Up Arrow", value: "ArrowUp" },
+          { label: "Down Arrow", value: "ArrowDown" },
+          { label: "Left Arrow", value: "ArrowLeft" },
+          { label: "Right Arrow", value: "ArrowRight" },
+          { label: "Letter A", value: "a" },
+        ],
+      },
+    },
+  },
+  broadcast: {
+    type: "broadcast",
+    category: "events",
+    shape: "stack",
+    label: "Broadcast {message}",
+    color: "#FFBF00",
+    inputs: {
+      message: { name: "message", type: "text", defaultValue: "message1" },
+    },
+  },
+  when_receive_message: {
+    type: "when_receive_message",
+    category: "events",
+    shape: "hat",
+    label: "When I receive {message}",
+    color: "#FFBF00",
+    inputs: {
+      message: { name: "message", type: "text", defaultValue: "message1" },
+    },
+  },
+
+  // --- CONTROL ---
+  wait: {
+    type: "wait",
+    category: "control",
+    shape: "stack",
+    label: "Wait {seconds} seconds",
+    color: "#FFAB19",
+    inputs: {
+      seconds: { name: "seconds", type: "number", defaultValue: 1 },
+    },
+  },
+  repeat: {
+    type: "repeat",
+    category: "control",
+    shape: "c_block",
+    label: "Repeat {times} times",
+    color: "#FFAB19",
+    inputs: {
+      times: { name: "times", type: "number", defaultValue: 10 },
+    },
+  },
+  forever: {
+    type: "forever",
+    category: "control",
+    shape: "c_block",
+    label: "Forever",
+    color: "#FFAB19",
+  },
+  if_then: {
+    type: "if_then",
+    category: "control",
+    shape: "c_block",
+    label: "If {condition} then",
+    color: "#FFAB19",
+    inputs: {
+      condition: { name: "condition", type: "reporter", defaultValue: "" },
+    },
+  },
+  if_else: {
+    type: "if_else",
+    category: "control",
+    shape: "c_block_else",
+    label: "If {condition} then ... Else",
+    color: "#FFAB19",
+    inputs: {
+      condition: { name: "condition", type: "reporter", defaultValue: "" },
+    },
+  },
+  stop_script: {
+    type: "stop_script",
+    category: "control",
+    shape: "stack",
+    label: "Stop this script",
+    color: "#FFAB19",
+  },
+  stop_all: {
+    type: "stop_all",
+    category: "control",
+    shape: "stack",
+    label: "Stop all",
+    color: "#FFAB19",
   },
 
   // --- SENSING ---
@@ -350,7 +352,7 @@ export const BLOCK_DEFINITIONS: Record<string, BlockDefinition> = {
     category: "sensing",
     shape: "boolean",
     label: "Touching {target}?",
-    color: "#06B6D4",
+    color: "#4CBFE6",
     inputs: {
       target: {
         name: "target",
@@ -368,7 +370,7 @@ export const BLOCK_DEFINITIONS: Record<string, BlockDefinition> = {
     category: "sensing",
     shape: "reporter",
     label: "Distance to {target}",
-    color: "#06B6D4",
+    color: "#4CBFE6",
     inputs: {
       target: {
         name: "target",
@@ -385,7 +387,7 @@ export const BLOCK_DEFINITIONS: Record<string, BlockDefinition> = {
     category: "sensing",
     shape: "stack",
     label: "Ask {question} and wait",
-    color: "#06B6D4",
+    color: "#4CBFE6",
     inputs: {
       question: { name: "question", type: "text", defaultValue: "What's your name?" },
     },
@@ -397,7 +399,7 @@ export const BLOCK_DEFINITIONS: Record<string, BlockDefinition> = {
     category: "operators",
     shape: "boolean",
     label: "{a} < {b}",
-    color: "#22C55E",
+    color: "#59C059",
     inputs: {
       a: { name: "a", type: "number", defaultValue: 5 },
       b: { name: "b", type: "number", defaultValue: 10 },
@@ -408,7 +410,7 @@ export const BLOCK_DEFINITIONS: Record<string, BlockDefinition> = {
     category: "operators",
     shape: "boolean",
     label: "{a} = {b}",
-    color: "#22C55E",
+    color: "#59C059",
     inputs: {
       a: { name: "a", type: "number", defaultValue: 5 },
       b: { name: "b", type: "number", defaultValue: 5 },
@@ -419,7 +421,7 @@ export const BLOCK_DEFINITIONS: Record<string, BlockDefinition> = {
     category: "operators",
     shape: "boolean",
     label: "{a} > {b}",
-    color: "#22C55E",
+    color: "#59C059",
     inputs: {
       a: { name: "a", type: "number", defaultValue: 10 },
       b: { name: "b", type: "number", defaultValue: 5 },
@@ -430,7 +432,7 @@ export const BLOCK_DEFINITIONS: Record<string, BlockDefinition> = {
     category: "operators",
     shape: "reporter",
     label: "{a} + {b}",
-    color: "#22C55E",
+    color: "#59C059",
     inputs: {
       a: { name: "a", type: "number", defaultValue: 1 },
       b: { name: "b", type: "number", defaultValue: 1 },
@@ -441,7 +443,7 @@ export const BLOCK_DEFINITIONS: Record<string, BlockDefinition> = {
     category: "operators",
     shape: "reporter",
     label: "{a} − {b}",
-    color: "#22C55E",
+    color: "#59C059",
     inputs: {
       a: { name: "a", type: "number", defaultValue: 10 },
       b: { name: "b", type: "number", defaultValue: 4 },
@@ -452,7 +454,7 @@ export const BLOCK_DEFINITIONS: Record<string, BlockDefinition> = {
     category: "operators",
     shape: "reporter",
     label: "{a} × {b}",
-    color: "#22C55E",
+    color: "#59C059",
     inputs: {
       a: { name: "a", type: "number", defaultValue: 3 },
       b: { name: "b", type: "number", defaultValue: 3 },
@@ -463,7 +465,7 @@ export const BLOCK_DEFINITIONS: Record<string, BlockDefinition> = {
     category: "operators",
     shape: "reporter",
     label: "{a} ÷ {b}",
-    color: "#22C55E",
+    color: "#59C059",
     inputs: {
       a: { name: "a", type: "number", defaultValue: 12 },
       b: { name: "b", type: "number", defaultValue: 3 },
@@ -474,7 +476,7 @@ export const BLOCK_DEFINITIONS: Record<string, BlockDefinition> = {
     category: "operators",
     shape: "boolean",
     label: "{a} and {b}",
-    color: "#22C55E",
+    color: "#59C059",
     inputs: {
       a: { name: "a", type: "reporter", defaultValue: "" },
       b: { name: "b", type: "reporter", defaultValue: "" },
@@ -485,7 +487,7 @@ export const BLOCK_DEFINITIONS: Record<string, BlockDefinition> = {
     category: "operators",
     shape: "boolean",
     label: "{a} or {b}",
-    color: "#22C55E",
+    color: "#59C059",
     inputs: {
       a: { name: "a", type: "reporter", defaultValue: "" },
       b: { name: "b", type: "reporter", defaultValue: "" },
@@ -496,9 +498,53 @@ export const BLOCK_DEFINITIONS: Record<string, BlockDefinition> = {
     category: "operators",
     shape: "boolean",
     label: "not {a}",
-    color: "#22C55E",
+    color: "#59C059",
     inputs: {
       a: { name: "a", type: "reporter", defaultValue: "" },
+    },
+  },
+
+  // --- VARIABLES ---
+  set_var: {
+    type: "set_var",
+    category: "variables",
+    shape: "stack",
+    label: "Set {variable} to {value}",
+    color: "#FF8C1A",
+    inputs: {
+      variable: { name: "variable", type: "text", defaultValue: "score" },
+      value: { name: "value", type: "number", defaultValue: 0 },
+    },
+  },
+  change_var: {
+    type: "change_var",
+    category: "variables",
+    shape: "stack",
+    label: "Change {variable} by {value}",
+    color: "#FF8C1A",
+    inputs: {
+      variable: { name: "variable", type: "text", defaultValue: "score" },
+      value: { name: "value", type: "number", defaultValue: 1 },
+    },
+  },
+  show_var: {
+    type: "show_var",
+    category: "variables",
+    shape: "stack",
+    label: "Show variable {variable}",
+    color: "#FF8C1A",
+    inputs: {
+      variable: { name: "variable", type: "text", defaultValue: "score" },
+    },
+  },
+  hide_var: {
+    type: "hide_var",
+    category: "variables",
+    shape: "stack",
+    label: "Hide variable {variable}",
+    color: "#FF8C1A",
+    inputs: {
+      variable: { name: "variable", type: "text", defaultValue: "score" },
     },
   },
 };

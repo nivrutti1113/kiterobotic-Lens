@@ -4,7 +4,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { BlockInstance, Sprite } from '@/lib/junior-blocks/types';
 import { BLOCK_DEFINITIONS } from '@/lib/junior-blocks/blocks-def';
 import { BlockView } from './BlockView';
-import { ZoomIn, ZoomOut, Maximize2, RotateCcw, RotateCw, Trash2, Copy, Sparkles } from 'lucide-react';
+import { ZoomIn, ZoomOut, RotateCcw, RotateCw, Trash2, Copy, Sparkles, Home } from 'lucide-react';
 
 interface WorkspaceProps {
   activeSprite: Sprite;
@@ -32,6 +32,7 @@ export const Workspace: React.FC<WorkspaceProps> = ({
   const [history, setHistory] = useState<BlockInstance[][]>([activeSprite.scripts]);
   const [historyIndex, setHistoryIndex] = useState<number>(0);
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number; scriptId: string } | null>(null);
+  const [snapTarget, setSnapTarget] = useState<{ x: number; y: number } | null>(null);
   const workspaceRef = useRef<HTMLDivElement>(null);
 
   const saveHistory = (newScripts: BlockInstance[]) => {
@@ -102,7 +103,7 @@ export const Workspace: React.FC<WorkspaceProps> = ({
     }
 
     const newBlock: BlockInstance = {
-      id: `block_${Date.now()}_${Math.floor(Math.random() * 1000)}`,
+      id: `b_${Date.now()}_${Math.floor(Math.random() * 1000)}`,
       type: blockType,
       category: def.category,
       inputs: sampleInputs,
@@ -130,23 +131,30 @@ export const Workspace: React.FC<WorkspaceProps> = ({
       });
     };
 
-    const updated = insertIntoTree(activeSprite.scripts);
-    saveHistory(updated);
+    const updatedScripts = insertIntoTree(activeSprite.scripts);
+    saveHistory(updatedScripts);
   };
 
   const handleDropOnWorkspace = (e: React.DragEvent) => {
     e.preventDefault();
-    setContextMenu(null);
-
-    const rect = workspaceRef.current?.getBoundingClientRect();
-    const dropX = rect ? (e.clientX - rect.left) / zoom : 40;
-    const dropY = rect ? (e.clientY - rect.top) / zoom : 40;
-
-    const blockType = e.dataTransfer.getData('kms/block_type');
     const existingBlockId = e.dataTransfer.getData('kms/existing_block_id');
+    const blockType = e.dataTransfer.getData('kms/block_type');
+
+    if (!workspaceRef.current) return;
+    const rect = workspaceRef.current.getBoundingClientRect();
+    const dropX = Math.round((e.clientX - rect.left) / zoom);
+    const dropY = Math.round((e.clientY - rect.top) / zoom);
+
+    if (existingBlockId) {
+      // Move existing root script
+      const updated = activeSprite.scripts.map((s) =>
+        s.id === existingBlockId ? { ...s, x: dropX, y: dropY } : s
+      );
+      saveHistory(updated);
+      return;
+    }
 
     if (blockType) {
-      // Adding new block from palette
       const def = BLOCK_DEFINITIONS[blockType];
       if (!def) return;
 
@@ -157,88 +165,16 @@ export const Workspace: React.FC<WorkspaceProps> = ({
         });
       }
 
-      const newBlock: BlockInstance = {
-        id: `block_${Date.now()}_${Math.floor(Math.random() * 1000)}`,
+      const newScript: BlockInstance = {
+        id: `b_${Date.now()}_${Math.floor(Math.random() * 1000)}`,
         type: blockType,
         category: def.category,
         inputs: sampleInputs,
-        x: Math.max(20, Math.round(dropX)),
-        y: Math.max(20, Math.round(dropY)),
+        x: dropX,
+        y: dropY,
       };
 
-      // Check magnetic snap to bottom of existing script
-      const scripts = [...activeSprite.scripts];
-      const targetScriptIndex = scripts.findIndex((s) => {
-        const rootX = s.x || 40;
-        const rootY = s.y || 40;
-        return Math.abs(dropX - rootX) < 100 && Math.abs(dropY - rootY) < 220;
-      });
-
-      if (targetScriptIndex !== -1) {
-        // Magnetic snap to bottom of chain
-        let tail = scripts[targetScriptIndex];
-        while (tail.next) {
-          tail = tail.next;
-        }
-        delete newBlock.x;
-        delete newBlock.y;
-        tail.next = newBlock;
-      } else {
-        scripts.push(newBlock);
-      }
-
-      saveHistory(scripts);
-    } else if (existingBlockId) {
-      // Check if block exists as a root script
-      const rootIndex = activeSprite.scripts.findIndex((s) => s.id === existingBlockId);
-      if (rootIndex !== -1) {
-        // Repositioning existing root script
-        const scripts = activeSprite.scripts.map((s) => {
-          if (s.id === existingBlockId) {
-            return { ...s, x: Math.max(20, Math.round(dropX)), y: Math.max(20, Math.round(dropY)) };
-          }
-          return s;
-        });
-        saveHistory(scripts);
-      } else {
-        // Detach nested block from inside a stack or C-block loop
-        let extractedBlock: BlockInstance | null = null;
-
-        const removeFromTree = (blocks: BlockInstance[]): BlockInstance[] => {
-          const result: BlockInstance[] = [];
-          for (let b of blocks) {
-            if (b.id === existingBlockId) {
-              extractedBlock = {
-                ...b,
-                next: undefined,
-                x: Math.max(20, Math.round(dropX)),
-                y: Math.max(20, Math.round(dropY)),
-              };
-              if (b.next) {
-                result.push(b.next);
-              }
-              continue;
-            }
-            let updated = { ...b };
-            if (updated.next) {
-              updated.next = removeFromTree([updated.next])[0] || undefined;
-            }
-            if (updated.children) {
-              updated.children = removeFromTree(updated.children);
-            }
-            if (updated.elseChildren) {
-              updated.elseChildren = removeFromTree(updated.elseChildren);
-            }
-            result.push(updated);
-          }
-          return result;
-        };
-
-        const cleanedScripts = removeFromTree(activeSprite.scripts);
-        if (extractedBlock) {
-          saveHistory([...cleanedScripts, extractedBlock]);
-        }
-      }
+      saveHistory([...activeSprite.scripts, newScript]);
     }
   };
 
@@ -248,16 +184,22 @@ export const Workspace: React.FC<WorkspaceProps> = ({
   };
 
   const handleDuplicateScript = (scriptId: string) => {
-    const script = activeSprite.scripts.find((s) => s.id === scriptId);
-    if (!script) return;
+    const scriptToDup = activeSprite.scripts.find((s) => s.id === scriptId);
+    if (!scriptToDup) return;
 
-    const cloned: BlockInstance = JSON.parse(JSON.stringify(script));
-    cloned.id = `block_${Date.now()}`;
-    cloned.x = (script.x || 40) + 40;
-    cloned.y = (script.y || 40) + 40;
+    const cloneBlock = (b: BlockInstance): BlockInstance => ({
+      ...b,
+      id: `b_${Date.now()}_${Math.floor(Math.random() * 1000)}`,
+      next: b.next ? cloneBlock(b.next) : undefined,
+      children: b.children ? b.children.map(cloneBlock) : undefined,
+      elseChildren: b.elseChildren ? b.elseChildren.map(cloneBlock) : undefined,
+    });
 
-    const updated = [...activeSprite.scripts, cloned];
-    saveHistory(updated);
+    const duplicated = cloneBlock(scriptToDup);
+    duplicated.x = (scriptToDup.x || 40) + 30;
+    duplicated.y = (scriptToDup.y || 40) + 30;
+
+    saveHistory([...activeSprite.scripts, duplicated]);
     setContextMenu(null);
   };
 
@@ -267,43 +209,34 @@ export const Workspace: React.FC<WorkspaceProps> = ({
     setContextMenu(null);
   };
 
-  const handleDragStartExisting = (e: React.DragEvent, block: BlockInstance) => {
-    e.dataTransfer.setData('kms/existing_block_id', block.id);
-  };
-
-  const [snapTarget, setSnapTarget] = useState<{ x: number; y: number } | null>(null);
-
   const handleDragOverWorkspace = (e: React.DragEvent) => {
     e.preventDefault();
-    e.dataTransfer.dropEffect = 'copy';
+    if (!workspaceRef.current) return;
+    const rect = workspaceRef.current.getBoundingClientRect();
+    const mouseX = (e.clientX - rect.left) / zoom;
+    const mouseY = (e.clientY - rect.top) / zoom;
 
-    const rect = workspaceRef.current?.getBoundingClientRect();
-    if (!rect) return;
+    let foundSnap: { x: number; y: number } | null = null;
 
-    const dragX = (e.clientX - rect.left) / zoom;
-    const dragY = (e.clientY - rect.top) / zoom;
+    for (const script of activeSprite.scripts) {
+      const scriptX = script.x || 40;
+      const scriptY = script.y || 40;
 
-    // Check snap distance to any existing script
-    const targetScript = activeSprite.scripts.find((s) => {
-      const rootX = s.x || 40;
-      const rootY = s.y || 40;
-      return Math.abs(dragX - rootX) < 80 && Math.abs(dragY - (rootY + 50)) < 70;
-    });
-
-    if (targetScript) {
-      const rootX = targetScript.x || 40;
-      let tail = targetScript;
-      let stackDepth = 1;
-      while (tail.next) {
-        tail = tail.next;
-        stackDepth++;
+      if (Math.abs(mouseX - scriptX) < 80 && Math.abs(mouseY - scriptY) < 120) {
+        let lastBlock = script;
+        let stackDepth = 1;
+        while (lastBlock.next) {
+          lastBlock = lastBlock.next;
+          stackDepth++;
+        }
+        foundSnap = { x: scriptX, y: scriptY + stackDepth * 42 };
+        break;
       }
-      const rootY = (targetScript.y || 40) + stackDepth * 40;
-      setSnapTarget({ x: rootX, y: rootY });
-    } else {
-      setSnapTarget(null);
     }
+
+    setSnapTarget(foundSnap);
   };
+
   return (
     <div
       ref={workspaceRef}
@@ -313,18 +246,18 @@ export const Workspace: React.FC<WorkspaceProps> = ({
         handleDropOnWorkspace(e);
       }}
       onClick={() => setContextMenu(null)}
-      className="relative flex-1 bg-white h-full overflow-auto shadow-inner rounded-r-2xl border-l border-[#EEDCD0] font-sans"
+      className="relative flex-1 bg-[#F8F9FC] h-full overflow-auto shadow-inner font-sans select-none"
       style={{
         backgroundImage: `radial-gradient(#CBD5E1 1.5px, transparent 1.5px)`,
         backgroundSize: `${24 * zoom}px ${24 * zoom}px`,
       }}
     >
-      {/* Workspace Scripts Container */}
+      {/* Workspace Canvas Container */}
       <div
-        className="min-w-[1200px] min-h-[900px] p-8 relative transform-origin-top-left transition-transform duration-75"
+        className="min-w-[1400px] min-h-[1000px] p-8 relative transform-origin-top-left transition-transform duration-75"
         style={{ transform: `scale(${zoom})` }}
       >
-        {/* Highlighted Snap Preview Line when dragging near a stack */}
+        {/* Snap Line Highlight Preview */}
         {snapTarget && (
           <div
             className="absolute h-1.5 bg-amber-400 border border-purple-600 rounded-full shadow-lg animate-pulse z-40 pointer-events-none"
@@ -336,11 +269,12 @@ export const Workspace: React.FC<WorkspaceProps> = ({
           />
         )}
 
+        {/* Workspace Root Block Scripts */}
         {activeSprite.scripts.map((script) => (
           <div
             key={script.id}
             onContextMenu={(e) => handleContextMenu(e, script.id)}
-            className="absolute cursor-grab active:cursor-grabbing hover:ring-2 hover:ring-purple-500 rounded-xl transition-shadow"
+            className="absolute cursor-grab active:cursor-grabbing hover:ring-2 hover:ring-purple-500/50 rounded-xl transition-shadow"
             style={{ left: `${script.x || 40}px`, top: `${script.y || 40}px` }}
           >
             <BlockView
@@ -352,13 +286,14 @@ export const Workspace: React.FC<WorkspaceProps> = ({
           </div>
         ))}
 
+        {/* Empty Workspace Placeholder */}
         {activeSprite.scripts.length === 0 && (
           <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-            <div className="w-16 h-16 rounded-3xl bg-purple-100 text-purple-800 flex items-center justify-center mb-3 shadow-inner">
-              <Sparkles className="w-8 h-8 text-purple-700" />
+            <div className="w-16 h-16 rounded-3xl bg-purple-100 text-[#6C2EB5] flex items-center justify-center mb-3 shadow-inner">
+              <Sparkles className="w-8 h-8 text-[#6C2EB5]" />
             </div>
-            <p className="font-black text-base text-slate-950 font-heading">Workspace is Empty</p>
-            <p className="text-xs text-slate-700 font-bold mt-1">Drag blocks from the left palette to start coding {activeSprite.name}!</p>
+            <p className="font-black text-base text-slate-900 font-heading">Workspace is Empty</p>
+            <p className="text-xs text-slate-600 font-bold mt-1">Drag blocks from the left palette to start coding {activeSprite.name}!</p>
           </div>
         )}
       </div>
@@ -366,27 +301,27 @@ export const Workspace: React.FC<WorkspaceProps> = ({
       {/* Right-Click Context Menu */}
       {contextMenu && (
         <div
-          className="fixed z-50 bg-[#FFFDF9] border border-[#EEDCD0] rounded-2xl shadow-2xl py-1.5 w-48 text-xs font-black text-slate-950 font-heading"
+          className="fixed z-50 bg-white border border-slate-200 rounded-2xl shadow-2xl py-1.5 w-48 text-xs font-black text-slate-900 font-heading"
           style={{ top: `${contextMenu.y}px`, left: `${contextMenu.x}px` }}
         >
           <button
             onClick={() => handleDuplicateScript(contextMenu.scriptId)}
-            className="w-full px-3.5 py-2 text-left hover:bg-purple-100 hover:text-purple-900 flex items-center gap-2"
+            className="w-full px-3.5 py-2 text-left hover:bg-purple-50 hover:text-[#6C2EB5] flex items-center gap-2"
           >
-            <Copy className="w-4 h-4 text-purple-700" />
+            <Copy className="w-4 h-4 text-[#6C2EB5]" />
             <span>Duplicate Script</span>
           </button>
           <button
             onClick={() => handleDeleteScript(contextMenu.scriptId)}
-            className="w-full px-3.5 py-2 text-left hover:bg-rose-100 text-rose-900 flex items-center gap-2 border-t border-slate-100"
+            className="w-full px-3.5 py-2 text-left hover:bg-rose-50 text-rose-700 flex items-center gap-2 border-t border-slate-100"
           >
-            <Trash2 className="w-4 h-4 text-rose-700" />
+            <Trash2 className="w-4 h-4 text-rose-600" />
             <span>Delete Script</span>
           </button>
         </div>
       )}
 
-      {/* Bottom Trash Drop Zone */}
+      {/* Bottom-Left Trash Drop Zone (Pill shape) */}
       <div
         onDragOver={(e) => e.preventDefault()}
         onDrop={(e) => {
@@ -394,12 +329,44 @@ export const Workspace: React.FC<WorkspaceProps> = ({
           const existingBlockId = e.dataTransfer.getData('kms/existing_block_id');
           if (existingBlockId) handleDeleteScript(existingBlockId);
         }}
-        className="absolute bottom-4 left-4 z-20 flex items-center gap-2 px-4 py-2.5 bg-rose-100/80 hover:bg-rose-200 text-rose-950 border border-rose-300 rounded-2xl shadow-md text-xs font-black transition-colors font-heading"
+        className="absolute bottom-4 left-4 z-20 flex items-center gap-1.5 px-3.5 py-1.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-700 border border-rose-300/80 rounded-full shadow-2xs text-xs font-black transition-colors font-heading cursor-pointer backdrop-blur-xs"
       >
-        <Trash2 className="w-4 h-4 text-rose-700" />
-        <span>Drag here to delete</span>
+        <Trash2 className="w-3.5 h-3.5 text-rose-600" />
+        <span>🗑 Drag here to delete</span>
+      </div>
+
+      {/* Floating Bottom-Right Circular Zoom & Pan Control Cluster */}
+      <div className="absolute bottom-4 right-4 z-20 flex items-center gap-2 bg-white/90 p-1.5 rounded-full border border-slate-200 shadow-md backdrop-blur-xs">
+        <button
+          onClick={() => setZoom((z) => Math.min(2.0, z + 0.1))}
+          className="w-8 h-8 bg-white hover:bg-slate-100 rounded-full flex items-center justify-center text-slate-700 transition-colors shadow-2xs"
+          title="Zoom In"
+        >
+          <ZoomIn className="w-4 h-4" />
+        </button>
+        <button
+          onClick={() => setZoom((z) => Math.max(0.5, z - 0.1))}
+          className="w-8 h-8 bg-white hover:bg-slate-100 rounded-full flex items-center justify-center text-slate-700 transition-colors shadow-2xs"
+          title="Zoom Out"
+        >
+          <ZoomOut className="w-4 h-4" />
+        </button>
+        <button
+          onClick={() => setZoom(1.0)}
+          className="w-8 h-8 bg-white hover:bg-slate-100 rounded-full flex items-center justify-center text-slate-700 transition-colors shadow-2xs font-black text-xs"
+          title="Reset Zoom / Home"
+        >
+          <Home className="w-4 h-4 text-slate-700" />
+        </button>
       </div>
 
     </div>
   );
+
+  function handleDragStartExisting(e: React.DragEvent, script: BlockInstance) {
+    e.stopPropagation();
+    e.dataTransfer.setData('kms/existing_block_id', script.id);
+    e.dataTransfer.setData('text/plain', script.id);
+    e.dataTransfer.effectAllowed = 'move';
+  }
 };

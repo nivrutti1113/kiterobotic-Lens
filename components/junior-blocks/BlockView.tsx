@@ -27,11 +27,11 @@ export const BlockView: React.FC<BlockViewProps> = ({
     category: block.category || 'movement',
     shape: 'stack',
     label: block.type,
-    color: '#3B82F6',
+    color: '#4C97FF',
   };
 
   const categoryColor = CATEGORY_COLORS[def.category as Category] || CATEGORY_COLORS.movement;
-  const isDarkText = def.category === 'events' || def.category === 'sensing';
+  const isDarkText = def.category === 'events';
 
   const handleTextOrNumChange = (inputName: string, valStr: string) => {
     if (!onInputChange) return;
@@ -40,11 +40,11 @@ export const BlockView: React.FC<BlockViewProps> = ({
     onInputChange(block.id, inputName, val);
   };
 
-  // Render label parts with inputs inserted in a strict horizontal flex row
+  // Render label parts with inputs inserted as unified inline white pill elements
   const renderLabel = () => {
     const parts = def.label.split(/(\{[\w]+\})/g);
     return (
-      <div className="relative z-10 flex items-center justify-start flex-row gap-2 whitespace-nowrap leading-none">
+      <div className="relative z-10 flex items-center justify-start flex-row gap-1.5 whitespace-nowrap leading-none">
         {parts.map((part, idx) => {
           if (!part) return null;
           if (part.startsWith('{') && part.endsWith('}')) {
@@ -53,7 +53,7 @@ export const BlockView: React.FC<BlockViewProps> = ({
             const val = block.inputs?.[inputName] !== undefined ? block.inputs[inputName] : inputDef?.defaultValue ?? '';
 
             if (typeof val === 'object' && val !== null) {
-              // Nested operator block
+              // Nested reporter/operator block
               return (
                 <span key={idx} className="inline-flex items-center shrink-0">
                   <BlockView block={val as BlockInstance} onInputChange={onInputChange} isTemplate={false} />
@@ -67,7 +67,7 @@ export const BlockView: React.FC<BlockViewProps> = ({
                   key={idx}
                   value={String(val)}
                   onChange={(e) => onInputChange && onInputChange(block.id, inputName, e.target.value)}
-                  className="bg-white/95 text-slate-950 font-black px-2 py-1 rounded-md text-xs focus:outline-none cursor-pointer border border-slate-300 shadow-sm shrink-0 my-0"
+                  className="bg-white/95 text-slate-950 font-black px-2 py-0.5 rounded-md text-xs focus:outline-none cursor-pointer border border-black/20 shadow-inner shrink-0 my-0"
                 >
                   {inputDef.options?.map((opt) => (
                     <option key={opt.value} value={opt.value} className="bg-slate-900 text-white font-bold">
@@ -84,10 +84,11 @@ export const BlockView: React.FC<BlockViewProps> = ({
                 type="text"
                 value={String(val)}
                 onChange={(e) => handleTextOrNumChange(inputName, e.target.value)}
-                className="w-14 bg-white/95 text-slate-950 font-black px-1.5 py-1 rounded-md text-xs border border-slate-300 focus:outline-none focus:ring-2 focus:ring-purple-600 text-center shadow-sm shrink-0 my-0"
+                className="w-14 bg-white/95 text-slate-950 font-black px-2 py-0.5 rounded-md text-xs border border-black/20 focus:outline-none focus:ring-2 focus:ring-purple-600 text-center shadow-inner shrink-0 my-0"
               />
             );
           }
+
           return (
             <span key={idx} className="whitespace-nowrap font-black inline-block text-xs leading-none">
               {part}
@@ -98,7 +99,7 @@ export const BlockView: React.FC<BlockViewProps> = ({
     );
   };
 
-  const textContrastClass = isDarkText ? 'text-slate-950 font-black' : 'text-white font-black drop-shadow-sm';
+  const textContrastClass = isDarkText ? 'text-slate-950 font-black' : 'text-white font-black drop-shadow-xs';
 
   const handleDragStartBlock = (e: React.DragEvent) => {
     e.stopPropagation();
@@ -108,7 +109,7 @@ export const BlockView: React.FC<BlockViewProps> = ({
     if (onDragStart) onDragStart(e, block);
   };
 
-  // Render authentic Scratch puzzle piece shape SVG overlay
+  // Render authentic Scratch/PictoBlox puzzle piece shape SVG overlay
   const renderSingleBlock = () => {
     // 1. Hat Block (Dome Top + Bottom Socket)
     if (def.shape === 'hat') {

@@ -3,7 +3,7 @@
 import React, { useRef, useEffect } from 'react';
 import { Project } from '@/lib/junior-blocks/types';
 import { BACKDROP_CATALOG } from '@/lib/junior-blocks/catalog';
-import { Play, Square, MessageSquare, Send } from 'lucide-react';
+import { Play, Square, MessageSquare, Send, RotateCcw, Camera, Grid } from 'lucide-react';
 
 interface StageCanvasProps {
   project: Project;
@@ -12,6 +12,9 @@ interface StageCanvasProps {
   isRunning: boolean;
   askPrompt: string | null;
   onToggleRun: () => void;
+  onRestart?: () => void;
+  onTakeScreenshot?: () => void;
+  onToggleGrid?: () => void;
   onSubmitAnswer: (answer: string) => void;
   onSelectSprite: (spriteId: string) => void;
   onSpriteClickTrigger?: (spriteId: string) => void;
@@ -24,6 +27,9 @@ export const StageCanvas: React.FC<StageCanvasProps> = ({
   isRunning,
   askPrompt,
   onToggleRun,
+  onRestart,
+  onTakeScreenshot,
+  onToggleGrid,
   onSubmitAnswer,
   onSelectSprite,
   onSpriteClickTrigger,
@@ -54,7 +60,7 @@ export const StageCanvas: React.FC<StageCanvasProps> = ({
       ctx.fillStyle = activeBackdrop.color || '#FFFFFF';
       ctx.fillRect(0, 0, width, height);
 
-      // 2. Draw Coordinate Grid Ruler if enabled
+      // 2. Draw Grid Ruler if enabled
       if (gridVisible) {
         ctx.strokeStyle = '#E2E8F0';
         ctx.lineWidth = 1;
@@ -108,21 +114,21 @@ export const StageCanvas: React.FC<StageCanvasProps> = ({
         }
 
         if (cachedImg && cachedImg.complete && cachedImg.naturalWidth !== 0) {
-          ctx.drawImage(cachedImg, -35, -35, 70, 70);
+          ctx.drawImage(cachedImg, -32, -32, 64, 64);
         } else {
-          // Fallback shape while image is initially loading
-          ctx.fillStyle = '#6D28D9';
+          // Fallback circle while image loads
+          ctx.fillStyle = '#6C2EB5';
           ctx.beginPath();
-          ctx.arc(0, 0, 25, 0, Math.PI * 2);
+          ctx.arc(0, 0, 22, 0, Math.PI * 2);
           ctx.fill();
         }
 
         // Draw selection ring for currently active sprite
         if (sprite.id === activeSpriteId) {
-          ctx.strokeStyle = '#7C3AED';
-          ctx.lineWidth = 3;
+          ctx.strokeStyle = '#6C2EB5';
+          ctx.lineWidth = 2.5;
           ctx.setLineDash([4, 4]);
-          ctx.strokeRect(-40, -40, 80, 80);
+          ctx.strokeRect(-36, -36, 72, 72);
           ctx.setLineDash([]);
         }
 
@@ -136,10 +142,10 @@ export const StageCanvas: React.FC<StageCanvasProps> = ({
           const bubbleW = textMetrics.width + 20;
           const bubbleH = 28;
           const bubbleX = stageX - bubbleW / 2;
-          const bubbleY = stageY - 65;
+          const bubbleY = stageY - 60;
 
           ctx.fillStyle = '#FFFFFF';
-          ctx.strokeStyle = '#5B21B6';
+          ctx.strokeStyle = '#6C2EB5';
           ctx.lineWidth = 2;
           ctx.beginPath();
           ctx.roundRect(bubbleX, bubbleY, bubbleW, bubbleH, 10);
@@ -155,7 +161,7 @@ export const StageCanvas: React.FC<StageCanvasProps> = ({
           ctx.fill();
           ctx.stroke();
 
-          ctx.fillStyle = '#1E1B4B';
+          ctx.fillStyle = '#0F172A';
           ctx.textAlign = 'center';
           ctx.textBaseline = 'middle';
           ctx.fillText(sprite.sayBubble.text, stageX, bubbleY + bubbleH / 2);
@@ -191,18 +197,18 @@ export const StageCanvas: React.FC<StageCanvasProps> = ({
   };
 
   return (
-    <div className="relative bg-white rounded-2xl border-2 border-slate-200 shadow-md overflow-hidden flex flex-col font-sans">
+    <div className="relative bg-white rounded-2xl border border-slate-200 shadow-sm p-2.5 flex flex-col gap-2 font-sans select-none">
       
-      {/* Authentic Scratch Stage Top Header Bar (Green Flag & Stop Controls) */}
-      <div className="px-3 py-1.5 bg-slate-100 border-b border-slate-200 flex items-center justify-between shrink-0 select-none">
-        <div className="flex items-center gap-2">
+      {/* Stage Header Controls Bar */}
+      <div className="px-2 py-1 bg-slate-50 rounded-xl border border-slate-200/80 flex items-center justify-between shrink-0">
+        <div className="flex items-center gap-1.5">
           {/* Green Flag Button */}
           <button
             onClick={onToggleRun}
-            className={`p-1.5 rounded-lg transition-all ${
-              isRunning ? 'bg-emerald-100 text-emerald-800 ring-2 ring-emerald-400' : 'hover:bg-emerald-100 text-emerald-600'
+            className={`p-1.5 rounded-full transition-all ${
+              isRunning ? 'bg-emerald-100 ring-2 ring-emerald-400' : 'hover:bg-emerald-100'
             }`}
-            title="Go / Run Flag Scripts"
+            title="Run Flag Scripts"
           >
             <Play className="w-4 h-4 fill-emerald-600 text-emerald-600" />
           </button>
@@ -210,8 +216,8 @@ export const StageCanvas: React.FC<StageCanvasProps> = ({
           {/* Red Octagon Stop Button */}
           <button
             onClick={onToggleRun}
-            className={`p-1.5 rounded-lg transition-all ${
-              !isRunning ? 'hover:bg-rose-100 text-rose-600' : 'bg-rose-600 text-white ring-2 ring-rose-400'
+            className={`p-1.5 rounded-full transition-all ${
+              !isRunning ? 'hover:bg-rose-100' : 'bg-rose-600 text-white ring-2 ring-rose-400'
             }`}
             title="Stop Execution"
           >
@@ -219,54 +225,105 @@ export const StageCanvas: React.FC<StageCanvasProps> = ({
           </button>
         </div>
 
-        {/* Active Sprite Info Label */}
-        <span className="text-[11px] font-black text-slate-700 tracking-tight">
+        {/* Active Sprite Name Label */}
+        <span className="text-xs font-black text-slate-800 tracking-tight font-heading">
           {activeSprite?.name || 'Stage'}
         </span>
       </div>
 
-      {/* Stage Backdrop & Ruler Canvas */}
-      <canvas
-        ref={canvasRef}
-        width={400}
-        height={300}
-        onClick={handleCanvasClick}
-        className="w-full h-auto cursor-pointer block"
-      />
+      {/* 4:3 Aspect Ratio Stage Canvas */}
+      <div className="relative w-full aspect-[4/3] rounded-xl overflow-hidden border border-slate-200 bg-white">
+        <canvas
+          ref={canvasRef}
+          width={400}
+          height={300}
+          onClick={handleCanvasClick}
+          className="w-full h-full cursor-pointer block object-contain"
+        />
 
-      {/* Ask & Wait Input Overlay Box */}
-      {askPrompt && (
-        <div className="absolute bottom-3 left-3 right-3 bg-white/95 border-2 border-purple-500 p-3 rounded-2xl shadow-2xl flex items-center gap-2 backdrop-blur-md animate-bounce">
-          <MessageSquare className="w-5 h-5 text-purple-600 shrink-0" />
-          <div className="flex-1">
-            <p className="text-xs font-extrabold text-slate-900">{askPrompt}</p>
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                onSubmitAnswer(answerInput);
-                setAnswerInput('');
-              }}
-              className="flex items-center gap-2 mt-1"
-            >
-              <input
-                type="text"
-                value={answerInput}
-                onChange={(e) => setAnswerInput(e.target.value)}
-                placeholder="Type your answer..."
-                autoFocus
-                className="flex-1 bg-slate-100 text-slate-900 font-bold px-3 py-1.5 rounded-xl text-xs border border-slate-300 focus:outline-none focus:ring-2 focus:ring-purple-600"
-              />
-              <button
-                type="submit"
-                className="px-3 py-1.5 bg-purple-700 hover:bg-purple-800 text-white font-black text-xs rounded-xl shadow transition-colors flex items-center gap-1"
+        {/* Ask & Wait Input Overlay Box */}
+        {askPrompt && (
+          <div className="absolute bottom-2 left-2 right-2 bg-white/95 border-2 border-[#6C2EB5] p-2.5 rounded-2xl shadow-2xl flex items-center gap-2 backdrop-blur-md animate-bounce">
+            <MessageSquare className="w-4 h-4 text-[#6C2EB5] shrink-0" />
+            <div className="flex-1">
+              <p className="text-xs font-extrabold text-slate-900">{askPrompt}</p>
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  onSubmitAnswer(answerInput);
+                  setAnswerInput('');
+                }}
+                className="flex items-center gap-1.5 mt-1"
               >
-                <span>Submit</span>
-                <Send className="w-3.5 h-3.5" />
-              </button>
-            </form>
+                <input
+                  type="text"
+                  value={answerInput}
+                  onChange={(e) => setAnswerInput(e.target.value)}
+                  placeholder="Type your answer..."
+                  autoFocus
+                  className="flex-1 bg-slate-100 text-slate-900 font-bold px-2.5 py-1 rounded-xl text-xs border border-slate-300 focus:outline-none focus:ring-2 focus:ring-purple-600"
+                />
+                <button
+                  type="submit"
+                  className="px-2.5 py-1 bg-[#6C2EB5] hover:bg-[#5b259b] text-white font-black text-xs rounded-xl shadow transition-colors flex items-center gap-1"
+                >
+                  <span>Submit</span>
+                  <Send className="w-3 h-3" />
+                </button>
+              </form>
+            </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
+
+      {/* Below Stage: Run Controls Row (Pill buttons) */}
+      <div className="flex items-center justify-between gap-1.5 flex-wrap pt-0.5">
+        <button
+          onClick={onToggleRun}
+          className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full font-black text-xs shadow-xs transition-all hover:scale-105 font-heading ${
+            isRunning
+              ? 'bg-rose-600 text-white'
+              : 'bg-emerald-600 text-white hover:bg-emerald-700'
+          }`}
+        >
+          {isRunning ? <Square className="w-3.5 h-3.5 fill-current" /> : <Play className="w-3.5 h-3.5 fill-current" />}
+          <span>{isRunning ? 'Stop' : '▶ Run Green Flag'}</span>
+        </button>
+
+        {onRestart && (
+          <button
+            onClick={onRestart}
+            className="flex items-center gap-1 px-3 py-1.5 rounded-full border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold text-xs transition-colors"
+            title="Reset Sprites"
+          >
+            <RotateCcw className="w-3.5 h-3.5 text-slate-500" />
+            <span>Reset</span>
+          </button>
+        )}
+
+        {onTakeScreenshot && (
+          <button
+            onClick={onTakeScreenshot}
+            className="flex items-center gap-1 px-3 py-1.5 rounded-full border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold text-xs transition-colors"
+            title="Snapshot Stage"
+          >
+            <Camera className="w-3.5 h-3.5 text-slate-500" />
+            <span>Snapshot</span>
+          </button>
+        )}
+
+        {onToggleGrid && (
+          <button
+            onClick={onToggleGrid}
+            className={`flex items-center gap-1 px-3 py-1.5 rounded-full border text-xs font-bold transition-colors ${
+              gridVisible ? 'bg-cyan-50 border-cyan-300 text-cyan-800' : 'border-slate-200 text-slate-700 hover:bg-slate-50'
+            }`}
+          >
+            <Grid className="w-3.5 h-3.5 text-slate-500" />
+            <span>Grid {gridVisible ? 'ON' : 'OFF'}</span>
+          </button>
+        )}
+      </div>
 
     </div>
   );

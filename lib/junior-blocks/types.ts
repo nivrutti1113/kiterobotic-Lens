@@ -5,7 +5,8 @@ export type Category =
   | "control" 
   | "sound" 
   | "sensing" 
-  | "operators";
+  | "operators"
+  | "variables";
 
 export type BlockShape = 
   | "hat" 
@@ -29,12 +30,12 @@ export type BlockDefinition = {
   type: string;
   category: Category;
   shape: BlockShape;
-  label: string; // E.g. "Move Right {n} steps"
+  label: string; // E.g. "Move Right {steps} steps"
   inputs?: Record<string, InputDefinition>;
   color: string;
 };
 
-// Data Model as specified in Section 6 of spec
+// Data Model
 export type BlockInstance = {
   id: string;
   type: string; // e.g. "move_right", "repeat", "if_else"

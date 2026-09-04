@@ -14,7 +14,6 @@ import { BlockPalette } from './BlockPalette';
 import { Workspace } from './Workspace';
 import { StageCanvas } from './StageCanvas';
 import { SpriteScenePanel } from './SpriteScenePanel';
-import { BottomToolbar } from './BottomToolbar';
 import { HelpModal } from './HelpModal';
 import { PythonCodeDrawer } from './PythonCodeDrawer';
 
@@ -196,12 +195,12 @@ export function JuniorBlocksStudio() {
     <div
       className={
         isFullscreen
-          ? 'fixed inset-0 z-50 bg-[#FAF7F5] w-screen h-screen flex flex-col overflow-hidden select-none p-2 gap-2'
-          : 'flex flex-col h-[calc(100vh-6rem)] min-h-[700px] w-full bg-[#FAF7F5] text-slate-900 font-sans select-none rounded-3xl border-2 border-slate-200 shadow-xl overflow-hidden'
+          ? 'fixed inset-0 z-50 bg-[#FAF9FC] w-screen h-screen flex flex-col overflow-hidden select-none'
+          : 'flex flex-col h-[calc(100vh-5rem)] min-h-[680px] w-full bg-[#FAF9FC] text-slate-900 font-sans select-none rounded-3xl border border-slate-200 shadow-xl overflow-hidden'
       }
     >
       
-      {/* 1. TOP HEADER BAR: Navigation, Files, Examples, Fixed Workspace Actions, Fullscreen */}
+      {/* 1. TOP HEADER BAR: PictoBlox 2-Row Header (Main Header + Editor Sub-Header Row) */}
       <TopBar
         project={project}
         showPythonDrawer={showPythonDrawer}
@@ -231,18 +230,18 @@ export function JuniorBlocksStudio() {
         canRedo={workspaceActions.canRedo}
       />
 
-      {/* 2. CORE STUDIO BODY: Standard PictoBlox / Scratch 3-Column Layout */}
-      <div className="flex-1 flex flex-col md:flex-row gap-2.5 min-h-0 overflow-hidden p-0.5">
+      {/* 2. CORE STUDIO BODY: Authentic PictoBlox 3-Column IDE Layout */}
+      <div className="flex-1 flex flex-col md:flex-row gap-0 min-h-0 overflow-hidden bg-[#FAF9FC]">
         
-        {/* COLUMN 1: Vertical Block Palette Sidebar (Fixed Width ~280px) */}
-        <div className="w-full md:w-72 h-64 md:h-full shrink-0 bg-white rounded-2xl border-2 border-slate-200 shadow-sm overflow-hidden flex flex-col">
+        {/* COLUMN 1: Left Block Palette Sidebar (Fixed Width ~280px) */}
+        <div className="w-full md:w-[280px] h-64 md:h-full shrink-0 overflow-hidden flex flex-col z-10">
           <BlockPalette
             onDragStartBlockTemplate={handleDragStartBlockTemplate}
           />
         </div>
 
-        {/* COLUMN 2: Large Block Workspace Canvas (Expands to fill 100% Center Height & Width) */}
-        <div className="flex-1 bg-white rounded-2xl border-2 border-slate-200 shadow-sm overflow-hidden min-h-0 relative flex flex-col">
+        {/* COLUMN 2: Large Block Workspace Canvas (Fluid Center Width & Height) */}
+        <div className="flex-1 overflow-hidden min-h-0 relative flex flex-col min-w-0">
           {activeSprite ? (
             <Workspace
               activeSprite={activeSprite}
@@ -258,7 +257,7 @@ export function JuniorBlocksStudio() {
         </div>
 
         {/* COLUMN 3: Stage Preview Canvas & Sprites Panel (Fixed Width ~340px) */}
-        <div className="w-full md:w-[320px] lg:w-[340px] flex flex-col gap-2 shrink-0 overflow-y-auto max-h-full">
+        <div className="w-full md:w-[340px] flex flex-col gap-2.5 shrink-0 overflow-y-auto max-h-full p-2.5 bg-slate-100/60 border-l border-slate-200/80 min-w-0">
           <StageCanvas
             project={project}
             activeSpriteId={activeSpriteId}
@@ -266,6 +265,9 @@ export function JuniorBlocksStudio() {
             isRunning={isRunning}
             askPrompt={askPrompt}
             onToggleRun={handleToggleRun}
+            onRestart={handleRestart}
+            onTakeScreenshot={handleTakeScreenshot}
+            onToggleGrid={() => setProject((prev) => ({ ...prev, gridVisible: !prev.gridVisible }))}
             onSubmitAnswer={(ans) => interpreterEngine.submitAnswer(ans)}
             onSelectSprite={setActiveSpriteId}
             onSpriteClickTrigger={(sId) => {
@@ -285,16 +287,6 @@ export function JuniorBlocksStudio() {
             onAddSprite={handleAddSprite}
             onDeleteSprite={handleDeleteSprite}
             onChangeBackdrop={(bgId) => setProject((prev) => ({ ...prev, backdropUrl: bgId }))}
-          />
-
-          <BottomToolbar
-            isRunning={isRunning}
-            gridVisible={project.gridVisible}
-            onToggleRun={handleToggleRun}
-            onRestart={handleRestart}
-            onTakeScreenshot={handleTakeScreenshot}
-            onToggleGrid={() => setProject((prev) => ({ ...prev, gridVisible: !prev.gridVisible }))}
-            onToggleFullscreen={handleToggleFullscreen}
           />
         </div>
 
