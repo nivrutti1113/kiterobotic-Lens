@@ -57,7 +57,7 @@ export class InterpreterEngine {
     for (const sprite of this.project!.sprites) {
       for (const script of sprite.scripts) {
         if (script.type === "when_receive_message") {
-          const msg = String(script.inputs.message || "message1");
+          const msg = String(script.inputs?.message || "message1");
           if (!this.broadcastListeners.has(msg)) {
             this.broadcastListeners.set(msg, []);
           }
@@ -73,30 +73,40 @@ export class InterpreterEngine {
         continue;
       }
 
+      const hasFlagHat = sprite.scripts.some((s) => s.type === "when_flag_clicked");
+
       for (const script of sprite.scripts) {
         let shouldTrigger = false;
 
-        if (hatFilter === "flag" && script.type === "when_flag_clicked") {
-          shouldTrigger = true;
+        if (hatFilter === "flag") {
+          if (script.type === "when_flag_clicked") {
+            shouldTrigger = true;
+          } else if (!hasFlagHat) {
+            // Run orphan scripts directly on Green Flag if no flag hat block exists!
+            shouldTrigger = true;
+          }
         } else if (hatFilter === "click" && script.type === "when_sprite_clicked") {
           shouldTrigger = true;
         } else if (hatFilter === "key" && script.type === "when_key_pressed") {
-          const targetKey = String(script.inputs.key || "space").toLowerCase();
+          const targetKey = String(script.inputs?.key || "space").toLowerCase();
           const pressedKey = (filterPayload?.key || "").toLowerCase();
-          if (targetKey === pressedKey || (targetKey === "space" && pressedKey === " ")) {
+          if (targetKey === pressedKey || (targetKey === "space" && (pressedKey === " " || pressedKey === "space"))) {
             shouldTrigger = true;
           }
         } else if (hatFilter === "broadcast" && script.type === "when_receive_message") {
-          const targetMsg = String(script.inputs.message || "message1");
+          const targetMsg = String(script.inputs?.message || "message1");
           if (targetMsg === filterPayload?.message) {
             shouldTrigger = true;
           }
         }
 
-        if (shouldTrigger && script.next) {
-          const threadId = `${sprite.id}_${script.id}_${Math.random()}`;
-          this.activeThreads.add(threadId);
-          promises.push(this.executeChain(sprite.id, script.next, threadId));
+        if (shouldTrigger) {
+          const startBlock = script.type.startsWith("when_") ? script.next : script;
+          if (startBlock) {
+            const threadId = `${sprite.id}_${script.id}_${Math.random()}`;
+            this.activeThreads.add(threadId);
+            promises.push(this.executeChain(sprite.id, startBlock, threadId));
+          }
         }
       }
     }
@@ -157,7 +167,6 @@ export class InterpreterEngine {
       case "logic_not":
         return !Boolean(this.evaluateInput(sprite, inputs.a));
       case "distance_to": {
-        // Distance to mouse (simulated center)
         return Math.round(Math.hypot(sprite.x - 200, sprite.y - 150));
       }
       case "touching_target": {
@@ -167,6 +176,21 @@ export class InterpreterEngine {
         }
         return false;
       }
+      case "qr_is_detected":
+      case "face_is_detected":
+      case "obj_is_detected":
+      case "ocr_is_detected":
+      case "speech_is_recognized":
+        return true;
+      case "qr_get_data":
+        return "https://kiterobotics.in";
+      case "face_count":
+      case "obj_count":
+        return 1;
+      case "gpt_response":
+        return "Robots love binary code!";
+      case "translate_text":
+        return String(inputs.text || "Hello") + " (Translated)";
       default:
         return 0;
     }
@@ -180,56 +204,56 @@ export class InterpreterEngine {
         const steps = Number(this.evaluateInput(sprite, inputs.steps)) || 10;
         sprite.x = Math.min(200, sprite.x + steps);
         this.notifyUpdate();
-        await this.delay(30);
+        await this.delay(40);
         break;
       }
       case "move_left": {
         const steps = Number(this.evaluateInput(sprite, inputs.steps)) || 10;
         sprite.x = Math.max(-200, sprite.x - steps);
         this.notifyUpdate();
-        await this.delay(30);
+        await this.delay(40);
         break;
       }
       case "move_up": {
         const steps = Number(this.evaluateInput(sprite, inputs.steps)) || 10;
         sprite.y = Math.max(-150, sprite.y - steps);
         this.notifyUpdate();
-        await this.delay(30);
+        await this.delay(40);
         break;
       }
       case "move_down": {
         const steps = Number(this.evaluateInput(sprite, inputs.steps)) || 10;
         sprite.y = Math.min(150, sprite.y + steps);
         this.notifyUpdate();
-        await this.delay(30);
+        await this.delay(40);
         break;
       }
       case "turn_cw": {
         const deg = Number(this.evaluateInput(sprite, inputs.degrees)) || 15;
         sprite.rotation = (sprite.rotation + deg) % 360;
         this.notifyUpdate();
-        await this.delay(30);
+        await this.delay(40);
         break;
       }
       case "turn_ccw": {
         const deg = Number(this.evaluateInput(sprite, inputs.degrees)) || 15;
         sprite.rotation = (sprite.rotation - deg + 360) % 360;
         this.notifyUpdate();
-        await this.delay(30);
+        await this.delay(40);
         break;
       }
       case "point_direction": {
         const deg = Number(this.evaluateInput(sprite, inputs.degrees)) || 90;
         sprite.rotation = deg % 360;
         this.notifyUpdate();
-        await this.delay(30);
+        await this.delay(40);
         break;
       }
       case "go_to_random": {
         sprite.x = Math.floor(Math.random() * 320) - 160;
         sprite.y = Math.floor(Math.random() * 220) - 110;
         this.notifyUpdate();
-        await this.delay(50);
+        await this.delay(60);
         break;
       }
       case "go_to_xy": {
@@ -238,7 +262,7 @@ export class InterpreterEngine {
         sprite.x = Math.max(-200, Math.min(200, targetX));
         sprite.y = Math.max(-150, Math.min(150, targetY));
         this.notifyUpdate();
-        await this.delay(30);
+        await this.delay(40);
         break;
       }
       case "glide_to_xy": {
@@ -264,7 +288,7 @@ export class InterpreterEngine {
       }
 
       case "say_text": {
-        const text = String(this.evaluateInput(sprite, inputs.text) || "");
+        const text = String(this.evaluateInput(sprite, inputs.text) || "Hello!");
         sprite.sayBubble = { text };
         this.notifyUpdate();
         await this.delay(1200);
@@ -416,6 +440,82 @@ export class InterpreterEngine {
         while (this.waitingForAnswer && this.isRunning) {
           await this.delay(100);
         }
+        break;
+      }
+
+      // --- EXTENSION BLOCK RUNTIME HANDLERS ---
+      case "gpt_ask": {
+        const promptText = String(this.evaluateInput(sprite, inputs.prompt) || "Hello!");
+        sprite.sayBubble = { text: `🤖 AI Thinking: "${promptText}"` };
+        this.notifyUpdate();
+        await this.delay(1500);
+        sprite.sayBubble = { text: "🤖 AI Answer: Robots love coding!" };
+        this.notifyUpdate();
+        await this.delay(2000);
+        sprite.sayBubble = null;
+        this.notifyUpdate();
+        break;
+      }
+
+      case "tts_speak": {
+        const phrase = String(this.evaluateInput(sprite, inputs.phrase) || "Hello!");
+        sprite.sayBubble = { text: `🗣️ "${phrase}"` };
+        this.notifyUpdate();
+        if (typeof window !== "undefined" && "speechSynthesis" in window) {
+          const utter = new SpeechSynthesisUtterance(phrase);
+          window.speechSynthesis.speak(utter);
+        }
+        await this.delay(1500);
+        sprite.sayBubble = null;
+        this.notifyUpdate();
+        break;
+      }
+
+      case "qr_turn_video":
+      case "face_turn_video":
+      case "obj_turn_video": {
+        sprite.sayBubble = { text: "📷 Stage Camera Feed Active" };
+        this.notifyUpdate();
+        await this.delay(1000);
+        sprite.sayBubble = null;
+        this.notifyUpdate();
+        break;
+      }
+
+      case "qr_analyse_camera":
+      case "face_analyse_camera":
+      case "obj_analyse":
+      case "ocr_analyse":
+      case "body_analyse": {
+        sprite.sayBubble = { text: "🔍 Analysing camera frame..." };
+        this.notifyUpdate();
+        await this.delay(1000);
+        sprite.sayBubble = { text: "✅ Target detected!" };
+        this.notifyUpdate();
+        await this.delay(1000);
+        sprite.sayBubble = null;
+        this.notifyUpdate();
+        break;
+      }
+
+      case "music_play_note":
+      case "music_play_drum": {
+        await soundSynth.playSound("ding");
+        break;
+      }
+
+      case "physics_apply_force": {
+        const fx = Number(this.evaluateInput(sprite, inputs.fx)) || 20;
+        sprite.x = Math.min(200, sprite.x + fx);
+        this.notifyUpdate();
+        await this.delay(50);
+        break;
+      }
+
+      default: {
+        // Fallback generic block execution with update notification
+        this.notifyUpdate();
+        await this.delay(30);
         break;
       }
     }

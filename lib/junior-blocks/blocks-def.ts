@@ -1,11 +1,12 @@
 import { BlockDefinition, Category } from "./types";
+import { EXTENSION_CATALOG } from "./extensions-catalog";
 
 export const CATEGORY_COLORS: Record<Category, { bg: string; border: string; text: string; hex: string }> = {
   movement: { bg: "bg-[#4C97FF]", border: "border-[#3373CC]", text: "text-white", hex: "#4C97FF" },
   looks: { bg: "bg-[#9966FF]", border: "border-[#7740E6]", text: "text-white", hex: "#9966FF" },
   sound: { bg: "bg-[#D65CD6]", border: "border-[#BD42BD]", text: "text-white", hex: "#D65CD6" },
-  events: { bg: "bg-[#FFBF00]", border: "border-[#CC9900]", text: "text-slate-950", hex: "#FFBF00" },
-  control: { bg: "bg-[#FFAB19]", border: "border-[#CF8B11]", text: "text-white", hex: "#FFAB19" },
+  events: { bg: "bg-[#FFBF00]", border: "border-[#CC9900]", text: "text-[#1E293B]", hex: "#FFBF00" },
+  control: { bg: "bg-[#FFAB19]", border: "border-[#CF8B11]", text: "text-[#1E293B]", hex: "#FFAB19" },
   sensing: { bg: "bg-[#4CBFE6]", border: "border-[#2E9CBD]", text: "text-white", hex: "#4CBFE6" },
   operators: { bg: "bg-[#59C059]", border: "border-[#389E38]", text: "text-white", hex: "#59C059" },
   variables: { bg: "bg-[#FF8C1A]", border: "border-[#DB6E00]", text: "text-white", hex: "#FF8C1A" },
@@ -548,3 +549,14 @@ export const BLOCK_DEFINITIONS: Record<string, BlockDefinition> = {
     },
   },
 };
+
+// Automatically register all 20+ extension block definitions from EXTENSION_CATALOG into BLOCK_DEFINITIONS
+EXTENSION_CATALOG.forEach((ext) => {
+  ext.sections.forEach((sec) => {
+    sec.items.forEach((item) => {
+      if (!BLOCK_DEFINITIONS[item.type]) {
+        BLOCK_DEFINITIONS[item.type] = item;
+      }
+    });
+  });
+});

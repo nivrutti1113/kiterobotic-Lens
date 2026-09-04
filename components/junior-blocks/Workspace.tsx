@@ -3,8 +3,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { BlockInstance, Sprite } from '@/lib/junior-blocks/types';
 import { BLOCK_DEFINITIONS } from '@/lib/junior-blocks/blocks-def';
+import { interpreterEngine } from '@/lib/junior-blocks/interpreter';
 import { BlockView } from './BlockView';
-import { ZoomIn, ZoomOut, RotateCcw, RotateCw, Trash2, Copy, Sparkles, Home } from 'lucide-react';
+import { ZoomIn, ZoomOut, Trash2, Copy, Sparkles, Home } from 'lucide-react';
 
 interface WorkspaceProps {
   activeSprite: Sprite;
@@ -90,7 +91,7 @@ export const Workspace: React.FC<WorkspaceProps> = ({
   }, [historyIndex, history.length, activeSprite]);
 
   const handleDropInsideCBlock = (e: React.DragEvent, parentBlockId: string, isElseSlot: boolean = false) => {
-    const blockType = e.dataTransfer.getData('kms/block_type');
+    const blockType = e.dataTransfer.getData('kms/block_type') || (window as any).__kms_dragged_block_type;
     if (!blockType) return;
     const def = BLOCK_DEFINITIONS[blockType];
     if (!def) return;
@@ -137,13 +138,13 @@ export const Workspace: React.FC<WorkspaceProps> = ({
 
   const handleDropOnWorkspace = (e: React.DragEvent) => {
     e.preventDefault();
-    const existingBlockId = e.dataTransfer.getData('kms/existing_block_id');
-    const blockType = e.dataTransfer.getData('kms/block_type');
+    const existingBlockId = e.dataTransfer.getData('kms/existing_block_id') || (window as any).__kms_dragged_existing_id;
+    const blockType = e.dataTransfer.getData('kms/block_type') || (window as any).__kms_dragged_block_type;
 
     if (!workspaceRef.current) return;
     const rect = workspaceRef.current.getBoundingClientRect();
-    const dropX = Math.round((e.clientX - rect.left) / zoom);
-    const dropY = Math.round((e.clientY - rect.top) / zoom);
+    const dropX = Math.max(20, Math.round((e.clientX - rect.left) / zoom));
+    const dropY = Math.max(20, Math.round((e.clientY - rect.top) / zoom));
 
     if (existingBlockId) {
       // Move existing root script
@@ -151,6 +152,7 @@ export const Workspace: React.FC<WorkspaceProps> = ({
         s.id === existingBlockId ? { ...s, x: dropX, y: dropY } : s
       );
       saveHistory(updated);
+      delete (window as any).__kms_dragged_existing_id;
       return;
     }
 
@@ -175,6 +177,7 @@ export const Workspace: React.FC<WorkspaceProps> = ({
       };
 
       saveHistory([...activeSprite.scripts, newScript]);
+      delete (window as any).__kms_dragged_block_type;
     }
   };
 
@@ -211,6 +214,8 @@ export const Workspace: React.FC<WorkspaceProps> = ({
 
   const handleDragOverWorkspace = (e: React.DragEvent) => {
     e.preventDefault();
+    e.dataTransfer.dropEffect = 'copy';
+
     if (!workspaceRef.current) return;
     const rect = workspaceRef.current.getBoundingClientRect();
     const mouseX = (e.clientX - rect.left) / zoom;
@@ -229,7 +234,7 @@ export const Workspace: React.FC<WorkspaceProps> = ({
           lastBlock = lastBlock.next;
           stackDepth++;
         }
-        foundSnap = { x: scriptX, y: scriptY + stackDepth * 42 };
+        foundSnap = { x: scriptX, y: scriptY + stackDepth * 40 };
         break;
       }
     }
@@ -273,7 +278,24 @@ export const Workspace: React.FC<WorkspaceProps> = ({
         {activeSprite.scripts.map((script) => (
           <div
             key={script.id}
+            draggable={true}
+            onDragStart={(e) => handleDragStartExisting(e, script)}
             onContextMenu={(e) => handleContextMenu(e, script.id)}
+            onClick={(e) => {
+              e.stopPropagation();
+              // Executing single script directly on stage when clicked
+              interpreterEngine.runProject(
+                {
+                  id: 'run_temp',
+                  name: 'Project',
+                  sprites: [{ ...activeSprite, scripts: [script] }],
+                  backdropUrl: 'default',
+                  gridVisible: false,
+                },
+                () => {},
+                'flag'
+              );
+            }}
             className="absolute cursor-grab active:cursor-grabbing hover:ring-2 hover:ring-purple-500/50 rounded-xl transition-shadow"
             style={{ left: `${script.x || 40}px`, top: `${script.y || 40}px` }}
           >
@@ -326,7 +348,7 @@ export const Workspace: React.FC<WorkspaceProps> = ({
         onDragOver={(e) => e.preventDefault()}
         onDrop={(e) => {
           e.preventDefault();
-          const existingBlockId = e.dataTransfer.getData('kms/existing_block_id');
+          const existingBlockId = e.dataTransfer.getData('kms/existing_block_id') || (window as any).__kms_dragged_existing_id;
           if (existingBlockId) handleDeleteScript(existingBlockId);
         }}
         className="absolute bottom-4 left-4 z-20 flex items-center gap-1.5 px-3.5 py-1.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-700 border border-rose-300/80 rounded-full shadow-2xs text-xs font-black transition-colors font-heading cursor-pointer backdrop-blur-xs"
@@ -339,21 +361,21 @@ export const Workspace: React.FC<WorkspaceProps> = ({
       <div className="absolute bottom-4 right-4 z-20 flex items-center gap-2 bg-white/90 p-1.5 rounded-full border border-slate-200 shadow-md backdrop-blur-xs">
         <button
           onClick={() => setZoom((z) => Math.min(2.0, z + 0.1))}
-          className="w-8 h-8 bg-white hover:bg-slate-100 rounded-full flex items-center justify-center text-slate-700 transition-colors shadow-2xs"
+          className="w-8 h-8 bg-white hover:bg-slate-100 rounded-full flex items-center justify-center text-slate-700 transition-colors shadow-2xs cursor-pointer"
           title="Zoom In"
         >
           <ZoomIn className="w-4 h-4" />
         </button>
         <button
           onClick={() => setZoom((z) => Math.max(0.5, z - 0.1))}
-          className="w-8 h-8 bg-white hover:bg-slate-100 rounded-full flex items-center justify-center text-slate-700 transition-colors shadow-2xs"
+          className="w-8 h-8 bg-white hover:bg-slate-100 rounded-full flex items-center justify-center text-slate-700 transition-colors shadow-2xs cursor-pointer"
           title="Zoom Out"
         >
           <ZoomOut className="w-4 h-4" />
         </button>
         <button
           onClick={() => setZoom(1.0)}
-          className="w-8 h-8 bg-white hover:bg-slate-100 rounded-full flex items-center justify-center text-slate-700 transition-colors shadow-2xs font-black text-xs"
+          className="w-8 h-8 bg-white hover:bg-slate-100 rounded-full flex items-center justify-center text-slate-700 transition-colors shadow-2xs font-black text-xs cursor-pointer"
           title="Reset Zoom / Home"
         >
           <Home className="w-4 h-4 text-slate-700" />
@@ -368,5 +390,6 @@ export const Workspace: React.FC<WorkspaceProps> = ({
     e.dataTransfer.setData('kms/existing_block_id', script.id);
     e.dataTransfer.setData('text/plain', script.id);
     e.dataTransfer.effectAllowed = 'move';
+    (window as any).__kms_dragged_existing_id = script.id;
   }
 };

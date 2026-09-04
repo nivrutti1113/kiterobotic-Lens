@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Category, BlockInstance, BlockDefinition } from '@/lib/junior-blocks/types';
+import { Category, BlockInstance } from '@/lib/junior-blocks/types';
 import { BLOCK_DEFINITIONS, CATEGORY_COLORS } from '@/lib/junior-blocks/blocks-def';
 import { EXTENSION_CATALOG, ExtensionItem } from '@/lib/junior-blocks/extensions-catalog';
 import { BlockView } from './BlockView';
@@ -51,6 +51,18 @@ export const BlockPalette: React.FC<BlockPaletteProps> = ({
     ? CATEGORY_COLORS[activeCategory as keyof typeof CATEGORY_COLORS] || CATEGORY_COLORS.movement
     : null;
 
+  const handleTemplateDragStart = (e: React.DragEvent, blockType: string) => {
+    e.dataTransfer.setData('kms/block_type', blockType);
+    e.dataTransfer.setData('text/plain', blockType);
+    e.dataTransfer.effectAllowed = 'copy';
+    (window as any).__kms_dragged_block_type = blockType;
+    onDragStartBlockTemplate(e, blockType);
+  };
+
+  const handleTemplateDragEnd = () => {
+    delete (window as any).__kms_dragged_block_type;
+  };
+
   return (
     <div className="flex h-full w-full bg-white font-sans overflow-hidden select-none border-r border-slate-200">
       
@@ -84,7 +96,7 @@ export const BlockPalette: React.FC<BlockPaletteProps> = ({
                 }`}
                 style={{
                   backgroundColor: catColor.hex,
-                  color: tab.id === 'events' ? '#0F172A' : '#FFFFFF',
+                  color: tab.id === 'events' || tab.id === 'control' ? '#1E293B' : '#FFFFFF',
                 }}
               >
                 {tab.icon}
@@ -199,15 +211,13 @@ export const BlockPalette: React.FC<BlockPaletteProps> = ({
                 <div
                   key={def.type}
                   draggable={true}
-                  onDragStart={(e) => {
-                    e.dataTransfer.setData('kms/block_type', def.type);
-                    e.dataTransfer.setData('text/plain', def.type);
-                    e.dataTransfer.effectAllowed = 'copy';
-                    onDragStartBlockTemplate(e, def.type);
-                  }}
+                  onDragStart={(e) => handleTemplateDragStart(e, def.type)}
+                  onDragEnd={handleTemplateDragEnd}
                   className="hover:scale-[1.02] transition-transform cursor-grab active:cursor-grabbing select-none w-fit"
                 >
-                  <BlockView block={templateBlock} isTemplate={true} />
+                  <div className="pointer-events-none">
+                    <BlockView block={templateBlock} isTemplate={true} />
+                  </div>
                 </div>
               );
             })}
@@ -243,12 +253,8 @@ export const BlockPalette: React.FC<BlockPaletteProps> = ({
                       <div
                         key={def.type}
                         draggable={true}
-                        onDragStart={(e) => {
-                          e.dataTransfer.setData('kms/block_type', def.type);
-                          e.dataTransfer.setData('text/plain', def.type);
-                          e.dataTransfer.effectAllowed = 'copy';
-                          onDragStartBlockTemplate(e, def.type);
-                        }}
+                        onDragStart={(e) => handleTemplateDragStart(e, def.type)}
+                        onDragEnd={handleTemplateDragEnd}
                         className="hover:scale-[1.02] transition-transform cursor-grab active:cursor-grabbing select-none w-fit flex items-center gap-1.5"
                       >
                         {/* Checkbox Monitor Stub if reporter block has checkbox */}
@@ -260,11 +266,13 @@ export const BlockPalette: React.FC<BlockPaletteProps> = ({
                             onClick={(e) => e.stopPropagation()}
                           />
                         )}
-                        <BlockView
-                          block={templateBlock}
-                          overrideDefinition={def}
-                          isTemplate={true}
-                        />
+                        <div className="pointer-events-none">
+                          <BlockView
+                            block={templateBlock}
+                            overrideDefinition={def}
+                            isTemplate={true}
+                          />
+                        </div>
                       </div>
                     );
                   })}
